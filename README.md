@@ -245,7 +245,11 @@ or
 
 For IRC messages, PRIVMSG is the main way to talk:
 
-  nick!~user@host PRIVSMG <to> :message here
+  :prefix PRIVSMG to-nick :message here
+
+where prefix can be expanded:
+
+  :nick!~user@host PRIVSMG to :message here
 
 * !~ is a separator
 * ":" is also separator
