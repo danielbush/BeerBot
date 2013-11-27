@@ -1,0 +1,9 @@
+{
+  "name":"localhost",
+  "nick":"beerbot",
+  "server":"localhost",
+  "port":6667,
+  "cmd_prefix":",",
+  "modules":["Facts"],
+  "channels":["#chan1","#chan2"]
+}

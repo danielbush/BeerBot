@@ -12,7 +12,7 @@ Use at your own risk..
 Only just started building this in the last week (27-Nov-2013).
 Be careful about using this on a public network.
 I wrote it partly in frustration with another ruby irc bot and
-partly of an internal irc server.
+partly for an internal irc server.
 
 ## Setup
 
