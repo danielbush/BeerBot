@@ -237,7 +237,7 @@ You can send any irc command you want by using `write`:
 or
 
 ```ruby
-  > @conn.write @parse.join("#channel1")
+  @conn.write @parse.join("#channel1")
 ```
 
 
