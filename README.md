@@ -6,6 +6,8 @@ Use at your own risk..
 * Uses ruby 2.0
 * Uses pry as a repl for administering the bot while running
 * Structured to be independent of irc, the bot itself is agnostic
+* Modules are hot-reloadable
+* Bot and the dispatcher are also hot-reloadable
 
 ## Status
 
@@ -142,6 +144,11 @@ The 'private' option should override this.
 The bot and its modules are protocol agnostic.  Instead, there is a
 dispatcher class that worries about the details of the protocol
 and mediates between the bot and the irc (or potentially other) connection.
+
+See
+```
+lib/dispatchers
+```
 
 ## Major components
 
