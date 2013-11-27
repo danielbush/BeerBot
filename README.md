@@ -129,9 +129,11 @@ will get the bot to say 'hi there' and 'oh crap'.
 
 There are some additional options you could pass.
 
+```ruby
   [..., private:true]
 
   => {..., :private => true }
+```
 
 means the message should be sent to the sender of the message.
 (this is the nick/user in the prefix part of the PRIVMSG).
@@ -204,11 +206,15 @@ You need to create module like this:
 
 And then store it here (with folder being the same name as the module):
 
+```
   lib/modules/MyMod/MyMod.rb
+```
 
 The bot loads modules into memory by loading this file
 
+```
   lib/modules/MyMod/init.rb
+```
 
 init.rb should load whatever could you require and the MyMod module.
 
