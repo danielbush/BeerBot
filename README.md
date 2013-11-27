@@ -20,19 +20,27 @@ Get ruby 2.0
 
 * Get rvm, see TODO
 * Then set it up
+
+```
  rvm use ruby-2.0.0
+```
 
 Clone this project, and cd into it.
 
 Install the required gems
+
+```
   bundle install
+```
 
 Most of the bot functionality is in lib/modules/.
 Specify the ones you want to load using the 'modules' property in your
 conf (see conf/ for examples).
 
 And run
+```
   bundle install
+```
 on these.
 
 
@@ -47,7 +55,9 @@ on localhost.
 Use irssi or your favourite irc client to connect and create
 channels.
 
+```
   ruby run-irc.rb conf/your-conf.json
+```
 
 Should start the bot and launch the pry repl.
 
