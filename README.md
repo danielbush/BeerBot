@@ -212,7 +212,12 @@ repl.  For the run-irc.rb example, you can access @bot.modules and
 
 ## Example session
 
-  ruby run-irc.rb conf/my-conf.json
+Set up an irc server on your computer.
+
+Then connect to it:
+```
+  ruby run-irc.rb conf/example-irc.json
+```
 
 You will see the bot receiving strings and the pry repl telling
 you its position.  This should change.  We're just using pry to
