@@ -1,0 +1,66 @@
+require File.dirname(__FILE__)+"/../lib/parse/parse.rb"
+require 'pp'
+
+describe "IRC parsing" do
+
+  describe "main irc regex parser" do
+    it "should parse prefixed and unprefixed irc strings" do
+
+      irc = BeerBot::Parse::IRC
+
+      samples = [
+        ":thursday!~bevan@172.17.217.13 QUIT :Quit: Leaving.\r\n",
+        ":tom!~tom@2404:130::1000:222:4dff:fe56:f81d NICK :tom_is_away\r\n",
+        ":adamr!~adam@172.17.217.13 PRIVMSG #sydney :because we have?\r\n",
+        ":timprice!~tprice@172.17.217.13 PART :#sydney\r\n",
+        ":irc.localhost 020 * :Please wait while we process your connection.\r\n",
+        ":thursday!~bevan@172.17.217.13 QUIT foo bar :Quit: Leaving.\r\n",
+      ]
+
+      irc.parse(samples[0])[:prefix][:nick].should eq('thursday')
+      irc.parse(samples[0])[:prefix][:user].should eq('~bevan')
+      irc.parse(samples[0])[:command].should eq('QUIT')
+      irc.parse(samples[1])[:prefix][:nick].should eq('tom')
+      irc.parse(samples[1])[:prefix][:host].should eq('2404:130::1000:222:4dff:fe56:f81d')
+      irc.parse(samples[1])[:command].should eq('NICK')
+
+      irc.parse(samples[2])[:command].should eq('PRIVMSG')
+      irc.parse(samples[2])[:params].should eq(['#sydney'])
+      irc.parse(samples[2])[:trailing].should eq('because we have?')
+
+      irc.parse(samples[4])[:prefix][:nick].should eq(nil)
+      irc.parse(samples[4])[:prefix][:host].should eq('irc.localhost')
+      irc.parse(samples[4])[:prefix][:user].should eq(nil)
+
+      irc.parse(samples[5])[:params].should eq(['foo','bar'])
+
+      # No prefix
+      samples = [
+        # Command with no prefix.
+        "PING :irc.dmz.wgtn.cat-it.co.nz\r\n",
+        "PING foo bar :irc.dmz.wgtn.cat-it.co.nz\r\n",
+      ]
+      irc.parse(samples[0])[:command].should eq('PING')
+      irc.parse(samples[0])[:trailing].should eq('irc.dmz.wgtn.cat-it.co.nz')
+      irc.parse(samples[1])[:command].should eq('PING')
+      irc.parse(samples[1])[:params].should eq(['foo','bar'])
+
+    end
+  end
+
+  describe "make_prefix_parser" do
+
+    it "should return message without the prefix" do
+
+      fn = BeerBot::Parse.make_prefix_parser(',')
+      fn.call(',hello').should eq('hello')
+      fn.call(',hello ').should eq('hello')
+
+      fn = BeerBot::Parse.make_prefix_parser('Beerbot')
+      fn.call('Beerbot: hello').should eq('hello')
+      fn.call('Beerbot hello').should eq('hello')
+    end
+
+  end
+
+end
