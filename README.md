@@ -69,13 +69,17 @@ A bot is
 
 For messages addressed to the bot, we use:
 
+```ruby
   def cmd msg,from:nil,world:nil
+```
 
 This is the way to send commands to the bot.
 
 For messages not addressed to the bot, we use:
 
+```ruby
   def hear msg,to:nil,from:nil,world:nil
+```
 
 
 cmd and hear should reply with an array of hashes where each hash is
@@ -83,24 +87,30 @@ a message or action.
 
 Example:
 
+```ruby
   [msg:'hi there']
 
   => [{:msg => "hi there"}]
+```
 
 is a single reply
 
+```ruby
   [action:'runs up the stairs']
 
   => [{:action => 'runs up the stairs'}]
+```
 
 is a single action.
 
 You can reply with multiple actions.
 
 
+```ruby
   [msg:'hi there'] + [msg:'oh crap!']
 
   => [{msg:'hi there'},{msg:...}]
+```
 
 will get the bot to say 'hi there' and 'oh crap'.
 
@@ -244,8 +254,10 @@ Here are some examples:
 
 1) danb1 says "yo" on #chan1:
   ":danb1!~danb@127.0.0.1 PRIVMSG #chan1 :yo\r\n"
+
 2) danb1 says "yo" to beerbot privately:
   ":danb1!~danb@127.0.0.1 PRIVMSG beerbot :yo\r\n"
+
 3) danb1 says "beerbot yo!" on #chan1:
   ":danb1!~danb@127.0.0.1 PRIVMSG #chan1 :beerbot yo!\r\n"
 
@@ -261,9 +273,3 @@ xmpp, who knows...
 Case 3 is really a special case of case 1. But it is very common way
 to request actions from the bot.
 
-Take these other examples:
-  "hey beerbot"
-  "what do you think, beerbot?"
-  "do you hate beerbot?"
-
-You could write a module that
