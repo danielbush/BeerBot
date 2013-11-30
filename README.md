@@ -142,7 +142,7 @@ You can reply with multiple actions.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-The spec for a valid botmsg is pretty much defined in ```lib/parse/parse.rb``` as:
+The spec for a valid botmsg is pretty much defined in ```lib/parse/parse.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
 
 ```ruby
 BeerBot::Parse.botmsg
