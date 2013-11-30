@@ -82,35 +82,51 @@ A bot is
 For messages addressed to the bot, we use:
 
 ```ruby
-  def cmd msg,from:nil,world:nil
+  def cmd msg,from:nil,to:nil,me:false,world:nil
 ```
 
 This is the way to send commands to the bot.
 
+* msg = the trailing component of PRIVMSG
+* from = the nick extracted from PRIVMSG prefix
+* to = the first parameter of PRIVMSG
+* me = true if 'to' is the bot's nick
+  * ordinarily the bot might reply to 'to' when on a
+    channel, but there is no point it replying to itself,
+    so modules should test for 'me' and if true
+    reply to 'from' not 'to'.
+  * the irc dispatcher (see below) will set this
+    before calling Bot#cmd .
+
 For messages not addressed to the bot, we use:
 
 ```ruby
-  def hear msg,to:nil,from:nil,world:nil
+  def hear msg,from:nil,to:nil,world:nil
 ```
 
+### Botmsg - the language the bot speaks in
 
-cmd and hear should reply with an array of hashes where each hash is
-a message or action.
+cmd and hear should reply with a hash or an array of hashes where each hash is a message or action.
+
+The hash message has several keys:
+* :msg the message
+* :action the action  (use either msg or action, not both)
+* :to the intended recipient of the message (channel or nick)
 
 Example:
 
 ```ruby
-  [msg:'hi there']
+  [msg:'hi there',to:"#chan1"]
 
-  => [{:msg => "hi there"}]
+  => [{:msg => "hi there",:to => "#chan1"}]
 ```
 
 is a single reply
 
 ```ruby
-  [action:'runs up the stairs']
+  [action:'runs up the stairs',to:"nick1"]
 
-  => [{:action => 'runs up the stairs'}]
+  => [{:action => 'runs up the stairs',to:"nick1"}]
 ```
 
 is a single action.
@@ -119,33 +135,19 @@ You can reply with multiple actions.
 
 
 ```ruby
-  [msg:'hi there'] + [msg:'oh crap!']
+  [msg:'hi there',to:"nick1"] + [msg:'oh crap!',to:"nick1"]
 
-  => [{msg:'hi there'},{msg:...}]
+  => [{msg:'hi there',...},{msg:...}]
 ```
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-
-There are some additional options you could pass.
-
-```ruby
-  [..., private:true]
-
-  => {..., :private => true }
-```
-
-means the message should be sent to the sender of the message.
-(this is the nick/user in the prefix part of the PRIVMSG).
-This distinction may be important when the bot receives a cmd via a channel.
-By default, the dispatcher will route the message back to the channel.
-The 'private' option should override this.
-
 ### Dispatching
 
-The bot and its modules are protocol agnostic.  Instead, there is a
-dispatcher class that worries about the details of the protocol
-and mediates between the bot and the irc (or potentially other) connection.
+The bot and its modules are protocol agnostic. Instead, there is a
+dispatcher class that worries about the details of the protocol and
+mediates between the bot and the irc (or potentially other)
+connection.
 
 See
 ```
@@ -180,6 +182,10 @@ The major components (modules/classes) in bot-land:
     or an array of these
 * lib/modules/...
   * modules used by the bot (your code goes here)
+* Scheduler
+  * allows scheduling of messages eg reminders or regular messages
+  * you can add a botmsg hash/array or a Proc that returns
+    as much
 
 Also see: run-irc.rb pretty much introduces you to the major parts of
 the system and how they are put together to create the bot.
@@ -191,10 +197,10 @@ You need to create module like this:
   module BeerBot
     module Modules
       module MyMod
-        def self.cmd msg,from:nil,world:nil
+        def self.cmd msg,from:nil,to:nil,me:false,world:nil
         end
         # Optional
-        def self.hear msg,to:nil,from:nil,world:nil
+        def self.hear msg,from:nil,to:nil,world:nil
         end
         # Optional
         def self.help
@@ -248,6 +254,7 @@ The pry repl will allow you to see everything in run-irc.rb.
   reload! # hot reload the bot and dispatcher
   @bot.load_modules! # reload the modules used by @bot
   @bot.modules = [...]  # change the modules the bot uses to respond
+  @bot.modules += [...] # add more modules (if they are present)
 ```
 
 You can talk to the bot directly, no irc
