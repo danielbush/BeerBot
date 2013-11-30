@@ -54,9 +54,13 @@ SQL
   end
 
   # Returns nil if table doesn't exist.
+
   def self.table table
     self.db.table_info(table)
   end
+
+  # Fetch term from database and unmarshal it (should be array) or
+  # return nil.
 
   def self.term term
     term = term.to_s
@@ -109,20 +113,21 @@ SQL
 
   def self.hear msg,to:nil,from:nil,world:nil
     self.build_tables!
-
     case msg
     when /,,(\S+)/
       term = $1
       i = -1
       if val = self.term(term) then
-        msg = ["#{term} is: "] + val.map{|v| "[%d] %s" % [i+=1,v]}
-        return [msg:msg]
+        msg = [msg:"#{term} is: ",to:to] +
+              val.map{|v| {:msg => "[%d] %s" % [i+=1,v],to:to}}
+        return msg
       end
     end
   end
 
-  def self.cmd msg,from:nil,world:nil
+  def self.cmd msg,from:nil,to:nil,me:false,world:nil
     self.build_tables!
+    to = me ? from : to
 
     case msg
 
@@ -134,13 +139,13 @@ SQL
       if ok then
         if rand(2) == 0 then
           msg = "Noted #{from}"
-          return [msg:msg]
+          return [msg:msg,to:to]
         else
           action = "carefully writes it down"
-          return [action:action]
+          return [action:action,to:to]
         end
       else
-        return [msg:"Failed to store term!"]
+        return [msg:"Failed to store term!",to:to]
       end
 
     # ",term is ..."
@@ -148,11 +153,11 @@ SQL
       term = $1
       fact = $2
       if self.term(term) then
-        return [msg:"Term already exists #{from} use ',<term> is also ...' or ',forget <term>' ."]
+        return [msg:"Term already exists #{from} use ',<term> is also ...' or ',forget <term>' .",to:to]
       end
       ok = self.add(term,fact.strip)
       msg = ok ? "Noted #{from}" : "Failed to store term!"
-      return [msg:msg]
+      return [msg:msg,to:to]
 
     # TODO: sed-edit a term ?
 
@@ -166,16 +171,16 @@ SQL
           n = n.to_i
           result = self.delete(term,n)
           if result then
-            return [msg:"Deleted #{term}[#{n}]"]
+            return [msg:"Deleted #{term}[#{n}]",to:to]
           else
-            return [msg:"Can't delete #{term}[#{n}]"]
+            return [msg:"Can't delete #{term}[#{n}]",to:to]
           end
         else
           self.delete(term)
-          return [msg:"Removed entry #{from}"]
+          return [msg:"Removed entry #{from}",to:to]
         end
       else
-        return [msg:"Can't find this term #{from}"]
+        return [msg:"Can't find this term #{from}",to:to]
       end
 
 
@@ -192,13 +197,14 @@ SQL
       val = self.term(term)
       if val then
         if val.size == 1
-          msg = [msg:"#{term} is: #{val[0]}"]
+          msg = [msg:"#{term} is: #{val[0]}",to:to]
         else
           i = -1
-          msg = [msg:"#{term} is: "] + val.map{|v| {msg:"[%d] %s" % [i+=1,v]} }
+          msg = [msg:"#{term} is: ",to:to] +
+                val.map{|v| {msg:"[%d] %s" % [i+=1,v],to:to} }
         end
       else
-        #msg = [msg:"Don't know this term #{from}"]
+        #msg = [msg:"Don't know this term #{from}",to:to]
         return nil
       end
       return msg

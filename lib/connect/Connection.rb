@@ -7,6 +7,10 @@
 
 module BeerBot
   class Connection
+    attr_accessor :queue
+    def initialize
+      @queue = Queue.new
+    end
     def open
     end
     def close
@@ -14,10 +18,6 @@ module BeerBot
     def write str
     end
     def ready? &block
-    end
-    def setEmit &block
-    end
-    def emit thing
     end
   end
 end

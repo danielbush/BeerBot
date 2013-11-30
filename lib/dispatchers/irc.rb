@@ -40,9 +40,10 @@ module BeerBot
       def initialize bot,nick,prefix
         @bot = bot
         @nick = nick
-        @nickrx = Regexp.new("^#{@nick}$",'i')
         @prefix = prefix
         @parse = BeerBot::Parse::IRC
+
+        @nickrx = Regexp.new("^#{@nick}$",'i')
         # TODO: @us? = BeerBot::Parse.make_nick_recogniser(nick)  # replace @nickrx
         @get_nick_cmd = BeerBot::Parse.make_prefix_parser(nick)
         @get_prefix_cmd = BeerBot::Parse.make_prefix_parser(prefix)
@@ -135,62 +136,41 @@ module BeerBot
           msg  = m[:trailing].strip
           from = m[:prefix][:nick].strip
           to   = m[:params][0].strip unless m[:params].empty?
-          replyto = nil
-          reply   = nil
 
           me = (@nickrx === to)
 
           # Somebody messaging us privately:
           if me then
-            replies = @bot.cmd(msg,from:from)
-            replyto = from # reply to sender
+            replies = @bot.cmd(
+              msg,
+              from:from,to:to,me:me,world:world)
 
           else
 
             # Somebody talking to us on channel: "Beerbot: ..."
             if msg2 = @get_nick_cmd.call(msg) then
-              replyto = to  # reply to channel
-              replies = @bot.cmd(msg2,from:from)
+              replies = @bot.cmd(
+                msg2,
+                from:from,to:to,me:me,world:world)
 
             # Somebody commanding us on channel: ",command ..."
             elsif msg2 = @get_prefix_cmd.call(msg) then
-              replyto = to  # reply to channel
-              replies = @bot.cmd(msg2,from:from)
+              replies = @bot.cmd(
+                msg2,
+                from:from,to:to,me:me,world:world)
 
             # We're just hearing something on a channel...
             else
-              replyto = to  # reply to channel
-              replies = @bot.hear(msg,from:from,to:to)
+              replies = @bot.hear(msg,from:from,to:to,world:world)
             end
 
           end
-
           
           # TODO: we could pass some fo the array to
           # a buffer which could be access by ,more
           # eg More.buffer(replyto,lines)
 
-          if replyto then
-            case replies
-            when Array
-              replies.map{|reply|
-                if reply[:private] then
-                  replyto = from
-                end
-                if reply[:action] then
-                  @parse.action(replyto,reply[:action])
-                elsif reply[:msg] then
-                  @parse.msg(replyto,reply[:msg])
-                else
-                  nil
-                end
-              }
-            else
-              nil
-            end
-          else
-            nil
-          end
+          @parse.botmsg(replies)
 
         end
       end # receive

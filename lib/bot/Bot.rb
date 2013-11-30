@@ -32,12 +32,71 @@ module BeerBot
       self.modules = modules
     end
 
+    # If you are addressing the bot directly.
+    #
+    # If :me then the bot is being PRIVMSG'd.
+    # If not :me, then the bot is being addressed over a channel.
+
+    def cmd msg,from:nil,to:nil,world:nil,me:false
+      p "[bot] msg => '#{msg}'"
+      if /^help/ === msg then
+        return self.help msg,from:from,to:to,world:world,me:me
+      end
+      response = nil
+      self.with_modules {|m,modname|
+        a = m.cmd(msg,from:from,to:to,world:world,me:me)
+        p "[bot] #{modname} => '#{a}'"
+        case a
+        when Array
+          # TODO: handle special cases or flags from the module
+          return a
+        else
+        end
+      }
+      nil
+    end
+
+    # Anythihg that isn't obviously a command, is 'heard' by the bot.
+    # The bot may decide it is being addressed can call self.cmd.
+
+    def hear msg,from:nil,to:nil,world:nil
+      self.with_modules {|m,modname|
+        next unless m.respond_to?('hear')
+        a = m.hear(msg,from:from,to:to,world:world)
+        case a
+        when Array
+          # TODO: handle special cases or flags from the module
+          return a
+        else
+        end
+      }
+      nil
+    end
+
+    # TODO: need a help protocol.
+    #
+    # help => list general commands or topics for all modules
+    # help moduleName => list same for the module
+    # help moduleName cmd => list cmd syntax (optional)
+
+    def help msg,from:nil,to:nil,world:nil,me:false
+      helplist = []
+      self.with_modules {|m,modname|
+        if m.respond_to?(:help) then
+          mhelp = m.help
+          helplist += mhelp
+        end
+      }
+      [msg:helplist.join(', ')]
+    end
+
+
     # Show the modules that will be used in responses.
     #
     # Only return a copy.
     # Every item in @modules is a string representing a
     # module name in @moduledir.
-    # It should be capitalized.
+    # It should be capitalized/camelcase, module or class name.
     #
     # Note: doing self#modules += [...] will work as expected because
     # of the clone.
@@ -85,62 +144,6 @@ module BeerBot
           end
         }
       }
-    end
-
-    
-    # If you are addressing the bot directly.
-
-    def cmd msg,from:nil,world:nil
-      p "[bot] msg => '#{msg}'"
-      if /^help/ === msg then
-        return self.help msg,from:nil,world:nil
-      end
-      response = nil
-      self.with_modules {|m,modname|
-        a = m.cmd(msg,from:from,world:world)
-        p "[bot] #{modname} => '#{a}'"
-        case a
-        when Array
-          # TODO: handle special cases or flags from the module
-          return a
-        else
-        end
-      }
-      nil
-    end
-
-    # Anythihg that isn't obviously a command, is 'heard' by the bot.
-    # The bot may decide it is being addressed can call self.cmd.
-
-    def hear msg,to:nil,from:nil,world:nil
-      self.with_modules {|m,modname|
-        next unless m.respond_to?('hear')
-        a = m.hear(msg,from:from,world:world)
-        case a
-        when Array
-          # TODO: handle special cases or flags from the module
-          return a
-        else
-        end
-      }
-      nil
-    end
-
-    # TODO: need a help protocol.
-    #
-    # help => list general commands or topics for all modules
-    # help moduleName => list same for the module
-    # help moduleName cmd => list cmd syntax (optional)
-
-    def help msg,from:nil,world:nil
-      helplist = []
-      self.with_modules {|m,modname|
-        if m.respond_to?(:help) then
-          mhelp = m.help
-          helplist += mhelp
-        end
-      }
-      [msg:helplist.join(', ')]
     end
 
     def with_modules &block

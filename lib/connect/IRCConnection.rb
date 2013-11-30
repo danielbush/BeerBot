@@ -20,22 +20,23 @@ module BeerBot
 
   class IRCConnection < Connection
 
+    # Queue containing received messages from the server.
+    attr_accessor :queue
     attr_accessor :name,:connection,:server,:port,:nick,:thread
 
-    def initialize name,server:nil,port:6667,nick:'beerbot',&block
+    def initialize name,server:nil,port:6667,nick:'beerbot'
       @name = name
       @parse = BeerBot::Parse::IRC
       @server = server
       @port = port
       @nick = nick
+      @queue = Queue.new
 
+      # This queue is only used at start up when the connection
+      # to the irc server isn't ready yet:
       @readyq = Queue.new
       @ready = false
       @ready_mutex = Mutex.new
-
-      if Kernel.block_given? then
-        self.set_emit &block
-      end 
 
     end
 
@@ -77,7 +78,7 @@ module BeerBot
                   end
                 }
               end
-              self.emit(m,str)
+              self.queue.enq([m,str])
             else
               puts "Don't recognise this command."
             end
@@ -102,20 +103,9 @@ module BeerBot
         @connection.print(message)
       when Array
         message.each{|m| self.write(m) }
+      when NilClass
       else
-      end
-    end
-
-
-    def set_emit &block
-      @emit = block;
-    end
-
-    def emit o,raw
-      return unless @emit
-      result = @emit.call(o)
-      if result then
-        self.write result
+        p "IRCConnection: can't process #{message}"
       end
     end
 

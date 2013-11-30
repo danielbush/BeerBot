@@ -14,6 +14,7 @@ require File.dirname(__FILE__)+'/lib/connect/IRCConnection'
 require File.dirname(__FILE__)+'/lib/world/World'
 require File.dirname(__FILE__)+'/lib/modules/init.rb'
 require File.dirname(__FILE__)+'/lib/parse/parse'
+require File.dirname(__FILE__)+'/lib/scheduler/scheduler'
 
 if ARGV.size == 0 then
   puts "Usage: ruby beerbot.rb path/to/ircconf.json"
@@ -45,19 +46,52 @@ def reload!
     @config['nick'],
     @config['cmd_prefix'] )
 
-  # Get connection to emit to dispatcher.
-  # Return value of receive will be processed by @conn if not nil.
+  send_mutex = Mutex.new
 
-  @conn.set_emit {|m,raw|
-    # TODO: add flag to disable receive
-    @dispatch.receive(m,raw,@world)
+  # Dispatcher thread.
+  #
+  # This thread executes the bot and module code.
+
+  Thread.new {
+    loop {
+      parsed,raw = @conn.queue.deq
+      # Dispatcher should return nil
+      # or valid irc response (String)
+      # or Array of valid irc resonses
+      response = @dispatch.receive(parsed,raw,@world)
+      send_mutex.synchronize {
+        @conn.write(response) if response
+      }
+    }
+  }
+
+  # Schedule dispatcher thread.
+  #
+  # These are responses that were prepared earlier and which
+  # also need to be dispatched.
+
+  Thread.new {
+    loop {
+      botmsg = @scheduler.queue.deq
+      begin
+        response = @parse.botmsg(botmsg)
+      rescue => e
+        p "#{e}"
+        next
+      end
+      send_mutex.synchronize {
+        @conn.write(response) if response
+      }
+    }
   }
 
 end
 
+@scheduler = BeerBot::Scheduler.new
+
 # Create a world associated with this irc connection.
 # (lists channels and users we know about)
-@world = BeerBot::IRCWorld.new(@config['name'])
+@world = BeerBot::IRCWorld.new(@config['name'],@config['nick'])
 
 # Create but don't open the irc connection.
 @conn = BeerBot::IRCConnection.new(
@@ -85,6 +119,13 @@ Thread.new {
       @conn.write(@parse.join(chan))
     }
   end
+  @scheduler.start
+  @scheduler.add(
+    {msg:"hi",to:"#chan1"},
+    DateTime.now+Rational(0,24*60))
+  @scheduler.add_perm(
+    lambda{|now,h|
+      {to:'#chan1',msg:"#{now}"} }
 }
 
 # Start the connection.

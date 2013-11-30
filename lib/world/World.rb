@@ -12,8 +12,9 @@ module BeerBot
 
   class World < Hash
 
-    def initialize name
+    def initialize name,nick
       self[:name] = name
+      self[:nick] = nick
 
       # An index/lookup for channels we know about.
       self[:channels] = Hash.new {|h,k| h[k] = {users:Set.new}}
@@ -63,6 +64,10 @@ module BeerBot
       }
       self[:users][nick] = self[:users][oldnick]
       self[:users].delete(oldnick)
+      # If it's us, update our nick:
+      if self[:nick] == oldnick then
+        self[:nick] = nick
+      end
       self
     end
 

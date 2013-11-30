@@ -108,16 +108,52 @@ module BeerBot
         result
       end
 
+      # Processes bot messages.
+      #
+      # Return irc string or array of these if botmsg is an array.
+      #
+      # botmsg is protocol agnostic.
+      # We need to convert to irc.
+      #
+      # Generates nil if it can't handle 'botmsg'.
+
+      def self.botmsg botmsg
+        case botmsg
+        when Hash
+          to = botmsg[:to]
+          return nil unless to
+          if botmsg[:action] then
+            self.action(to,botmsg[:action])
+          elsif botmsg[:msg] then
+            self.msg(to,botmsg[:msg])
+          else
+            nil
+          end
+        when Array
+          botmsg.map{|reply|
+            self.botmsg reply
+          }
+        when Proc
+          p botmsg.call
+          self.botmsg(botmsg.call)
+        else
+          nil
+        end
+      end
+
       # Send PRIVMSG to channel or nick.
 
-      def self.msg to,msg
-        "PRIVMSG #{to} :#{msg}"
+      def self.msg to,str
+        "PRIVMSG #{to} :#{str}"
+      end
+      class << self
+        alias_method :privmsg,:msg
       end
 
       # Send a /me-style action to channel or nick.
 
-      def self.action to,msg
-        "PRIVMSG #{to} :\u0001#{'ACTION'} #{msg}\u0001"
+      def self.action to,str
+        "PRIVMSG #{to} :\u0001#{'ACTION'} #{str}\u0001"
       end
 
       # Join a channel
