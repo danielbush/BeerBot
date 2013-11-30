@@ -48,7 +48,7 @@ on these.
 
 ## Usage
 
-Create an irc conf, use conf/ as an example.
+Create an irc conf, use ```conf/``` as an example.
 
 If you want to test or play with it with a real irc server, on
 linux it is pretty easy to install an irc server and run it
@@ -142,12 +142,14 @@ You can reply with multiple actions.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-The spec for a valid botmsg is pretty much defined by this
-function ```lib/parse/parse.rb``` is
-
+The spec for a valid botmsg is pretty much defined 
+```lib/parse/parse.rb```:
 ```ruby
 BeerBot::Parse.botmsg
 ```
+
+Note that ```Proc``` instances will also be accepted and
+called for a ```botmsg``` hash.
 
 ### Dispatching
 
@@ -156,10 +158,12 @@ dispatcher class that worries about the details of the protocol and
 mediates between the bot and the irc (or potentially other)
 connection.
 
-See
+See ```lib/dispatchers```. For irc we have
+```ruby
+BeerBot::Dispatchers::IRC
 ```
-lib/dispatchers
-```
+* this class is initialised with bot details.
+* ```BeerBot::Dispatchers::IRC#receive``` then receives and routes messages accordingly returning a message in ```botmsg``` format.
 
 ## Major components
 
