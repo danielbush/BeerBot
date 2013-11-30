@@ -142,8 +142,8 @@ You can reply with multiple actions.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-The spec for a valid botmsg is pretty much defined 
-```lib/parse/parse.rb```:
+The spec for a valid botmsg is pretty much defined in ```lib/parse/parse.rb``` as:
+
 ```ruby
 BeerBot::Parse.botmsg
 ```
