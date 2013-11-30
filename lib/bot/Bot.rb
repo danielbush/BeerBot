@@ -29,7 +29,7 @@ module BeerBot
       @nick = nick
       @dir = File.dirname(__FILE__)
       @moduledir = "#{@dir}/../modules"
-      self.modules = modules
+      self.modules = modules || []
     end
 
     # If you are addressing the bot directly.
@@ -117,7 +117,7 @@ module BeerBot
         if bad.empty? then
           @modules = arr
         else
-          puts "These module names must start with capital or were not found in #{@moduledir}: #{bad}"
+          puts "*** ERROR: These module names must start with capital or were not found in #{@moduledir}: #{bad}"
           @modules
         end
       }
