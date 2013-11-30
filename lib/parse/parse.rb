@@ -27,85 +27,106 @@ module BeerBot
       }
     end
 
+
     module IRC
 
-      # This regexp captures the basic pattern used for prefixed irc
-      # commands sent by the server to a client.
-      # 
-      # See: http://tools.ietf.org/html/rfc1459.html sec 2.3.1
-      #
-      # NOTE: some of the opening messages sent at connection time
-      # by the default debian irc server don't start with ':'.
-      # So to handle these, we start with '^:?' not '^:'.
+      # In coming IRC messages are parsed into hashes with several
+      # additional methods.
 
-      CMD = Regexp.new(
-        '^(:(?<prefix>\S+)\s+)?'+ # nick!~user@host
-        '(?<command>\S+)'+  # eg 'PRIVMSG' , 3-digit code
-        '(\s+(?<params>.*))?\s*'+ # bit after the command (one or more words)
-        '\s:\s*(?<trailing>.*)$' # bit after second ':' the msg in PRIVMSG
-        )
+      class IRCMessage < Hash
 
-      # Parse irc messages received from the irc server.
+        # This regexp captures the basic pattern used for prefixed and
+        # unprefixed irc commands sent by the server to a client.
+        # 
+        # See: http://tools.ietf.org/html/rfc1459.html sec 2.3.1
+        #
+        # NOTE: some of the opening messages sent at connection time
+        # by the default debian irc server don't start with ':'.
+        # So to handle these, we start with '^:?' not '^:'.
 
-      def self.parse msg
-        if m = CMD.match(msg) then
+        CMD = Regexp.new(
+          '^(:(?<prefix>\S+)\s+)?'+ # nick!~user@host
+          '(?<command>\S+)'+  # eg 'PRIVMSG' , 3-digit code
+          '(\s+(?<params>.*))?\s*'+ # bit after the command (one or more words)
+          '\s:\s*(?<trailing>.*)$' # bit after second ':' the msg in PRIVMSG
+          )
 
-          if m[:prefix] then
-            nick,host = m[:prefix].split('!')
-            if host then
-              user,host = host.split('@')
-            else
-              host = nick
-              nick = user = nil
+        def initialize raw
+
+          @valid = false
+          @has_prefix = false
+          @user_prefix = false # message came from nick
+          self[:prefix] = {}
+          self[:command] = :unknown
+          self[:raw] = raw
+          self[:params] = []
+          self[:trailing] = nil
+
+          if m = CMD.match(raw) then
+            @valid = true
+            if m[:prefix] then
+              @has_prefix = true
+              nick,host = m[:prefix].split('!')
+              if host then
+                @user_prefix = true
+                user,host = host.split('@')
+                self[:prefix][:nick] = nick
+                self[:prefix][:user] = user
+                self[:prefix][:host] = host
+              else
+                # It aint a user prefix, so just bung it in host for the
+                # moment.
+                self[:prefix][:host] = nick
+              end
             end
-          else
-            nick = user = host = nil
+
+            self[:command] = m[:command].strip
+            params = if m[:params] then m[:params].strip else "" end
+            self[:params] = params.split(/\s+/)
+            self[:trailing]= m[:trailing].strip
           end
 
-          command = m[:command].strip
-          params = if m[:params] then m[:params].strip else "" end
-          trailing = m[:trailing].strip
-          params = params.split(/\s+/)
+        end
 
-          result = {
-            prefix:{
-              nick:nick,
-              user:user,
-              host:host
-            },
-            command:command,
-            params:params,
-            trailing:trailing
+        # We couldn't parse the command if not valid.
+
+        def valid?
+          @valid
+        end
+
+        # Is a prefixed irc string sent by server.
+
+        def prefix?
+          @has_prefix
+        end
+
+        # Is prefixed and the prefix is nick!~user@host .
+
+        def user_prefix?
+          @user_prefix
+        end
+
+        # Check that syms exist in the hash otherwise return the missing
+        # sym.  
+
+        def check *syms
+          result = true
+          syms.each{|sym|
+            case sym
+            when :prefix,:nick,:user,:host
+              return :prefix unless self[:prefix]
+              case sym
+              when :prefix
+              else
+                return sym unless self[:prefix][sym]
+              end
+            else
+              return sym unless self[sym]
+            end
           }
           result
-        else
-          {command: :unknown, raw: msg}
         end
-      end
 
-      # Check the result of 'parse' for relevant parts.
-      # 
-      # Return false if 'items' aren't found in 'm'.
-      # Use this to check what we got back from parsing.
-      #
-      # @see parse.
-
-      def self.check m,items
-        result = true
-        items.each{|item|
-          case item
-          when :prefix,:nick,:user,:host
-            return :prefix unless m[:prefix]
-            case item
-            when :prefix
-            else
-              return item unless m[:prefix][item]
-            end
-          else
-            return item unless m[item]
-          end
-        }
-        result
       end
 
       # Processes bot messages.

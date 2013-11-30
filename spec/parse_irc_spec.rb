@@ -6,7 +6,7 @@ describe "IRC parsing" do
   describe "main irc regex parser" do
     it "should parse prefixed and unprefixed irc strings" do
 
-      irc = BeerBot::Parse::IRC
+      IRC = BeerBot::Parse::IRCMessage
 
       samples = [
         ":thursday!~bevan@172.17.217.13 QUIT :Quit: Leaving.\r\n",
@@ -17,22 +17,29 @@ describe "IRC parsing" do
         ":thursday!~bevan@172.17.217.13 QUIT foo bar :Quit: Leaving.\r\n",
       ]
 
-      irc.parse(samples[0])[:prefix][:nick].should eq('thursday')
-      irc.parse(samples[0])[:prefix][:user].should eq('~bevan')
-      irc.parse(samples[0])[:command].should eq('QUIT')
-      irc.parse(samples[1])[:prefix][:nick].should eq('tom')
-      irc.parse(samples[1])[:prefix][:host].should eq('2404:130::1000:222:4dff:fe56:f81d')
-      irc.parse(samples[1])[:command].should eq('NICK')
+      IRC.new(samples[0])[:prefix][:nick].should eq('thursday')
+      IRC.new(samples[0])[:prefix][:user].should eq('~bevan')
+      IRC.new(samples[0])[:command].should eq('QUIT')
+      IRC.new(samples[0]).prefix?.should eq(true)
+      IRC.new(samples[0]).user_prefix?.should eq(true)
 
-      irc.parse(samples[2])[:command].should eq('PRIVMSG')
-      irc.parse(samples[2])[:params].should eq(['#sydney'])
-      irc.parse(samples[2])[:trailing].should eq('because we have?')
+      IRC.new(samples[1])[:prefix][:nick].should eq('tom')
+      IRC.new(samples[1])[:prefix][:host].should eq('2404:130::1000:222:4dff:fe56:f81d')
+      IRC.new(samples[1])[:command].should eq('NICK')
+      IRC.new(samples[1]).prefix?.should eq(true)
+      IRC.new(samples[1]).user_prefix?.should eq(true)
 
-      irc.parse(samples[4])[:prefix][:nick].should eq(nil)
-      irc.parse(samples[4])[:prefix][:host].should eq('irc.localhost')
-      irc.parse(samples[4])[:prefix][:user].should eq(nil)
+      IRC.new(samples[2])[:command].should eq('PRIVMSG')
+      IRC.new(samples[2])[:params].should eq(['#sydney'])
+      IRC.new(samples[2])[:trailing].should eq('because we have?')
 
-      irc.parse(samples[5])[:params].should eq(['foo','bar'])
+      IRC.new(samples[4])[:prefix][:nick].should eq(nil)
+      IRC.new(samples[4])[:prefix][:host].should eq('irc.localhost')
+      IRC.new(samples[4]).prefix?.should eq(true)
+      IRC.new(samples[4]).user_prefix?.should eq(false)
+      IRC.new(samples[4])[:prefix][:user].should eq(nil)
+
+      IRC.new(samples[5])[:params].should eq(['foo','bar'])
 
       # No prefix
       samples = [
@@ -40,10 +47,12 @@ describe "IRC parsing" do
         "PING :irc.dmz.wgtn.cat-it.co.nz\r\n",
         "PING foo bar :irc.dmz.wgtn.cat-it.co.nz\r\n",
       ]
-      irc.parse(samples[0])[:command].should eq('PING')
-      irc.parse(samples[0])[:trailing].should eq('irc.dmz.wgtn.cat-it.co.nz')
-      irc.parse(samples[1])[:command].should eq('PING')
-      irc.parse(samples[1])[:params].should eq(['foo','bar'])
+      IRC.new(samples[0])[:command].should eq('PING')
+      IRC.new(samples[0]).prefix?.should eq(false)
+      IRC.new(samples[0]).user_prefix?.should eq(false)
+      IRC.new(samples[0])[:trailing].should eq('irc.dmz.wgtn.cat-it.co.nz')
+      IRC.new(samples[1])[:command].should eq('PING')
+      IRC.new(samples[1])[:params].should eq(['foo','bar'])
 
     end
   end

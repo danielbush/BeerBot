@@ -59,17 +59,19 @@ module BeerBot
 
       def receive m,raw,world
 
-        if not m then
-          puts "Can't parse '#{raw}'"
+        case m
+        when BeerBot::Parse::IRC::IRCMessage
+        else
+          puts "Require an IRCMessage instance."
           return nil
         end
 
         case m[:command]
 
         when 'NICK'  # change of nick
-          check = @parse.check(m,[:prefix,:nick,:trailing])
-          if check!=true then
-            puts "* NICK expected #{check}"
+          case s=m.check(:prefix,:nick,:trailing)
+          when Symbol
+            puts "* NICK expected #{s}"
             return nil
           end
 
@@ -79,9 +81,9 @@ module BeerBot
           nil
 
         when 'PART' # someone leaves channel
-          check = @parse.check(m,[:prefix,:nick,:params])
-          if check!=true then
-            puts "* PART expected #{check}"
+          case s=m.check(:prefix,:nick,:params)
+          when Symbol
+            puts "* PART expected #{s}"
             return nil
           end
 
@@ -94,9 +96,9 @@ module BeerBot
           nil
 
         when 'JOIN' # someone joins channel
-          check = @parse.check(m,[:prefix,:nick,:trailing])
-          if check!=true then
-            puts "* JOIN expected #{check}"
+          case s=m.check(:prefix,:nick,:trailing)
+          when Symbol
+            puts "* JOIN expected #{s}"
             return nil
           end
 
@@ -111,9 +113,9 @@ module BeerBot
           nil
 
         when '353'  # channel user list when we join the channel
-          check = @parse.check(m,[:params,:trailing])
-          if check!=true then
-            puts "* 353 expected #{check}"
+          case s=m.check(:params,:trailing)
+          when Symbol
+            puts "* 353 expected #{s}"
             return nil
           end
 
@@ -127,9 +129,9 @@ module BeerBot
         when '366'  # end of 353
 
         when 'PRIVMSG'
-          check = @parse.check(m,[:prefix,:nick,:params,:trailing])
-          if check!=true then
-            puts "* JOIN expected #{check}"
+          case s=m.check(:prefix,:nick,:params,:trailing)
+          when Symbol
+            puts "* PRIVMSG expected #{s}"
             return nil
           end
 

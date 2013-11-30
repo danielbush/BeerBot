@@ -29,6 +29,9 @@ conffile = ARGV[0]
 #
 # You can call this using pry repl below during a session.
 # Note: we don't reload the irc connection, that would be silly.
+#
+# The connection, and the bot's world and the scheduler remain
+# untouched.
 
 def reload!
 
@@ -53,16 +56,22 @@ def reload!
   # This thread executes the bot and module code.
 
   Thread.new {
-    loop {
-      parsed,raw = @conn.queue.deq
-      # Dispatcher should return nil
-      # or valid irc response (String)
-      # or Array of valid irc resonses
-      response = @dispatch.receive(parsed,raw,@world)
-      send_mutex.synchronize {
-        @conn.write(response) if response
+    begin
+      loop {
+        parsed,raw = @conn.queue.deq
+        # Dispatcher should return nil
+        # or valid irc response (String)
+        # or Array of valid irc responses.
+        response = @dispatch.receive(parsed,raw,@world)
+        send_mutex.synchronize {
+          @conn.write(response) if response
+        }
       }
-    }
+    rescue => e
+      puts e
+      puts e.backtrace
+      exit 1
+    end
   }
 
   # Schedule dispatcher thread.
@@ -76,7 +85,8 @@ def reload!
       begin
         response = @parse.botmsg(botmsg)
       rescue => e
-        p "#{e}"
+        puts e
+        puts e.backtrace
         next
       end
       send_mutex.synchronize {
@@ -120,12 +130,14 @@ Thread.new {
     }
   end
   @scheduler.start
-  @scheduler.add(
-    {msg:"hi",to:"#chan1"},
-    DateTime.now+Rational(0,24*60))
-  @scheduler.add_perm(
-    lambda{|now,h|
-      {to:'#chan1',msg:"#{now}"} }
+  if false then
+    @scheduler.add(
+      {msg:"hi",to:"#chan1"},
+      DateTime.now+Rational(0,24*60))
+    @scheduler.add_perm(
+      lambda{|now,h|
+        {to:'#chan1',msg:"#{now}"} })
+  end
 }
 
 # Start the connection.

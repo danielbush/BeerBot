@@ -26,7 +26,7 @@ module BeerBot
 
     def initialize name,server:nil,port:6667,nick:'beerbot'
       @name = name
-      @parse = BeerBot::Parse::IRC
+      @irc = BeerBot::Parse::IRC::IRCMessage
       @server = server
       @port = port
       @nick = nick
@@ -66,7 +66,7 @@ module BeerBot
           when /^PING (.*)$/
             self.write "PONG #{$1}"
           else
-            m = @parse.parse(str)
+            m = @irc.new(str)
             if m then
               case m[:command]
               when '001'  # welcome message
