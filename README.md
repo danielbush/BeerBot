@@ -142,6 +142,12 @@ You can reply with multiple actions.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
+The spec for a valid botmsg is pretty much defined by this
+function:
+```
+  lib/parse/parse.rb self.botmsg
+```
+
 ### Dispatching
 
 The bot and its modules are protocol agnostic. Instead, there is a
