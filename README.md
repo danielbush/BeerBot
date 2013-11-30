@@ -177,7 +177,7 @@ The major components (modules/classes) in bot-land:
   * routes messages to the Bot instance and route the replies
     back to the irc connection
   * instantiate one of these and have the IRCConnection
-    emit to the 'receive' function
+    write these
   * 'receive' should output nil or a valid IRC response string
     or an array of these
 * lib/modules/...
