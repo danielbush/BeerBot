@@ -106,7 +106,7 @@ For messages not addressed to the bot, we use:
 
 ### Botmsg - the language the bot speaks in
 
-cmd and hear should reply with a hash or an array of hashes where each hash is a message or action.
+#cmd and #hear methods should return a hash or an array of hashes where each hash is a message or action (called ```botmsg```).
 
 The hash message has several keys:
 * :msg the message
