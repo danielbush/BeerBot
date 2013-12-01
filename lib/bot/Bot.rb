@@ -38,14 +38,16 @@ module BeerBot
     # If not :me, then the bot is being addressed over a channel.
 
     def cmd msg,from:nil,to:nil,world:nil,me:false
-      p "[bot] msg => '#{msg}'"
-      if /^help/ === msg then
+      case msg
+      when /^more!{0,}|moar!{0,}/i
+        return More.more(to)
+      when /^help/
         return self.help msg,from:from,to:to,world:world,me:me
       end
       response = nil
       self.with_modules {|m,modname|
         a = m.cmd(msg,from:from,to:to,world:world,me:me)
-        p "[bot] #{modname} => '#{a}'"
+        #p "[bot] #{modname} => '#{a}'"
         case a
         when Array
           # TODO: handle special cases or flags from the module

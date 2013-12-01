@@ -172,7 +172,7 @@ module BeerBot
           # a buffer which could be access by ,more
           # eg More.buffer(replyto,lines)
 
-          @parse.botmsg(replies)
+          replies
 
         end
       end # receive

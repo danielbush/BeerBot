@@ -15,6 +15,11 @@ require File.dirname(__FILE__)+'/lib/world/World'
 require File.dirname(__FILE__)+'/lib/modules/init.rb'
 require File.dirname(__FILE__)+'/lib/parse/parse'
 require File.dirname(__FILE__)+'/lib/scheduler/scheduler'
+require File.dirname(__FILE__)+'/lib/more/more'
+
+# More is used to buffer output when the bot responds
+# with more than several PRIVMSG's (lines).
+More = BeerBot::More
 
 if ARGV.size == 0 then
   puts "Usage: ruby beerbot.rb path/to/ircconf.json"
@@ -49,52 +54,6 @@ def reload!
     @config['nick'],
     @config['cmd_prefix'] )
 
-  send_mutex = Mutex.new
-
-  # Dispatcher thread.
-  #
-  # This thread executes the bot and module code.
-
-  Thread.new {
-    begin
-      loop {
-        parsed,raw = @conn.queue.deq
-        # Dispatcher should return nil
-        # or valid irc response (String)
-        # or Array of valid irc responses.
-        response = @dispatch.receive(parsed,raw,@world)
-        send_mutex.synchronize {
-          @conn.write(response) if response
-        }
-      }
-    rescue => e
-      puts e
-      puts e.backtrace
-      exit 1
-    end
-  }
-
-  # Schedule dispatcher thread.
-  #
-  # These are responses that were prepared earlier and which
-  # also need to be dispatched.
-
-  Thread.new {
-    loop {
-      botmsg = @scheduler.queue.deq
-      begin
-        response = @parse.botmsg(botmsg)
-      rescue => e
-        puts e
-        puts e.backtrace
-        next
-      end
-      send_mutex.synchronize {
-        @conn.write(response) if response
-      }
-    }
-  }
-
 end
 
 @scheduler = BeerBot::Scheduler.new
@@ -108,6 +67,78 @@ end
   @config['name'],
   nick:@config['nick'],
   server:@config['server'])
+
+send_mutex = Mutex.new
+
+# Dispatcher thread.
+#
+# This thread executes the bot and module code.
+
+Thread.new {
+  p "Start dispatch thread"
+  begin
+    loop {
+      response = nil
+      ircmsg,raw = @conn.queue.deq
+
+      # Dispatcher should return nil or valid botmsg (Hash) or Array
+      # of valid botmsh Hashes or possibly a Proc that might return
+      # similar.
+
+      botmsg = @dispatch.receive(ircmsg,raw,@world)
+
+      # More-filter it!
+      if botmsg then
+        arr = @parse.botmsg_expand(botmsg)
+        # We should be guaranteed an array of >= 1 botmsg hashes.
+        # (all proc's should have also been called)
+        # Group by :to and then more-filter them.
+        result = []
+        by_to = Hash.new{|h,k| h[k]=[]}
+        arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
+        by_to.each_pair{|to,a|
+          result += More.filter(a,to)
+          if result.size < a.size then
+            result += [msg:"Type: ,more",to:to]
+          end
+        }
+      end
+
+      #response = @parse.botmsg2irc(botmsg)
+      response = @parse.botmsg2irc(result)
+      send_mutex.synchronize {
+        @conn.write(response) if response
+      }
+    }
+  rescue => e
+    puts e
+    puts e.backtrace
+    exit 1
+  end
+}
+
+# Schedule dispatcher thread.
+#
+# These are responses that were prepared and scheduled earlier and
+# which also need to be dispatched.
+
+Thread.new {
+  loop {
+    botmsg = @scheduler.queue.deq
+    begin
+      response = @parse.botmsg2irc(botmsg)
+    rescue => e
+      puts e
+      puts e.backtrace
+      next
+    end
+    send_mutex.synchronize {
+      @conn.write(response) if response
+    }
+  }
+}
+
+
 
 # Load the bot and ircdispatcher code.
 reload!
