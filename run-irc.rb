@@ -49,10 +49,12 @@ def reload!
 
   # Dispatcher which receives messages and interacts with the bot.
 
-  @dispatch = BeerBot::Dispatchers::IRC.new(
+  @dispatch = BeerBot::Dispatchers.makeIRCDispatcher(
     @bot,
     @config['nick'],
-    @config['cmd_prefix'] )
+    @config['cmd_prefix'],
+    @world
+    )
 
 end
 
@@ -85,7 +87,7 @@ Thread.new {
       # of valid botmsh Hashes or possibly a Proc that might return
       # similar.
 
-      botmsg = @dispatch.receive(ircmsg,raw,@world)
+      botmsg = @dispatch.call(ircmsg)
 
       # More-filter it!
       if botmsg then

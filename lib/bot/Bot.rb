@@ -39,7 +39,7 @@ module BeerBot
 
     def cmd msg,from:nil,to:nil,world:nil,me:false
       case msg
-      when /^more!{0,}|moar!{0,}/i
+      when /^more!{0,}|^moar!{0,}/i
         return More.more(to)
       when /^help/
         return self.help msg,from:from,to:to,world:world,me:me
