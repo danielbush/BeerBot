@@ -13,7 +13,7 @@ module BeerBot
     end
 
     def self.buffer
-      @buffer ||= Hash.new
+      @buffer ||= Hash.new {|h,k| h[k]=[]}
     end
 
     # Fetch array of items from buffer for 'to'.
