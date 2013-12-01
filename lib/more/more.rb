@@ -25,7 +25,7 @@ module BeerBot
 
     def self.more key
       a = self.buffer[key]
-      self.buffer[key] = a.slice(self.size,a.size)  # could be nil
+      self.buffer[key] = a.slice(self.size,a.size) || []
       return a.slice(0,self.size-1)
     end
 
