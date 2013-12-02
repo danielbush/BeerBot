@@ -115,13 +115,21 @@ The hash message has several keys:
 
 Example:
 
+A message could be a single ```botmsg``` hash:
+
+```ruby
+{:msg => "hi there",:to => "#chan1"}
+```
+
+Or it could be an array of one or more such hashes:
+
 ```ruby
   [msg:'hi there',to:"#chan1"]
 
   => [{:msg => "hi there",:to => "#chan1"}]
 ```
 
-is a single reply
+Actions use ```:action``` instead of message.
 
 ```ruby
   [action:'runs up the stairs',to:"nick1"]
@@ -129,9 +137,9 @@ is a single reply
   => [{:action => 'runs up the stairs',to:"nick1"}]
 ```
 
-is a single action.
-
-You can reply with multiple actions.
+You can reply with multiple responses and actions to different
+recipients. In practice, you're probably more likely to reply to one
+or more times to the same recipient.
 
 
 ```ruby
