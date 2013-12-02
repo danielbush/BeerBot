@@ -87,7 +87,7 @@ For messages addressed to the bot, we use:
 
 This is the way to send commands to the bot.
 
-* msg = the trailing component of PRIVMSG
+* msg = the trailing component of PRIVMSG, a string with the message
 * from = the nick extracted from PRIVMSG prefix
 * to = the first parameter of PRIVMSG
 * me = true if 'to' is the bot's nick
@@ -104,11 +104,18 @@ For messages not addressed to the bot, we use:
   def hear msg,from:nil,to:nil,world:nil
 ```
 
+The distinction between ```hear``` and ```cmd``` is partly for convenience.
+
+The bot can be addressed directly (when you /query or pm the bot) and this is considered a command.
+But by convention the bot will also respond to any request over a channel that starts with a a character like ```,```, called the ```comand prefix```.  This can be configured in the conf file.
+
+The dispatcher will look for this and handle it automatically, making the bot code easier to write.
+
 ### Botmsg - the language the bot speaks in
 
 ```cmd``` and ```hear``` methods should return a hash or an array of hashes where each hash is a message or action (called ```botmsg```).
 
-The hash message has several keys:
+The botmsg hash has several keys:
 * :msg the message
 * :action the action  (use either msg or action, not both)
 * :to the intended recipient of the message (channel or nick)
@@ -168,19 +175,20 @@ connection.
 
 See ```lib/dispatchers```. For irc we have
 ```ruby
-BeerBot::Dispatchers::IRC
+dispatch = BeerBot::Dispatchers::makeIRCDispatcher
 ```
-* this class is initialised with bot details.
-* ```BeerBot::Dispatchers::IRC#receive``` then receives and routes messages accordingly returning a message in ```botmsg``` format.
+* this function returns a lambda that closes over an instance of Bot and IRCWorld.
+* ```dispatch.call(ircmsg)``` then receives and routes messages ```Parse::IRC::IRCMessage```'s.
 
 ## Major components
 
 The major components (modules/classes) in bot-land:
 
 * Parse
-  * the Parse::IRC.parse module does the job of "parsing" irc messages
+  * the Parse::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
   * the Parse::IRC.msg creates a PRIVMSG which you can send to the irc server
   * the Parse::IRC.action creates an action /me-style PRIVMSG
+  * the Parse::IRC.botmsg2irc converts a botmsg to a valid irc string to send to the server
 * IRCConnection < Connection
   * connects to irc
   * does ping/pong, and provides a ready? hook for you to do things
