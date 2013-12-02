@@ -162,20 +162,22 @@ module BeerBot
         end
       end
 
-      # Convert botmsg to an array of one or more botmsg hashes
+      # Convert botmsg to an array of one or more botmsg hashes.
+      #
+      # Proc's are executed to retrieve an array or hash.
       #
       # Array => Array
       # Hash  => [Hash]
       # Proc  => [Hash]
 
-      def self.botmsg_expand botmsg
+      def self.botmsg_to_a botmsg
         case botmsg
         when Hash
           return [botmsg]
         when Array
           return botmsg
         when Proc
-          return self.botmsg_expand(botmsg.call)
+          return self.botmsg_to_a(botmsg.call)
         else
           return nil
         end

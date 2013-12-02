@@ -17,9 +17,6 @@ require File.dirname(__FILE__)+'/lib/parse/parse'
 require File.dirname(__FILE__)+'/lib/scheduler/scheduler'
 require File.dirname(__FILE__)+'/lib/more/more'
 
-# More is used to buffer output when the bot responds
-# with more than several PRIVMSG's (lines).
-More = BeerBot::More
 
 if ARGV.size == 0 then
   puts "Usage: ruby beerbot.rb path/to/ircconf.json"
@@ -89,25 +86,7 @@ Thread.new {
 
       botmsg = @dispatch.call(ircmsg)
 
-      # More-filter it!
-      if botmsg then
-        arr = @parse.botmsg_expand(botmsg)
-        # We should be guaranteed an array of >= 1 botmsg hashes.
-        # (all proc's should have also been called)
-        # Group by :to and then more-filter them.
-        result = []
-        by_to = Hash.new{|h,k| h[k]=[]}
-        arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
-        by_to.each_pair{|to,a|
-          result += More.filter(a,to)
-          if result.size < a.size then
-            result += [msg:"Type: ,more",to:to]
-          end
-        }
-      end
-
-      #response = @parse.botmsg2irc(botmsg)
-      response = @parse.botmsg2irc(result)
+      response = @parse.botmsg2irc(botmsg)
       send_mutex.synchronize {
         @conn.write(response) if response
       }
@@ -142,7 +121,7 @@ Thread.new {
 
 
 
-# Load the bot and ircdispatcher code.
+# Load the bot and irc dispatcher code.
 reload!
 
 # Set up a repl in a separate thread.

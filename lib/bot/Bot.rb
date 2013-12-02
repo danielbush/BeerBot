@@ -5,6 +5,8 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
+require File.dirname(__FILE__)+'/../more/more'
+require File.dirname(__FILE__)+'/../parse/parse'
 
 module BeerBot
 
@@ -23,16 +25,42 @@ module BeerBot
 
   class Bot
 
+    # More is used to buffer output when the bot responds
+    # with more than several PRIVMSG's (lines).
+
+    More = BeerBot::More
+
     attr_reader :nick
 
     def initialize nick,modules:[]
+      @parse = BeerBot::Parse::IRC
       @nick = nick
       @dir = File.dirname(__FILE__)
       @moduledir = "#{@dir}/../modules"
       self.modules = modules || []
     end
 
-    # If you are addressing the bot directly.
+    # More-filter it!
+
+    def more botmsg
+      return nil unless botmsg
+      result = []
+      by_to = Hash.new{|h,k| h[k]=[]}
+      arr = @parse.botmsg_to_a(botmsg)
+
+      arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
+      by_to.each_pair{|to,a|
+        result += More.filter(a,to)
+        if result.size < a.size then
+          result += [msg:"Type: ,more",to:to]
+        end
+      }
+      return result
+    end
+
+    # For addressing the bot directly.
+    #
+    # msg: String excluding command prefix(es)
     #
     # If :me then the bot is being PRIVMSG'd.
     # If not :me, then the bot is being addressed over a channel.
@@ -42,18 +70,14 @@ module BeerBot
       when /^more!{0,}|^moar!{0,}/i
         return More.more(to)
       when /^help/
-        return self.help msg,from:from,to:to,world:world,me:me
+        botmsg = self.help(msg,from:from,to:to,world:world,me:me)
+        return self.more(botmsg)
       end
       response = nil
       self.with_modules {|m,modname|
-        a = m.cmd(msg,from:from,to:to,world:world,me:me)
-        #p "[bot] #{modname} => '#{a}'"
-        case a
-        when Array
-          # TODO: handle special cases or flags from the module
-          return a
-        else
-        end
+        botmsg = m.cmd(msg,from:from,to:to,world:world,me:me)
+        p [modname,botmsg]
+        return self.more(botmsg) if botmsg
       }
       nil
     end
@@ -64,13 +88,8 @@ module BeerBot
     def hear msg,from:nil,to:nil,world:nil
       self.with_modules {|m,modname|
         next unless m.respond_to?('hear')
-        a = m.hear(msg,from:from,to:to,world:world)
-        case a
-        when Array
-          # TODO: handle special cases or flags from the module
-          return a
-        else
-        end
+        botmsg = m.hear(msg,from:from,to:to,world:world)
+        return self.more(botmsg) if botmsg
       }
       nil
     end
