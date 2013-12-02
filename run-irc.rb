@@ -55,6 +55,7 @@ def reload!
 
 end
 
+# Set up scheduler (this doesn't start it yet)...
 @scheduler = BeerBot::Scheduler.new
 
 # Create a world associated with this irc connection.
@@ -134,6 +135,7 @@ Thread.new {
 @parse = BeerBot::Parse::IRC
 
 # Join channels.
+# Start the scheduler.
 @conn.ready? {
   channels = @config['channels']
   if channels then
@@ -142,6 +144,7 @@ Thread.new {
     }
   end
   @scheduler.start
+  # TODO: example scheduling, remove this...
   if false then
     @scheduler.add(
       {msg:"hi",to:"#chan1"},

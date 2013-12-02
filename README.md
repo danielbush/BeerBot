@@ -107,9 +107,11 @@ For messages not addressed to the bot, we use:
 The distinction between ```hear``` and ```cmd``` is partly for convenience.
 
 The bot can be addressed directly (when you /query or pm the bot) and this is considered a command.
-But by convention the bot will also respond to any request over a channel that starts with a a character like ```,```, called the ```comand prefix```.  This can be configured in the conf file.
+But by convention the bot will also respond to any request over a channel that starts with a a character like ```,```, called the ```cmd_prefix```.  This can be configured in the conf file.
 
 The dispatcher will look for this and handle it automatically, making the bot code easier to write.
+
+If you don't want this, you can easily write your own dispatcher and have everything passed through unprocessed.
 
 ### Botmsg - the language the bot speaks in
 

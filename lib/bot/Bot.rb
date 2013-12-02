@@ -17,10 +17,9 @@ module BeerBot
   # The bot also records which modules it may use to respond to messages
   # and the order in which to check them.
   # 
-  # 1. TODO per-from (user/channel) paging
-  # 2. response limiting (probably measured over time)
-  # 3. plugin chain: ordering and calling thereof
-  # 4. not responding to other bots
+  # TODO
+  # 1. response limiting (probably measured over time)
+  # 2. not responding to other bots
   #
 
   class Bot
