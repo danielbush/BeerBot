@@ -20,7 +20,7 @@ module BeerBot
   class IRCConnection < Connection
 
     # Queue containing received messages from the server.
-    attr_accessor :queue
+    attr_accessor :queue,:writeq
     attr_accessor :name,:connection,:server,:port,:nick,:thread
 
     def initialize name,server:nil,port:6667,nick:'beerbot'
@@ -28,13 +28,15 @@ module BeerBot
       @server = server
       @port = port
       @nick = nick
-      @queue = Queue.new
+      @queue = Queue.new   # received messages
+      @writeq = Queue.new  # messages to send out
 
       # This queue is only used at start up when the connection
       # to the irc server isn't ready yet:
       @readyq = Queue.new
       @ready = false
       @ready_mutex = Mutex.new
+      @write_mutex = Mutex.new
 
     end
 
@@ -83,6 +85,13 @@ module BeerBot
           end
         end
       }
+      @write_thread = Thread.new {
+        loop do
+          str = @writeq.deq
+          self.write str
+        end
+      }
+
       @thread
     end
 
@@ -98,7 +107,9 @@ module BeerBot
       when String
         message = message.chomp + "\r\n"
         p ">> #{message}"
-        @connection.print(message)
+        @write_mutex.synchronize {
+          @connection.print(message)
+        }
       when Array
         message.each{|m| self.write(m) }
       when NilClass

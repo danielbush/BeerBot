@@ -69,8 +69,6 @@ end
   nick:@config['nick'],
   server:@config['server'])
 
-send_mutex = Mutex.new
-
 # Dispatcher thread.
 #
 # This thread executes the bot and module code.
@@ -93,9 +91,7 @@ Thread.new {
         response = @parse.botmsg2irc(response)
       end
 
-      send_mutex.synchronize {
-        @conn.write(response) if response
-      }
+      @conn.writeq.enq(response) if response
     }
   rescue => e
     puts e
@@ -119,9 +115,7 @@ Thread.new {
       puts e.backtrace
       next
     end
-    send_mutex.synchronize {
-      @conn.write(response) if response
-    }
+    @conn.writeq.enq(response) if response
   }
 }
 
@@ -139,6 +133,7 @@ Thread.new {
 # Make this available to pry so we can issue commands from pry.
 # 
 # eg
+#   @conn.writeq.enq @parse.join('#chan1')
 #   @conn.write @parse.join('#chan1')
 
 @parse = BeerBot::Parse::IRC
@@ -152,7 +147,7 @@ Thread.new {
   channels = @config['channels']
   if channels then
     channels.each{|chan|
-      @conn.write(@parse.join(chan))
+      @conn.writeq.enq(@parse.join(chan))
     }
   end
   @scheduler.start
