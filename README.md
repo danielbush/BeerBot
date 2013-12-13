@@ -58,7 +58,7 @@ Use irssi or your favourite irc client to connect and create
 channels.
 
 ```
-  ruby run-irc.rb conf/your-conf.json
+  ruby bin/run-irc.rb conf/your-conf.json
 ```
 
 Should start the bot and launch the pry repl.
@@ -216,7 +216,7 @@ The major components (modules/classes) in bot-land:
   * you can add a botmsg hash/array or a Proc that returns
     as much
 
-Also see: run-irc.rb pretty much introduces you to the major parts of
+Also see: ```bin/run-irc.rb``` pretty much introduces you to the major parts of
 the system and how they are put together to create the bot.
 
 ## Adding a module
@@ -255,8 +255,8 @@ init.rb should load whatever could you require and the MyMod module.
 
 Finally you need to add "MyMod" to the 'modules' array in your json conf.
 You can also add the module to the bot after it starts using the pry
-repl.  For the run-irc.rb example, you can access @bot.modules and
-@bot.modules= .  See example session below.
+repl.  For the ```run-irc.rb``` example, you can access ```@bot.modules``` and
+```@bot.modules=``` .  See example session below.
 
 ## Example session
 
@@ -264,7 +264,7 @@ Set up an irc server on your computer.
 
 Then connect to it:
 ```
-  ruby run-irc.rb conf/example-irc.json
+  ruby bin/run-irc.rb conf/example-irc.json
 ```
 
 You will see the bot receiving strings and the pry repl telling

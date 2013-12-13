@@ -15,19 +15,36 @@ require 'set'
 # Scheduler
 # 
 # Usage:
-#   s = Scheduler.new
+#   s = Scheduler.instance  # get the singleton instance
 #   id = s.add(<A>,<DateTime>,nick) # one off
 #   id = s.add_perm(<A>,nick)       # permanently add
+#   s.permlist = [] # remove everything from permlist
+#   ... etc
 # where <A> could be
 #   lambda{|now,h|}                  # add_perm or add
 #   {...}  # eg {:msg => "...", ...} # add only
 #   [...]  # eg [:msg => "...", ...] # add only
+# 'now' is generated and passed by the scheduler when it invokes your
+# lambda.
+# 'h' is the original record stored in the scheduler.
+# The scheduler stores records via #add and #add_perm.
+# They take the form of:
+#   {id:@item_id,at:at,owner:owner,item:item}
+# where id is an internal id used by the scheduler,
+# owner and item are 'nick' and '<A>' in the above.
 
 class BeerBot::Scheduler
 
   DIR = File.dirname(__FILE__)
 
   attr_accessor :queue,:list,:permlist
+
+  # Use instead of #new to get a singleton instance that can be seen
+  # by other modules.
+
+  def self.instance
+    @@scheduler ||= BeerBot::Scheduler.new
+  end
 
   def initialize
     @item_id = 0;
@@ -52,7 +69,12 @@ class BeerBot::Scheduler
       
   end
 
-  # Process a list
+  # Process a list of scheduler records and enqueue them on the
+  # scheduler queue.
+  #
+  # A separate thread outside the scheduler should be ready to
+  # dequeue, convert the botmsg format to irc and send it over the irc
+  # connection.
   #
   # List containing hashes (h) of form:
   #   {at:<DateTime item:Hash|Array|Proc owner:nick}

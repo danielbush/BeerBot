@@ -10,12 +10,13 @@ require 'set'
 require 'rubygems'
 require 'pry'
 require 'json'
-require File.dirname(__FILE__)+'/lib/connect/IRCConnection'
-require File.dirname(__FILE__)+'/lib/world/World'
-require File.dirname(__FILE__)+'/lib/modules/init.rb'
-require File.dirname(__FILE__)+'/lib/parse/parse'
-require File.dirname(__FILE__)+'/lib/scheduler/scheduler'
-require File.dirname(__FILE__)+'/lib/more/more'
+@path = File.expand_path(File.dirname(__FILE__)+'/..')
+require @path+'/lib/connect/IRCConnection'
+require @path+'/lib/world/World'
+require @path+'/lib/modules/init.rb'
+require @path+'/lib/parse/parse'
+require @path+'/lib/scheduler/scheduler'
+require @path+'/lib/more/more'
 
 
 if ARGV.size == 0 then
@@ -37,8 +38,8 @@ conffile = ARGV[0]
 
 def reload!
 
-  load File.dirname(__FILE__)+'/lib/bot/Bot.rb'
-  load File.dirname(__FILE__)+'/lib/dispatchers/irc.rb'
+  load @path+'/lib/bot/Bot.rb'
+  load @path+'/lib/dispatchers/irc.rb'
 
   # Create the bot.
 
@@ -56,7 +57,7 @@ def reload!
 end
 
 # Set up scheduler (this doesn't start it yet)...
-@scheduler = BeerBot::Scheduler.new
+@scheduler = BeerBot::Scheduler.instance
 
 # Create a world associated with this irc connection.
 # (lists channels and users we know about)
@@ -132,10 +133,17 @@ Thread.new {
 }
 
 # Make this available to pry so we can issue commands from pry.
+# 
+# eg
+#   @conn.write @parse.join('#chan1')
+
 @parse = BeerBot::Parse::IRC
 
+# Do stuff once we've identified with the irc server...
+# 
 # Join channels.
 # Start the scheduler.
+
 @conn.ready? {
   channels = @config['channels']
   if channels then
