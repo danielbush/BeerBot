@@ -80,15 +80,19 @@ Thread.new {
   begin
     loop {
       response = nil
-      ircmsg,raw = @conn.queue.deq
+      str,raw = @conn.queue.deq
 
       # Dispatcher should return nil or valid botmsg (Hash) or Array
       # of valid botmsh Hashes or possibly a Proc that might return
       # similar.
 
-      botmsg = @dispatch.call(ircmsg)
+      response = @dispatch.call(str)
+      case response
+      when String
+      else
+        response = @parse.botmsg2irc(response)
+      end
 
-      response = @parse.botmsg2irc(botmsg)
       send_mutex.synchronize {
         @conn.write(response) if response
       }

@@ -7,7 +7,6 @@
 
 require 'socket'
 require 'set'
-require File.dirname(__FILE__)+'/../parse/parse'
 require File.dirname(__FILE__) + '/Connection'
 
 module BeerBot
@@ -26,7 +25,6 @@ module BeerBot
 
     def initialize name,server:nil,port:6667,nick:'beerbot'
       @name = name
-      @irc = BeerBot::Parse::IRC::IRCMessage
       @server = server
       @port = port
       @nick = nick
@@ -76,20 +74,12 @@ module BeerBot
           str = @connection.gets()
           p "<< #{str}"
           case str
-          # TODO put this into parser (so we can test it easily)
           when /^PING (.*)$/
             self.write "PONG #{$1}"
+          when / 001 / # ready
+            self.ready!
           else
-            m = @irc.new(str)
-            if m then
-              case m[:command]
-              when '001'  # welcome message
-                self.ready!
-              end
-              self.queue.enq([m,str])
-            else
-              puts "Don't recognise this command."
-            end
+            self.queue.enq(str)
           end
         end
       }

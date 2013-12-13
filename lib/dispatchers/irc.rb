@@ -25,17 +25,17 @@ module BeerBot
 
     def self.makeIRCDispatcher bot,nick,prefix,world,&block
 
-      parse = BeerBot::Parse::IRC
+      irc = BeerBot::Parse::IRC::IRCMessage
       nickrx = Regexp.new("^#{nick}$",'i')
       get_nick_cmd = BeerBot::Parse.make_prefix_parser(nick)
       get_prefix_cmd = BeerBot::Parse.make_prefix_parser(prefix)
 
-      lambda {|m|
-        case m
-        when BeerBot::Parse::IRC::IRCMessage
-        else
-          puts "Require an IRCMessage instance."
-          return nil
+      lambda {|str|
+
+        m = irc.new(str)
+
+        if not m then
+          puts "Don't recognise this command: '#{str}'."
         end
 
         case m[:command]
