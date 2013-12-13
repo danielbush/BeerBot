@@ -40,6 +40,20 @@ module BeerBot
 
     end
 
+    # Flag the connection as ready.
+    #
+    # Any blocks passed to ready? will now be executed.
+
+    def ready!
+      @ready_mutex.synchronize {
+        @ready = true
+        while @readyq.size > 0
+          block = @readyq.deq
+          block.call
+        end
+      }
+    end
+
     def ready? &block
       @ready_mutex.synchronize {
         if @ready then
@@ -70,13 +84,7 @@ module BeerBot
             if m then
               case m[:command]
               when '001'  # welcome message
-                @ready_mutex.synchronize {
-                  @ready = true
-                  while @readyq.size > 0
-                    block = @readyq.deq
-                    block.call
-                  end
-                }
+                self.ready!
               end
               self.queue.enq([m,str])
             else
