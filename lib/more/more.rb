@@ -12,24 +12,26 @@ module BeerBot
   # For irc and other messaging the key should probably
   # be the thing you want to message eg a channel or nick.
 
-  module More
+  class More
 
-    def self.size
+    attr_accessor :size
+    attr_reader :buffer
+
+    def size
       @size ||= 4  # lines
     end
 
-    def self.buffer
+    def buffer
       @buffer ||= Hash.new {|h,k| h[k]=[]}
     end
 
-    # Fetch array of items from buffer for 'to'.
+    # Fetch array of items from buffer for key 'key'.
     #
-    # 'to' should probably be
-    #   prefix PRIVMSG to :msg
+    # 'key' should probably be a person or channel you are messaging.
     #
-    # Should return an array of botmsg's.
+    # Should return an array of items (eg of botmsg hashes).
 
-    def self.more key
+    def more key
       a = self.buffer[key]
       self.buffer[key] = a.slice(self.size,a.size) || []
       return a.slice(0,self.size-1)
@@ -41,7 +43,7 @@ module BeerBot
     # The remainder are stored in a buffer and can
     # be accessed via 'key' using 'self.more'.
 
-    def self.filter arr,key
+    def filter arr,key
       if arr.size <= self.size then
         self.buffer[key] = [] # reset buffer
         return arr

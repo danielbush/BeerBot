@@ -18,20 +18,14 @@ module BeerBot
   # and the order in which to check them.
   # 
   # TODO
-  # 1. response limiting (probably measured over time)
-  # 2. not responding to other bots
-  #
+  # 1. not responding to other bots
 
   class Bot
-
-    # More is used to buffer output when the bot responds
-    # with more than several PRIVMSG's (lines).
-
-    More = BeerBot::More
 
     attr_reader :nick
 
     def initialize nick,modules:[]
+      @more = BeerBot::More.new  # to buffer outgoing messages
       @parse = BeerBot::Parse::IRC
       @nick = nick
       @dir = File.dirname(__FILE__)
@@ -39,8 +33,8 @@ module BeerBot
       self.modules = modules || []
     end
 
-    # Process a botmsg (or array of such), and filter by 'to'
-    # and then more-filter based on this.
+    # Process a botmsg (or array of such), and filter by 'to' and then
+    # more-filter based on this.
     #
     # Returns the first 'n' messages for each 'to'.
 
@@ -52,7 +46,7 @@ module BeerBot
 
       arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
       by_to.each_pair{|to,a|
-        result += More.filter(a,to)
+        result += @more.filter(a,to)
         if result.size < a.size then
           result += [msg:"Type: ,more",to:to]
         end
@@ -69,12 +63,18 @@ module BeerBot
 
     def cmd msg,from:nil,to:nil,world:nil,me:false
       case msg
+
+      # Pull out stuff that has been buffered...
       when /^more!{0,}|^moar!{0,}/i
-        return More.more(to)
+        return @more.more(to)
+
+      # Process help request...
       when /^help/
         botmsg = self.help(msg,from:from,to:to,world:world,me:me)
         return self.more(botmsg)
       end
+
+      # Respond using a module...
       response = nil
       self.with_modules {|m,modname|
         botmsg = m.cmd(msg,from:from,to:to,world:world,me:me)
@@ -85,6 +85,7 @@ module BeerBot
     end
 
     # Anythihg that isn't obviously a command, is 'heard' by the bot.
+    # 
     # The bot may decide it is being addressed can call self.cmd.
 
     def hear msg,from:nil,to:nil,world:nil

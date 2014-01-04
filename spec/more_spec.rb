@@ -5,16 +5,17 @@ More = ::BeerBot::More
 
 describe "More buffering" do
   it "should buffer" do
-    More.size.should == 4
+    more = More.new
+    more.size.should == 4
 
-    a = More.filter([1,2,3,4,5,6],:mine)
+    a = more.filter([1,2,3,4,5,6],:mine)
     a.should == [1,2,3,4]
-    b = More.more(:mine)
+    b = more.more(:mine)
     b.should == [5,6]
 
-    a = More.filter([1,2,3],:mine)
+    a = more.filter([1,2,3],:mine)
     a.should == [1,2,3]
-    b = More.more(:mine)
+    b = more.more(:mine)
     b.should == []
   end
 end
