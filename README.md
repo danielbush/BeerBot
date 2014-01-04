@@ -242,7 +242,7 @@ You need to create module like this:
         def self.hear msg,from:nil,to:nil,world:nil
         end
         # Optional
-        def self.help
+        def self.help detail=nil
         end
       end
     end
