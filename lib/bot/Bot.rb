@@ -49,7 +49,7 @@ module BeerBot
       by_to.each_pair{|to,a|
         result += @more.filter(a,to)
         if result.size < a.size then
-          result += [msg:"Type: ,more",to:to]
+          result += [msg:"Type: more",to:to]
         end
       }
       return result
@@ -67,12 +67,22 @@ module BeerBot
 
       # Pull out stuff that has been buffered...
       when /^more!{0,}|^moar!{0,}/i
-        return @more.more(to)
+        if not me then
+          p "more called key (to):#{to}"
+          return @more.more(to)
+        else
+          p "more called key (from):#{from}"
+          return @more.more(from)
+        end
 
       # Process help request...
-      when /^help/
-        botmsg = self.help(msg,from:from,to:to,world:world,me:me)
-        return self.more(botmsg)
+      when /^help(\s+(\S+)(\s+\S+)?)?\s*$/
+        topic = $2  # could be nil
+        subtopic = $3  # could be nil
+        subtopic = subtopic.strip if subtopic
+        p "help called, topic:#{topic}, subtopic:#{subtopic}"
+        botmsg = self.help(topic,subtopic,from:from,to:to,world:world,me:me)
+        return self.more(botmsg) if botmsg
       end
 
       # Respond using a module...
@@ -98,21 +108,55 @@ module BeerBot
       nil
     end
 
-    # TODO: need a help protocol.
-    #
-    # help => list general commands or topics for all modules
-    # help moduleName => list same for the module
-    # help moduleName cmd => list cmd syntax (optional)
+    # Handle help commands.
+    # 
+    # "help" => list general commands or topics for all modules
+    # "help topic" => list topics for topic (usually module name)
+    # "help topic subtopic" => list subtopics for topic
 
-    def help msg,from:nil,to:nil,world:nil,me:false
-      helplist = []
-      self.with_modules {|m,modname|
-        if m.respond_to?(:help) then
-          mhelp = m.help
-          helplist += mhelp
+    def help topic,subtopic,from:nil,to:nil,world:nil,me:false
+      m = nil
+
+      # "help modname [topic]"
+      if topic then
+        modname = topic
+        mod = self.get_module(modname)
+        if mod then
+          if mod.respond_to?(:help) then
+            arr = mod.help(subtopic)
+            return nil if not arr
+            m = []
+            if not subtopic then
+              m += [to:from,msg:"type: help #{modname} <topic>"]
+            end
+            m += arr.map{|a| {to:from,msg:a}}
+          end
+        else
+          m = [to:to,msg:"Don't know this topic #{from}"]
+          return m
         end
-      }
-      [msg:helplist.join(', ')]
+
+      # "help"
+      else
+        helplist = []
+        self.with_modules {|m,modname|
+          helplist.push modname.split('::').last
+        }
+        m = [
+          to:from,
+          msg:"Modules (type: help <module-name>): "+helplist.join('; ')
+        ]
+
+      end
+
+      if m then
+        if not me then
+          m += [to:to,msg:"pm'ing you #{from}"]
+        end
+      end
+
+      return m
+
     end
 
 
@@ -173,15 +217,20 @@ module BeerBot
 
     def with_modules &block
       @modules.each {|m|
-        modname = "::BeerBot::Modules::#{m}"
-        begin
-          mod = Object.const_get(modname)
-        rescue => e
-          puts "'#{modname}' was not loaded into ruby! #{e}"
-          next
-        end
-        yield mod,modname
+        mod = get_module m
+        yield mod,m if mod
       }
+    end
+
+    def get_module modname
+      modname = "::BeerBot::Modules::#{modname}"
+      begin
+        mod = Object.const_get(modname)
+        return mod
+      rescue => e
+        puts "'#{modname}' was not loaded into ruby! #{e}"
+        return nil
+      end
     end
 
 

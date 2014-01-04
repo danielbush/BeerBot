@@ -107,8 +107,33 @@ SQL
     end
   end
 
-  def self.help
-    ["<term> is|<term> is also|forget <term>"]
+  def self.help detail=nil
+    if not detail then
+      ["topics: add,forget,edit,search"]
+    else
+      case detail
+      when 'add'
+        [
+          "<term> is ...  # to create a new term",
+          "<term> is also ...  # to add a entry for existing term",
+        ]
+      when 'forget'
+        [
+          "forget <term> # forget the term",
+          "forget <term>[n] # forget entry n in term (not implemented yet)",
+        ]
+      when 'edit'
+        [
+          "<term> s/../../g  # not implemented yet",
+        ]
+      when 'edit'
+        [
+          ",?<regex> (case insensitive) # not implemented yet",
+        ]
+      else
+        ["No information"]
+      end
+    end
   end
 
   def self.hear msg,to:nil,from:nil,world:nil

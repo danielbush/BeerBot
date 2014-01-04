@@ -70,14 +70,21 @@ class RunIRC
           # of valid botmsh Hashes or possibly a Proc that might return
           # similar.
 
-          response = @dispatch.call(str)
-          case response
+          result = @dispatch.call(str)
+          case result
           when String
+            response = result  # assume irc string
           else
-            response = @botmsg.botmsg2irc(response)
+            response = @botmsg.botmsg2irc(result)
           end
 
-          @conn.writeq.enq(response) if response
+          if response then
+            @conn.writeq.enq(response)
+          else
+            if result then
+              p "Dispatcher returned #{result.inspect} which could not be converted to irc string"
+            end
+          end
         }
       rescue => e
         puts e
