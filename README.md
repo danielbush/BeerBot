@@ -206,7 +206,12 @@ The major components (modules/classes) in bot-land:
   * manages modules, loading them in ```lib/modules/```
 * ```lib/modules/...```
   * modules used by the bot (your code goes here)
-* Dispatchers::IRC
+
+There are 2 components that know about the others and manage and
+orchestrate all the interactions.
+
+These are:
+* Dispatchers.makeIRCDispatcher
   * routes messages to the Bot instance and route the replies
     back to the irc connection
   * instantiate one of these and have the IRCConnection
