@@ -5,7 +5,7 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-module BeerBot;  module Modules; end; end
+module BeerBot; module Modules; end; end
 
 require 'sqlite3'
 
@@ -33,7 +33,11 @@ require 'sqlite3'
 
 module BeerBot::Modules::Facts
 
-  DBFILE = File.expand_path(File.dirname(__FILE__))+'/facts.db'
+  # IMPORTANT: set this outside of any methods, otherwise, expand_path
+  # will not actually resolve correctly - maybe something to do with
+  # the way we load modules?
+
+  @@path = File.expand_path(File.dirname(__FILE__))
 
   # TODO: use BLOB instead of TEXT for values?
   def self.build_tables!
@@ -48,8 +52,21 @@ module BeerBot::Modules::Facts
 SQL
   end
 
+  # By default, we create facts.db in this directory, but you can
+  # override it here for testing purposes.
+
+  def self.set_db dbfile
+    @@dbfile = dbfile
+    @@db = nil  # force new database instance
+  end
+  def self.dbfile
+    @@dbfile
+  end
+
   def self.db
-    @@db ||= SQLite3::Database.new(DBFILE)
+    @@dbfile ||= @@path+'/facts.db'
+    p @@dbfile
+    @@db ||= SQLite3::Database.new(@@dbfile)
     @@db
   end
 

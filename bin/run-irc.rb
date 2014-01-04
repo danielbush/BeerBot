@@ -5,6 +5,7 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
+raise "Needs ruby 2" if /^1/===RUBY_VERSION
 path = File.expand_path(File.dirname(__FILE__))
 require path+'/../lib/run/RunIRC'
 
