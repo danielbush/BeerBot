@@ -159,7 +159,7 @@ or more times to the same recipient.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-The spec for a valid botmsg is pretty much defined in ```lib/parse/parse.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
+The spec for a valid botmsg is pretty much defined in ```lib/protocols/botmsg.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
 
 ```ruby
 BeerBot::Protocol::BotMsg.botmsg2irc
@@ -186,7 +186,7 @@ dispatch = BeerBot::Dispatchers::makeIRCDispatcher
 
 The major components (modules/classes) in bot-land:
 
-* Parse
+* Protocol modules
   * the Protocol::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
   * the Protocol::IRC.msg creates a PRIVMSG which you can send to the irc server
   * the Protocol::IRC.action creates an action /me-style PRIVMSG
@@ -197,11 +197,15 @@ The major components (modules/classes) in bot-land:
     once connection is established
 * IRCWorld < World
   * the bot's world, the channels and people he knows about
+* Scheduler
+  * allows scheduling of messages eg reminders or regular messages
+  * you can add a botmsg hash/array or a Proc that returns
+    as much
 * Bot
   * the bot itself, implements hear/cmd methods
-  * manages modules, loading them
-  * it's really just a glorified module loader/router for getting
-    your modules to receive and reply to messages
+  * manages modules, loading them in ```lib/modules/```
+* ```lib/modules/...```
+  * modules used by the bot (your code goes here)
 * Dispatchers::IRC
   * routes messages to the Bot instance and route the replies
     back to the irc connection
@@ -209,12 +213,7 @@ The major components (modules/classes) in bot-land:
     write these
   * 'receive' should output nil or a valid IRC response string
     or an array of these
-* lib/modules/...
-  * modules used by the bot (your code goes here)
-* Scheduler
-  * allows scheduling of messages eg reminders or regular messages
-  * you can add a botmsg hash/array or a Proc that returns
-    as much
+* RunIRC class (in ```lib/run/RunIRC```)
 
 Also see: ```bin/run-irc.rb``` pretty much introduces you to the major parts of
 the system and how they are put together to create the bot.
@@ -278,9 +277,10 @@ The pry repl will allow you to see everything in run-irc.rb.
   @conn  # shows IRCConnection
   @bot   # shows the bot instance
   @dispatch  # the dispatcher that mediates between @bot and @conn
-  @parse     # irc parser
+  @irc   # irc protocol
 
   reload! # hot reload the bot and dispatcher
+  say to,msg # convenience for making the bot say something
   @bot.load_modules! # reload the modules used by @bot
   @bot.modules = [...]  # change the modules the bot uses to respond
   @bot.modules += [...] # add more modules (if they are present)
@@ -301,7 +301,7 @@ You can send any irc command you want by using `write`:
 or
 
 ```ruby
-  @conn.write @parse.join("#channel1")
+  @conn.write @irc.join("#channel1")
 ```
 
 
