@@ -77,7 +77,7 @@ class BeerBot::Scheduler
   # connection.
   #
   # List containing hashes (h) of form:
-  #   {at:<DateTime item:Hash|Array|Proc owner:nick}
+  #   {at:<DateTime> item:Hash|Array|Proc owner:nick}
   #
   # 'now' should generally be set to now, unless you're testing.
   #

@@ -9,11 +9,12 @@ module BeerBot
 
   module Parse
 
-    # Parse a string msg and look for nick or command prefix at
-    # beginning.
+    # Return a parser that takes string msg and extracts a specified
+    # prefix at beginning.
+    #
+    # The prefix might be a nick or a command prefix.
     #
     # Use this to get commands issued to the bot through a channel.
-    # msg should be :msg (or :trailing) in self.parse.
     #
     # TODO: make sure this returns msg without the prefix, or nil
     # otherwise.
@@ -39,10 +40,6 @@ module BeerBot
         # unprefixed irc commands sent by the server to a client.
         # 
         # See: http://tools.ietf.org/html/rfc1459.html sec 2.3.1
-        #
-        # NOTE: some of the opening messages sent at connection time
-        # by the default debian irc server don't start with ':'.
-        # So to handle these, we start with '^:?' not '^:'.
 
         CMD = Regexp.new(
           '^(:(?<prefix>\S+)\s+)?'+ # nick!~user@host
@@ -129,12 +126,7 @@ module BeerBot
 
       end
 
-      # Processes bot messages.
-      #
-      # Return irc string or array of these if botmsg is an array.
-      #
-      # botmsg is protocol agnostic.
-      # We need to convert to irc.
+      # Return irc-conformat string from a botmsg hash.
       #
       # Generates nil if it can't handle 'botmsg'.
 

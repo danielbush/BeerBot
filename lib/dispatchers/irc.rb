@@ -13,15 +13,19 @@ module BeerBot
   # processing a protocol and update the world or call the bot (both
   # in protocol agnostic fashion).
   #
-  # Dispatchers should return botmsg's.
-  #
-  # Think of them as glorified receive functions that vet access to
-  # the bot they're associated with, worry about the protocol details
-  # and send the bot generic messages. No protocol details should leak
-  # through.
-  #
+  # The lambda will route messages to the bot (cmd or hear) in
+  # a protocol neutral message using botmsg hashes.
 
   module Dispatchers
+
+    # Create a lambda for a given bot/nick/world/command prefix for
+    # irc.
+    # 
+    # The lambda receives an incoming irc string, tries to parse
+    # it and act on it.
+    # The lambda should return nil or a botmsg hash.
+    # Note that connection readiness and PONG protocol are handled by
+    # the irc connection, not here.
 
     def self.makeIRCDispatcher bot,nick,prefix,world,&block
 

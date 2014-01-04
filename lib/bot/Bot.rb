@@ -39,7 +39,10 @@ module BeerBot
       self.modules = modules || []
     end
 
-    # More-filter it!
+    # Process a botmsg (or array of such), and filter by 'to'
+    # and then more-filter based on this.
+    #
+    # Returns the first 'n' messages for each 'to'.
 
     def more botmsg
       return nil unless botmsg
