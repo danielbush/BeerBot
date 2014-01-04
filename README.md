@@ -197,15 +197,21 @@ The major components (modules/classes) in bot-land:
     once connection is established
 * IRCWorld < World
   * the bot's world, the channels and people he knows about
+* More
+  * a generic buffer using hash to provide key-based storage
+  * ```Bot``` will use an instance of ```More``` to limit the
+    size of messages and buffer the remainder for later access
+    using the command ```more```.
 * Scheduler
   * allows scheduling of messages eg reminders or regular messages
   * you can add a botmsg hash/array or a Proc that returns
     as much
 * Bot
-  * the bot itself, implements hear/cmd methods
+  * the bot itself, implements ```hear```/```cmd```/```help``` methods
   * manages modules, loading them in ```lib/modules/```
 * ```lib/modules/...```
   * modules used by the bot (your code goes here)
+  * have the same method hear/cmd/help signatures as ```Bot```
 
 There are 2 components that know about the others and manage and
 orchestrate all the interactions.
