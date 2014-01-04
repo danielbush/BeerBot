@@ -19,8 +19,10 @@ require path+'/scheduler/scheduler'
 
 # Run the irc bot.
 #
-# This class represents all the high level components needed to run
-# beerbot on irc.
+# This class creates and coordinates all the high level components
+# needed to run beerbot over irc.
+#
+# See bin/* .
 
 class RunIRC
 

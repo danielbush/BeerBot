@@ -6,7 +6,7 @@ describe "IRC parsing" do
   describe "main irc regex parser" do
     it "should parse prefixed and unprefixed irc strings" do
 
-      IRC = BeerBot::Parse::IRCMessage
+      IRC = BeerBot::Parse::IRC::IRCMessage
 
       samples = [
         ":thursday!~bevan@172.17.217.13 QUIT :Quit: Leaving.\r\n",
