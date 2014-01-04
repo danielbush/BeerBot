@@ -117,10 +117,11 @@ module BeerBot
     def help topic,subtopic,from:nil,to:nil,world:nil,me:false
       m = nil
 
-      # "help modname [topic]"
+      # "help modname [subtopic]"
       if topic then
         modname = topic
         mod = self.get_module(modname)
+        return nil unless @modules.rindex(modname)
         if mod then
           if mod.respond_to?(:help) then
             arr = mod.help(subtopic)
@@ -221,6 +222,8 @@ module BeerBot
         yield mod,m if mod
       }
     end
+
+    # Get reference to a module if it is loaded, return nil otherwise.
 
     def get_module modname
       modname = "::BeerBot::Modules::#{modname}"
