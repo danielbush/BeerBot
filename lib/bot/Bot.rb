@@ -6,7 +6,8 @@
 # see <http://www.gnu.org/licenses/>.
 
 require File.dirname(__FILE__)+'/../more/more'
-require File.dirname(__FILE__)+'/../parse/parse'
+require File.dirname(__FILE__)+'/../protocols/irc'
+require File.dirname(__FILE__)+'/../protocols/botmsg'
 
 module BeerBot
 
@@ -26,7 +27,7 @@ module BeerBot
 
     def initialize nick,modules:[]
       @more = BeerBot::More.new  # to buffer outgoing messages
-      @parse = BeerBot::Parse::IRC
+      @botmsg = BeerBot::Protocol::BotMsg
       @nick = nick
       @dir = File.dirname(__FILE__)
       @moduledir = "#{@dir}/../modules"
@@ -42,7 +43,7 @@ module BeerBot
       return nil unless botmsg
       result = []
       by_to = Hash.new{|h,k| h[k]=[]}
-      arr = @parse.botmsg_to_a(botmsg)
+      arr = @botmsg.botmsg_to_a(botmsg)
 
       arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
       by_to.each_pair{|to,a|

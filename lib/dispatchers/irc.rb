@@ -5,7 +5,8 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-require File.dirname(__FILE__)+'/../parse/parse'
+require File.dirname(__FILE__)+'/../protocols/general'
+require File.dirname(__FILE__)+'/../protocols/irc'
 
 module BeerBot
 
@@ -29,10 +30,10 @@ module BeerBot
 
     def self.makeIRCDispatcher bot,nick,prefix,world,&block
 
-      irc = BeerBot::Parse::IRC::IRCMessage
+      irc = BeerBot::Protocol::IRC::IRCMessage
       nickrx = Regexp.new("^#{nick}$",'i')
-      get_nick_cmd = BeerBot::Parse.make_prefix_parser(nick)
-      get_prefix_cmd = BeerBot::Parse.make_prefix_parser(prefix)
+      get_nick_cmd = BeerBot::Protocol.make_prefix_parser(nick)
+      get_prefix_cmd = BeerBot::Protocol.make_prefix_parser(prefix)
 
       lambda {|str|
 

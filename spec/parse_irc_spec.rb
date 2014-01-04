@@ -1,4 +1,4 @@
-require File.dirname(__FILE__)+"/../lib/parse/parse.rb"
+require File.dirname(__FILE__)+"/../lib/protocols/irc"
 require 'pp'
 
 describe "IRC parsing" do
@@ -6,7 +6,7 @@ describe "IRC parsing" do
   describe "main irc regex parser" do
     it "should parse prefixed and unprefixed irc strings" do
 
-      IRC = BeerBot::Parse::IRC::IRCMessage
+      IRC = BeerBot::Protocol::IRC::IRCMessage
 
       samples = [
         ":thursday!~bevan@172.17.217.13 QUIT :Quit: Leaving.\r\n",
@@ -61,11 +61,11 @@ describe "IRC parsing" do
 
     it "should return message without the prefix" do
 
-      fn = BeerBot::Parse.make_prefix_parser(',')
+      fn = BeerBot::Protocol.make_prefix_parser(',')
       fn.call(',hello').should eq('hello')
       fn.call(',hello ').should eq('hello')
 
-      fn = BeerBot::Parse.make_prefix_parser('Beerbot')
+      fn = BeerBot::Protocol.make_prefix_parser('Beerbot')
       fn.call('Beerbot: hello').should eq('hello')
       fn.call('Beerbot hello').should eq('hello')
     end

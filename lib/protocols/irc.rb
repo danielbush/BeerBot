@@ -7,27 +7,7 @@
 
 module BeerBot
 
-  module Parse
-
-    # Return a parser that takes string msg and extracts a specified
-    # prefix at beginning.
-    #
-    # The prefix might be a nick or a command prefix.
-    #
-    # Use this to get commands issued to the bot through a channel.
-    #
-    # TODO: make sure this returns msg without the prefix, or nil
-    # otherwise.
-
-    def self.make_prefix_parser prefix
-      rx = Regexp.new("^#{prefix}\\W?(.*)",'i')
-      lambda {|msg|
-        if m = rx.match(msg) then
-          m[1].strip
-        end
-      }
-    end
-
+  module Protocol
 
     module IRC
 
@@ -126,54 +106,6 @@ module BeerBot
 
       end
 
-      # Return irc-conformat string from a botmsg hash.
-      #
-      # Generates nil if it can't handle 'botmsg'.
-
-      def self.botmsg2irc botmsg
-        case botmsg
-        when Hash
-          to = botmsg[:to]
-          return nil unless to
-          if botmsg[:action] then
-            self.action(to,botmsg[:action])
-          elsif botmsg[:msg] then
-            self.msg(to,botmsg[:msg])
-          else
-            nil
-          end
-        when Array
-          botmsg.map{|reply|
-            self.botmsg2irc reply
-          }
-        when Proc
-          #p botmsg.call
-          self.botmsg2irc(botmsg.call)
-        else
-          nil
-        end
-      end
-
-      # Convert botmsg to an array of one or more botmsg hashes.
-      #
-      # Proc's are executed to retrieve an array or hash.
-      #
-      # Array => Array
-      # Hash  => [Hash]
-      # Proc  => [Hash]
-
-      def self.botmsg_to_a botmsg
-        case botmsg
-        when Hash
-          return [botmsg]
-        when Array
-          return botmsg
-        when Proc
-          return self.botmsg_to_a(botmsg.call)
-        else
-          return nil
-        end
-      end
 
       # Send PRIVMSG to channel or nick.
 

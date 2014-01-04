@@ -162,7 +162,7 @@ will get the bot to say 'hi there' and 'oh crap'.
 The spec for a valid botmsg is pretty much defined in ```lib/parse/parse.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
 
 ```ruby
-BeerBot::Parse.botmsg2irc
+BeerBot::Protocol::BotMsg.botmsg2irc
 ```
 
 Note that ```Proc``` instances will also be accepted and
@@ -180,17 +180,17 @@ See ```lib/dispatchers```. For irc we have
 dispatch = BeerBot::Dispatchers::makeIRCDispatcher
 ```
 * this function returns a lambda that closes over an instance of Bot and IRCWorld.
-* ```dispatch.call(ircmsg)``` then receives and routes messages ```Parse::IRC::IRCMessage```'s.
+* ```dispatch.call(ircmsg)``` then receives and routes messages ```Protocol::IRC::IRCMessage```'s.
 
 ## Major components
 
 The major components (modules/classes) in bot-land:
 
 * Parse
-  * the Parse::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
-  * the Parse::IRC.msg creates a PRIVMSG which you can send to the irc server
-  * the Parse::IRC.action creates an action /me-style PRIVMSG
-  * the Parse::IRC.botmsg2irc converts a botmsg to a valid irc string to send to the server
+  * the Protocol::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
+  * the Protocol::IRC.msg creates a PRIVMSG which you can send to the irc server
+  * the Protocol::IRC.action creates an action /me-style PRIVMSG
+  * the Protocol::BotMsg.botmsg2irc converts a botmsg to a valid irc string to send to the server
 * IRCConnection < Connection
   * connects to irc
   * does ping/pong, and provides a ready? hook for you to do things

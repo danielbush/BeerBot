@@ -14,7 +14,8 @@ path = File.expand_path(File.dirname(__FILE__)+'/..')
 require path+'/connect/IRCConnection'
 require path+'/world/World'
 require path+'/modules/init.rb'
-require path+'/parse/parse'
+require path+'/protocols/botmsg'
+require path+'/protocols/irc'
 require path+'/scheduler/scheduler'
 
 # Run the irc bot.
@@ -50,7 +51,8 @@ class RunIRC
 
     # Make parser available to pry.
 
-    @parse = BeerBot::Parse::IRC
+    @botmsg = BeerBot::Protocol::BotMsg
+    @irc = BeerBot::Protocol::IRC
 
     # Dispatcher thread.
     #
@@ -72,7 +74,7 @@ class RunIRC
           case response
           when String
           else
-            response = @parse.botmsg2irc(response)
+            response = @botmsg.botmsg2irc(response)
           end
 
           @conn.writeq.enq(response) if response
@@ -93,7 +95,7 @@ class RunIRC
       loop {
         botmsg = @scheduler.queue.deq
         begin
-          response = @parse.botmsg2irc(botmsg)
+          response = @botmsg.botmsg2irc(botmsg)
         rescue => e
           puts e
           puts e.backtrace
@@ -109,8 +111,8 @@ class RunIRC
     # Set up a repl in a separate thread.
     # 
     # In pry, you can then do:
-    #   @conn.writeq.enq @parse.join('#chan1')
-    #   @conn.write @parse.join('#chan1')
+    #   @conn.writeq.enq @irc.join('#chan1')
+    #   @conn.write @irc.join('#chan1')
 
     Pry.config.prompt = Proc.new {|_| ""}
     @pry_thread = Thread.new {
@@ -126,7 +128,7 @@ class RunIRC
       channels = @config['channels']
       if channels then
         channels.each{|chan|
-          @conn.writeq.enq(@parse.join(chan))
+          @conn.writeq.enq(@irc.join(chan))
         }
       end
       @scheduler.start
@@ -175,7 +177,7 @@ class RunIRC
 
   # Convenience method to say something to channel or someone.
   def say to,msg
-    @conn.writeq.enq(@parse.msg(to,msg))
+    @conn.writeq.enq(@irc.msg(to,msg))
   end
 
 end
