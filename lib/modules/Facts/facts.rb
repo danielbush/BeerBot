@@ -179,7 +179,7 @@ SQL
         ]
       when 'search'
         [
-          "?<regex> (case insensitive) # not implemented yet",
+          "<pattern>? (case insensitive), pattern will be automatically globbed",
         ]
       when 'rand'
         [
