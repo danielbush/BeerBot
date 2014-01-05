@@ -19,7 +19,7 @@ describe "Facts module" do
     it "should not add terms that use square brackets" do
       Facts.valid_term?("term[1]").should == false
       Facts.add('term[1]','foo').should == false
-      /failed/i.should === Facts.cmd("term[foo] is foo")[0][:msg]
+      /failed/i.should === Facts.cmd("term[foo] is: foo")[0][:msg]
     end
 
     it "should not add terms that start with command prefix" do
@@ -32,8 +32,8 @@ describe "Facts module" do
       Facts.add('term3','foo').should == []
       Facts.term('term3').should == ['foo']  # just checking
 
-      /failed/i.should === Facts.cmd(",term is foo")[0][:msg]
-      /noted/i.should === Facts.cmd("term2 is foo")[0][:msg]
+      /failed/i.should === Facts.cmd(",term is: foo")[0][:msg]
+      /noted/i.should === Facts.cmd("term2 is: foo")[0][:msg]
     end
 
     # Add may sometimes delete the term and build a new one.

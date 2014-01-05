@@ -194,8 +194,8 @@ SQL
       case detail
       when 'add'
         [
-          "<term> is ...  # to create a new term",
-          "<term> is also ...  # to add a entry for existing term",
+          "<term> is: ...  # to create a new term",
+          "<term> is also: ...  # to add a entry for existing term",
         ]
       when 'forget'
         [
@@ -241,7 +241,7 @@ SQL
     case msg
 
     # ",term is also ..."
-    when /^(\S+)\s+is\s+also\s+(.*)$/
+    when /^(\S+)\s+is\s+also:\s+(.*)$/
       term = $1
       fact = $2
       ok = self.add(term,fact,false)
@@ -262,7 +262,7 @@ SQL
       end
 
     # ",term is ..."
-    when /^(\S+)\s+is\s+(.*)$/
+    when /^(\S+)\s+is:\s+(.*)$/
       term = $1
       fact = $2
       if self.term(term) then
