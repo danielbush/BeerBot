@@ -46,9 +46,24 @@ module BeerBot::Modules::Facts
     CREATE TABLE facts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       term VARCHAR(30) UNIQUE NOT NULL,
-      val  TEXT
+      val  TEXT,
+      mode VARCHAR(50)
     );
 SQL
+  end
+
+  # At the moment, just a colleciton of things you would run if your
+  # database already exists.
+  #
+  # Manually:
+  #  sqlite3 facts.db
+  #  .schema facts  # show the table definition
+  #  ALTER TABLE ...
+
+  def self.migrations
+    [
+      "ALTER TABLE facts ADD mode VARCHAR(50);"
+    ]
   end
 
   # By default, we create facts.db in this directory, but you can
@@ -85,6 +100,19 @@ SQL
     return nil if not val
     arr = Marshal.load(val)
     return arr
+  end
+
+  # Get the mode for an entry.
+  #
+  # Currently entries are either modeless or "rand".
+
+  def self.get_mode term
+    self.db.get_first_value("SELECT mode FROM facts WHERE term=?",[term])
+  end
+
+  def self.set_mode term,mode
+    self.db.execute("UPDATE facts SET mode=? WHERE term=?",
+      [mode,term])
   end
 
   # Search on terms and their values.
@@ -128,9 +156,10 @@ SQL
       else
         val = exists.push(val)
       end
+      mode = self.get_mode(term)
       self.delete(term)
-      self.db.execute("INSERT INTO facts(term,val) VALUES (?,?)",
-        [term,Marshal.dump(val)])
+      self.db.execute("INSERT INTO facts(term,val,mode) VALUES (?,?,?)",
+        [term,Marshal.dump(val),mode])
     else
       val = [val]
       self.db.execute("INSERT INTO facts(term,val) VALUES (?,?)",
@@ -251,9 +280,28 @@ SQL
       end
       return [msg:msg,to:to]
 
+    # ",term rand"
+    when /^(\S+)\s+rand\s*$/
+      term = $1
+      if not self.term(term) then
+        return [to:to,msg:"Don't know this term, #{from}"]
+      end
+      mode = self.get_mode(term)
+      case mode
+      when "rand"
+        msg = "Unrandomising #{term}"
+        self.set_mode(term,nil)
+      else
+        msg = "Randomising #{term}"
+        self.set_mode(term,"rand")
+      end
+      return [msg:msg,to:to]
+
     # TODO: sed-edit a term ?
 
-    # TODO: forget <term> n where n = 0,1,2,3,
+    # forget <term>
+    # forget <term> n where n = 0,1,2,3,
+
     when /^forget\s+(\S+)(\s+.*)?$/
       term = $1
       n = $2
@@ -277,7 +325,7 @@ SQL
 
 
     # ",term?"
-    # TODO: search terms and values
+
     when /^(\S+)\?\s*$/
       search = $1
       arr = self.search(search)
@@ -291,6 +339,7 @@ SQL
       end
 
     # ",term" or ",term n"
+
     when /^(\S+)(\s*\S+)?\s*$/
       term = $1
       n = $2
@@ -305,6 +354,8 @@ SQL
       if val then
         if n then
           msg = [msg:"#{term}#{nstr} is: #{val[n]}",to:to]
+        elsif self.get_mode(term) == "rand" then
+          msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
         elsif val.size == 1 then
           msg = [msg:"#{term}#{nstr} is: #{val[0]}",to:to]
         else
