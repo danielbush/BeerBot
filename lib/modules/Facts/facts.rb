@@ -42,7 +42,6 @@ module BeerBot::Modules::Facts
   # TODO: use BLOB instead of TEXT for values?
   def self.build_tables!
     return unless self.table('facts').empty?
-    p "Rebuilding tables"
     rows = self.db.execute <<-SQL
     CREATE TABLE facts (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -59,13 +58,13 @@ SQL
     @@dbfile = dbfile
     @@db = nil  # force new database instance
   end
+
   def self.dbfile
     @@dbfile
   end
 
   def self.db
     @@dbfile ||= @@path+'/facts.db'
-    p @@dbfile
     @@db ||= SQLite3::Database.new(@@dbfile)
     @@db
   end
@@ -76,18 +75,52 @@ SQL
     self.db.table_info(table)
   end
 
-  # Fetch term from database and unmarshal it (should be array) or
-  # return nil.
+  # Fetch term from database.
+  #
+  # Should return an array if term or entry found, or nil otherwise.
 
   def self.term term
     term = term.to_s
     val = self.db.get_first_value("SELECT val FROM facts WHERE term=?",[term])
     return nil if not val
-    return Marshal.load(val)
+    arr = Marshal.load(val)
+    return arr
+  end
+
+  # Search on terms and their values.
+  # 
+  # Notes:
+  # LIKE is not case-sensitive; GLOB is.
+  # See: http://www.sqlite.org/lang_expr.html
+  # db.execute returns array - empty if no results.
+
+  def self.search pattern
+    # We need to add '%'
+    pattern = "%"+pattern+"%"
+    val = self.db.execute(
+      "SELECT term FROM facts WHERE "+
+      "term LIKE ?"+
+      "OR val LIKE ?",
+      [pattern,pattern])
+    return nil if not val
+    return val
+  end
+
+  def self.valid_term? term
+    # No square brackets.
+    return false if /[\]\[]/ === term
+    return false if /^[:;,!?*&%^#$]/ === term
+    return true
   end
 
   # Add term to facts table.
+  #
+  # Return false
+
   def self.add term,val,replace=false
+    if not self.valid_term?(term) then
+      return false
+    end
     exists = self.term(term)
     if exists then
       if replace then
@@ -110,6 +143,7 @@ SQL
       self.db.execute("DELETE FROM facts WHERE term = ?",[term])
       return true
     else
+      # Delete nth entry, and rebuild the term.
       vals = self.term(term)
       if not vals.nil? then
         if vals[n] then
@@ -126,7 +160,7 @@ SQL
 
   def self.help detail=nil
     if not detail then
-      ["topics: add,forget,edit,search"]
+      ["topics: add,forget,edit,search,rand"]
     else
       case detail
       when 'add'
@@ -137,15 +171,19 @@ SQL
       when 'forget'
         [
           "forget <term> # forget the term",
-          "forget <term>[n] # forget entry n in term (not implemented yet)",
+          "forget <term> n  # forget entry n in term (not implemented yet)",
         ]
       when 'edit'
         [
-          "<term> s/../../g  # not implemented yet",
+          "<term> n s/../../g  # not implemented yet",
         ]
-      when 'edit'
+      when 'search'
         [
-          ",?<regex> (case insensitive) # not implemented yet",
+          "?<regex> (case insensitive) # not implemented yet",
+        ]
+      when 'rand'
+        [
+          "<term> rand # toggle random selection of entry in term",
         ]
       else
         ["No information"]
@@ -187,7 +225,11 @@ SQL
           return [action:action,to:to]
         end
       else
-        return [msg:"Failed to store term!",to:to]
+        if not self.valid_term?(term) then
+          return [to:to,msg:"Failed to store term! Terms should not contain square brackets or start with punctuation."]
+        else
+          return [to:to,msg:"Failed to store term!"]
+        end
       end
 
     # ",term is ..."
@@ -198,7 +240,15 @@ SQL
         return [msg:"Term already exists #{from} use ',<term> is also ...' or ',forget <term>' .",to:to]
       end
       ok = self.add(term,fact.strip)
-      msg = ok ? "Noted #{from}" : "Failed to store term!"
+      if ok then
+        msg = "Noted #{from}"
+      else
+        if not self.valid_term?(term) then
+          msg = "Failed to store term! Terms should not contain square brackets or start with punctuation."
+        else
+          msg = "Failed to store term!"
+        end
+      end
       return [msg:msg,to:to]
 
     # TODO: sed-edit a term ?
@@ -229,20 +279,37 @@ SQL
     # ",term?"
     # TODO: search terms and values
     when /^(\S+)\?\s*$/
-      return nil
+      search = $1
+      arr = self.search(search)
+      if arr.empty? then
+        return [msg:"Can't find anything relevant #{from}",to:to]
+      else
+        return [
+          to:to,
+          msg:"You might want to look at these terms #{from}: " + arr.join(', '),
+        ]
+      end
 
-    # TODO ",term n" where n = 0,1,2,3
-
-    # ",term"
-    when /^(\S+)\s*$/
+    # ",term" or ",term n"
+    when /^(\S+)(\s*\S+)?\s*$/
       term = $1
+      n = $2
+
+      # If we find n, then set nstr.
+      n = n.to_i if n
+      nstr = n ? "[#{n}]" : ""
+
+      # Fetch the term.
       val = self.term(term)
+
       if val then
-        if val.size == 1
-          msg = [msg:"#{term} is: #{val[0]}",to:to]
+        if n then
+          msg = [msg:"#{term}#{nstr} is: #{val[n]}",to:to]
+        elsif val.size == 1 then
+          msg = [msg:"#{term}#{nstr} is: #{val[0]}",to:to]
         else
           i = -1
-          msg = [msg:"#{term} is: ",to:to] +
+          msg = [msg:"#{term}#{nstr} is: ",to:to] +
                 val.map{|v| {msg:"[%d] %s" % [i+=1,v],to:to} }
         end
       else
