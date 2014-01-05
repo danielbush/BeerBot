@@ -4,6 +4,6 @@
   "server":"localhost",
   "port":6667,
   "cmd_prefix":",",
-  "modules":["Facts"],
+  "modules":["Facts","Oracle"],
   "channels":["#chan1","#chan2"]
 }
