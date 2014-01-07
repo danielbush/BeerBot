@@ -187,6 +187,26 @@ SQL
     end
   end
 
+  # Swap entries within a term.
+  #
+  # Return revised array (as well as saving it to the db) or nil if
+  # error.
+
+  def self.swap term,m,n
+    arr = self.term(term)
+    if not arr then
+      return nil
+    end
+    if (not arr[m]) || (not arr[n]) then
+      return nil
+    end
+    arr[n],arr[m] = arr[m],arr[n]
+    self.delete(term)
+    arr.each{|t|
+      self.add term,t
+    }
+  end
+
   def self.help detail=nil
     if not detail then
       ["topics: add,forget,edit,search,rand"]
@@ -213,6 +233,10 @@ SQL
       when 'rand'
         [
           "<term> rand # toggle random selection of entry in term",
+        ]
+      when 'swap'
+        [
+          "<term> swap m n # swap mth and nth terms in entry",
         ]
       else
         ["No information"]
@@ -296,6 +320,26 @@ SQL
         self.set_mode(term,"rand")
       end
       return [msg:msg,to:to]
+
+    # ",term swap m n"
+    when /^(\S+)\s+swap\s+(\d+)\s+(\d+)\s*$/
+      term = $1
+      m = $2.to_i
+      n = $3.to_i
+      if m == n then
+        msg = [
+          "That's just silly #{from}",
+          "Srsly?"
+        ].sample
+      else
+        result = self.swap(term,m,n)
+        if result then
+          msg = "Swapped #{m} with #{n}"
+        else
+          msg = "Couldn't make that swap, #{from}"
+        end
+      end
+      return [to:to,msg:msg]
 
     # TODO: sed-edit a term ?
 

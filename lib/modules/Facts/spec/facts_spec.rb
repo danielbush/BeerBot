@@ -70,6 +70,54 @@ describe "Facts module" do
     end
   end
 
+  describe "swapping terms" do
+
+    before(:each) do
+      Facts.delete('term-swap')
+      Facts.add("term-swap","A")
+      Facts.add("term-swap","B")
+      Facts.add("term-swap","C")
+      Facts.add("term-swap","D")
+    end
+
+    describe "low level interface" do
+
+      it "should return false if indices are not valid" do
+        Facts.term('term-swap').should == ['A','B','C','D']
+        result = Facts.swap('term-swap',11,3)
+        result.should == nil
+        Facts.term('term-swap').should == ['A','B','C','D']
+      end
+
+      it "should swap terms if indices are valid" do
+        result = Facts.swap('term-swap',1,3)
+        result.should == ['A','D','C','B']
+        Facts.term('term-swap').should == ['A','D','C','B']
+      end
+
+      it "should return false if term doesn't exist" do
+        result = Facts.swap('term-swap-notexists',11,3)
+        result.should == nil
+        Facts.term('term-swap').should == ['A','B','C','D']
+      end
+
+    end
+
+    it "should swap terms if indices are valid" do
+      Facts.cmd("term-swap swap 1 3")[0][:msg]
+      arr = Facts.term('term-swap')
+      arr.should == ['A','D','C','B']
+    end
+
+    it "should complain if indices are not valid" do
+      Facts.cmd("term-swap swap 11 3")[0][:msg]
+      Facts.term('term-swap').should == ['A','B','C','D']
+    end
+  end
+
+  describe "s// terms" do
+  end
+
   describe "randomising a term" do
 
     Facts.add("term-rand","A")
