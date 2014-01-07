@@ -207,6 +207,26 @@ SQL
     }
   end
 
+  # Extract regex rx and replacement string str from input string of
+  # form "s/rx/str/flag".
+  #
+  # Single quotes for rx and triple backslash to detect a backslash.
+  # This should allow us to handle escaping forward slashes like this:
+  #   s/\\\//.../g
+  # No idea how that all works actually.  See the spec tests.
+  #
+  # Returns [rx,replacement,flags] or [nil,nil,nil].
+
+  def self.extract_sed_string str
+    rx = Regexp.new('^s/(.*[^\\\])/(.*)/([g])?$')
+    m = rx.match(str)
+    return [nil,nil,nil] if not m
+    r = Regexp.new(m[1])
+    replacement = m[2]
+    flags = m[3].nil? ? [] : m[3].split
+    return [r,replacement,flags]
+  end
+
   def self.help detail=nil
     if not detail then
       ["topics: add,forget,edit,search,rand"]
@@ -224,7 +244,7 @@ SQL
         ]
       when 'edit'
         [
-          "<term> n s/../../g  # not implemented yet",
+          "<term> n s/../../g  # edit nth entry of term",
         ]
       when 'search'
         [
@@ -341,7 +361,29 @@ SQL
       end
       return [to:to,msg:msg]
 
-    # TODO: sed-edit a term ?
+    # <term> n s///
+
+    when /^(\S+)(\s*\d+)\s*(\S.*)$/
+      term = $1
+      n = $2.to_i
+      sed = $3.strip
+      rx,replacement,flags = self.extract_sed_string(sed)
+      return [to:to,msg:"No dice."] if not rx
+      arr = self.term(term)
+      return [to:to,msg:"Don't know this term."] if not arr
+      entry = arr[n]
+      return [to:to,msg:"You sure that index is right?"] if not entry
+      if flags.rindex('g')
+        arr[n] = entry.gsub(rx,replacement)
+      else
+        arr[n] = entry.sub(rx,replacement)
+      end
+      self.delete(term)
+      arr.each {|t|
+        self.add(term,t)
+      }
+      return [to:to,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
+
 
     # forget <term>
     # forget <term> n where n = 0,1,2,3,
@@ -384,7 +426,7 @@ SQL
 
     # ",term" or ",term n"
 
-    when /^(\S+)(\s*\S+)?\s*$/
+    when /^(\S+)(\s*\d+)?\s*$/
       term = $1
       n = $2
 

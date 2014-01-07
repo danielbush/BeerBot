@@ -116,6 +116,42 @@ describe "Facts module" do
   end
 
   describe "s// terms" do
+    describe "low level interface" do
+      it "can safely extract a regex and replacement string" do
+        examples = [
+          "s/a/9/",
+          "s/a/9/g"
+        ]
+        rx,replacement,flags = Facts.extract_sed_string(examples[0])
+        rx.source.should == 'a'
+        replacement.should === '9'
+        flags.should == []
+        rx,replacement,flags = Facts.extract_sed_string(examples[1])
+        rx.source.should == 'a'
+        replacement.should === '9'
+        flags.should == ['g']
+      end
+    end
+
+    before(:each) do
+      Facts.delete('sterm')
+      Facts.add('sterm',"quick fox")
+      Facts.add('sterm',"lazy cow")
+      Facts.add('sterm',"/abc/xyz/")
+    end
+
+    it "should perform s// on a term entry" do
+      Facts.cmd("sterm 0 s/qui/bla/")
+      Facts.term('sterm')[0].should == 'black fox'
+    end
+
+    it "should handle replacements that use forward slashes" do
+      Facts.cmd("sterm 2 s/\\\//z/")
+      Facts.term('sterm')[2].should == 'zabc/xyz/'
+      Facts.cmd("sterm 2 s/\\\//0/g")
+      Facts.term('sterm')[2].should == 'zabc0xyz0'
+    end
+
   end
 
   describe "randomising a term" do
