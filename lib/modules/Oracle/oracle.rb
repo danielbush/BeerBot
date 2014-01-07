@@ -21,25 +21,38 @@ module BeerBot::Modules::Oracle
     "No.",
     "Definitely not!",
     "I don't think so",
-    "Undoubtedly",
     "Hell no",
     "Nope",
+    "I have grave doubts",
+    "I have my doubts",
 
     "Yes",
     "Yes.",
     "yup",
     "Sure",
+    "I concur",
     "I think so",
-    "Clearly",
+    "I'd say so",
+    #"Clearly",
     "Absolutely",
     "Definitely",
+    "fo' shizzle man",
+    "Undoubtedly",
 
     "Maybe",
+    "pass",
+    "I'll take a pass on that one :from",
+    "Well, maybe",
+    "Meh!",
     "Perhaps",
     "Possibly",
+    "Possible perhaps",
     "I don't know",
+    "I'd have to think about it :from",
     "I'm not so sure",
+    "I need to think about it some more",
     "hmmm",
+    "errr...",
 
   ]
 
@@ -49,7 +62,7 @@ module BeerBot::Modules::Oracle
     #"why not?",
     #"Because",
     "I don't know",
-    "I think you must search deep inside yourself to find the answer on that one",
+    "I think you must search deep inside yourself to find the answer to that one",
     "Maybe you're going to have to rephrase that :from",
     "I know but I'm not sure I should be telling you",
     "Ask somebody else :from",
@@ -101,8 +114,13 @@ module BeerBot::Modules::Oracle
   # Route messages like "beerbot: why ... " etc
   #
   # Assumes: msg has "beerbot: " stripped out via the dispatcher.
+
   def self.cmd msg,from:nil,to:nil,me:false,world:nil
     self.hear msg,from:from,to:to,world:world
+  end
+
+  def self.help details=nil
+    ["Ask the bot questions ending in ??"]
   end
 
 end
