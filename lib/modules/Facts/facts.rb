@@ -215,13 +215,20 @@ SQL
   #   s/\\\//.../g
   # No idea how that all works actually.  See the spec tests.
   #
-  # Returns [rx,replacement,flags] or [nil,nil,nil].
+  # Returns [rx,replacement,flags] or [nil,msg,nil] where msg might be
+  # an error message or nil.
 
   def self.extract_sed_string str
     rx = Regexp.new('^s/(.*[^\\\])/(.*)/([g])?$')
     m = rx.match(str)
     return [nil,nil,nil] if not m
-    r = Regexp.new(m[1])
+
+    begin
+      r = Regexp.new(m[1])
+    rescue => e
+      return [nil,e.to_s,nil]
+    end
+
     replacement = m[2]
     flags = m[3].nil? ? [] : m[3].split
     return [r,replacement,flags]
@@ -361,28 +368,6 @@ SQL
       end
       return [to:to,msg:msg]
 
-    # <term> n s///
-
-    when /^(\S+)(\s*\d+)\s*(\S.*)$/
-      term = $1
-      n = $2.to_i
-      sed = $3.strip
-      rx,replacement,flags = self.extract_sed_string(sed)
-      return [to:to,msg:"No dice."] if not rx
-      arr = self.term(term)
-      return [to:to,msg:"Don't know this term."] if not arr
-      entry = arr[n]
-      return [to:to,msg:"You sure that index is right?"] if not entry
-      if flags.rindex('g')
-        arr[n] = entry.gsub(rx,replacement)
-      else
-        arr[n] = entry.sub(rx,replacement)
-      end
-      self.delete(term)
-      arr.each {|t|
-        self.add(term,t)
-      }
-      return [to:to,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
 
 
     # forget <term>
@@ -408,6 +393,35 @@ SQL
       else
         return [msg:"Can't find this term #{from}",to:to]
       end
+
+    # <term> n s///
+
+    when /^(\S+)(\s*\d+)\s*(\S.*)$/
+      term = $1
+      n = $2.to_i
+      sed = $3.strip
+      rx,replacement,flags = self.extract_sed_string(sed)
+      if not rx then
+        if replacement then
+          return [to:to,msg: replacement]
+        else
+          return [to:to,msg:"No dice."]
+        end
+      end
+      arr = self.term(term)
+      return [to:to,msg:"Don't know this term."] if not arr
+      entry = arr[n]
+      return [to:to,msg:"You sure that index is right?"] if not entry
+      if flags.rindex('g')
+        arr[n] = entry.gsub(rx,replacement)
+      else
+        arr[n] = entry.sub(rx,replacement)
+      end
+      self.delete(term)
+      arr.each {|t|
+        self.add(term,t)
+      }
+      return [to:to,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
 
 
     # ",term?"

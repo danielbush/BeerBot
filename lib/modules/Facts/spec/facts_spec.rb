@@ -131,6 +131,12 @@ describe "Facts module" do
         replacement.should === '9'
         flags.should == ['g']
       end
+      it "should handle bad regexes and return error" do
+        rx,msg,_ = Facts.extract_sed_string('s/[q/b/]')
+        rx.should == nil
+        msg.should.class == String
+        Facts.term('sterm')[0].should == 'quick fox'
+      end
     end
 
     before(:each) do
@@ -143,6 +149,12 @@ describe "Facts module" do
     it "should perform s// on a term entry" do
       Facts.cmd("sterm 0 s/qui/bla/")
       Facts.term('sterm')[0].should == 'black fox'
+    end
+
+    it "should handle bad regexes" do
+      botmsg = Facts.cmd("sterm 0 s/[q/b/")
+      botmsg[0][:msg].class.should == String
+      Facts.term('sterm')[0].should == 'quick fox'
     end
 
     it "should handle replacements that use forward slashes" do
