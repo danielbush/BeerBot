@@ -18,7 +18,7 @@ module BeerBot
     attr_reader :buffer
 
     def size
-      @size ||= 4  # lines
+      @size ||= 7  # lines
     end
 
     def buffer
