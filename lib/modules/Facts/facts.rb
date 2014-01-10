@@ -236,7 +236,7 @@ SQL
 
   def self.help detail=nil
     if not detail then
-      ["topics: add,forget,edit,search,rand"]
+      ["topics: add,forget,edit,search,modes"]
     else
       case detail
       when 'add'
@@ -257,9 +257,11 @@ SQL
         [
           "<pattern>? (case insensitive), pattern will be automatically globbed",
         ]
-      when 'rand'
+      when 'modes'
         [
+          "<term> nomode # turn of modes, and resume default entry listing behaviour",
           "<term> rand # toggle random selection of entry in term",
+          "<term> reply # bot selects entry and says it; if entry starts with '*', /me action is performed",
         ]
       when 'swap'
         [
@@ -286,6 +288,7 @@ SQL
   end
 
   def self.cmd msg,from:nil,to:nil,me:false,world:nil
+
     self.build_tables!
     to = me ? from : to
 
@@ -331,22 +334,6 @@ SQL
       end
       return [msg:msg,to:to]
 
-    # ",term rand"
-    when /^(\S+)\s+rand\s*$/
-      term = $1
-      if not self.term(term) then
-        return [to:to,msg:"Don't know this term, #{from}"]
-      end
-      mode = self.get_mode(term)
-      case mode
-      when "rand"
-        msg = "Unrandomising #{term}"
-        self.set_mode(term,nil)
-      else
-        msg = "Randomising #{term}"
-        self.set_mode(term,"rand")
-      end
-      return [msg:msg,to:to]
 
     # ",term swap m n"
     when /^(\S+)\s+swap\s+(\d+)\s+(\d+)\s*$/
@@ -396,7 +383,7 @@ SQL
 
     # <term> n s///
 
-    when /^(\S+)(\s*\d+)\s*(\S.*)$/
+    when /^(\S+)(\s+\d+)\s+(\S.*)$/
       term = $1
       n = $2.to_i
       sed = $3.strip
@@ -422,6 +409,7 @@ SQL
         self.add(term,t)
       }
       return [to:to,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
+
 
 
     # ",term?"
@@ -452,12 +440,31 @@ SQL
       val = self.term(term)
 
       if val then
-        if n then
+
+        if n then # term n
           msg = [msg:"#{term}#{nstr} is: #{val[n]}",to:to]
-        elsif self.get_mode(term) == "rand" then
-          msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
+
+        # Modes
+        elsif mode = self.get_mode(term) then
+          case mode
+          when "rand"
+            msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
+          when "reply"
+            v = val.sample
+            if v[0] == '*' then
+              msg = [action:v[1..-1].strip,to:to]
+            else
+              msg = [msg:v,to:to]
+            end
+          else
+            msg = [to:to,msg:"Don't know how to handle mode #{mode}!"]
+          end
+
+        # Default mode, only 1 entry
         elsif val.size == 1 then
           msg = [msg:"#{term}#{nstr} is: #{val[0]}",to:to]
+
+        # Default mode, several entries
         else
           i = -1
           msg = [msg:"#{term}#{nstr} is: ",to:to] +
@@ -468,6 +475,32 @@ SQL
         return nil
       end
       return msg
+
+    # ",term nomode|rand|reply"
+    when /^(\S+)\s+(\S+)\s*$/
+      term = $1
+      new_mode = $2
+      if not self.term(term) then
+        return [to:to,msg:"Don't know this term, #{from}"]
+      end
+      mode = self.get_mode(term)
+
+      if mode == new_mode then
+        msg = "#{mode} mode already set"
+        return [msg:msg,to:to]
+      end
+
+      case new_mode
+      when "nomode"
+        self.set_mode(term,nil)
+        msg = "Turning off #{mode} mode."
+      when "rand","reply"
+        self.set_mode(term,new_mode)
+        msg = "Setting mode to #{new_mode} on #{term}"
+      else
+        msg = "wtf?"
+      end
+      return [msg:msg,to:to]
 
     else
       return nil

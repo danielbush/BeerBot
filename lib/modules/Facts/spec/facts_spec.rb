@@ -166,10 +166,13 @@ describe "Facts module" do
 
   end
 
-  describe "randomising a term" do
+  describe "term modes" do
 
-    Facts.add("term-rand","A")
-    Facts.add("term-rand","B")
+    before(:each) do
+      Facts.delete('term-rand')
+      Facts.add("term-rand","A")
+      Facts.add("term-rand","B")
+    end
 
     it "should be able to get and set the mode of the term" do
       Facts.get_mode("term-rand").should == nil
@@ -179,15 +182,45 @@ describe "Facts module" do
       Facts.get_mode("term-rand").should == nil
     end
 
-    it "should turn randomising on" do
-      /^Randomising/.should === Facts.cmd("term-rand rand")[0][:msg]
-      /^Unrandomising/.should === Facts.cmd("term-rand rand")[0][:msg]
-      /^Randomising/.should === Facts.cmd("term-rand rand")[0][:msg]
-      /[AB]/.should === Facts.cmd("term-rand")[0][:msg]
-      /^Unrandomising/.should === Facts.cmd("term-rand rand")[0][:msg]
-      /^\[0\]/.should === Facts.cmd("term-rand")[1][:msg]
-      /^\[1\]/.should === Facts.cmd("term-rand")[2][:msg]
+    describe "turning a term into a reply" do
+
+      it "should turn reply-mode on" do
+        Facts.cmd("term-rand reply")[0][:msg].should match(/^Setting mode to reply/)
+      end
+
+      it "should reply directly" do
+        Facts.cmd("term-rand reply")
+        Facts.get_mode('term-rand').should == 'reply'
+        Facts.cmd("term-rand")[0][:msg].should match(/^[AB]$/)
+      end
+
+      it "should create actions for items that start with '*'" do
+        Facts.add("term-rand-2","* does something")
+        Facts.cmd("term-rand-2 reply")
+        msg = Facts.cmd("term-rand-2")[0][:action]
+        msg.should == 'does something'
+      end
     end
+
+    describe "randomising a term" do
+
+      it "should turn randomising on" do
+        Facts.cmd("term-rand rand")[0][:msg].should match(/^Setting mode to/)
+        /already set/.should === Facts.cmd("term-rand rand")[0][:msg]
+        /is:\s*[AB]/.should === Facts.cmd("term-rand")[0][:msg]
+      end
+
+    end
+
+    describe "unsetting a mode" do
+      it "should revert to default behaviour" do
+        /^Setting mode to rand/.should === Facts.cmd("term-rand rand")[0][:msg]
+        /^Turning off/.should === Facts.cmd("term-rand nomode")[0][:msg]
+        /^\[0\]/.should === Facts.cmd("term-rand")[1][:msg]
+        /^\[1\]/.should === Facts.cmd("term-rand")[2][:msg]
+      end
+    end
+
   end
 
 end
