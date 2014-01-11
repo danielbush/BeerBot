@@ -63,6 +63,7 @@ module BeerBot
     # If not :me, then the bot is being addressed over a channel.
 
     def cmd msg,from:nil,to:nil,world:nil,me:false
+
       case msg
 
       # Pull out stuff that has been buffered...
@@ -139,13 +140,21 @@ module BeerBot
 
       # "help"
       else
-        helplist = []
+        helplist = [
+        ]
         self.with_modules {|m,modname|
           helplist.push modname.split('::').last
         }
-        m = [
-          to:from,
-          msg:"Modules (type: help <module-name>): "+helplist.join('; ')
+        m = [{
+            to:from,
+            msg:"To issue commands to the bot over a channel, you need to start with a command prefix like ','."
+          },{
+            to:from,
+            msg:"When talking to the bot directly, you don't need a prefix."
+          },{
+            to:from,
+            msg:"Modules (type: help <module-name>): "+helplist.join('; ')
+          }
         ]
 
       end
