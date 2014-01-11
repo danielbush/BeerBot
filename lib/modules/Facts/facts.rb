@@ -102,6 +102,57 @@ SQL
     return arr
   end
 
+  # Return a botmsg array for term or nth entry.
+  #
+  # If term has a mode, we process it here.
+
+  def self.reply term,n=nil,to:nil,from:nil
+
+    nstr = n ? "[#{n}]" : ""
+
+    # Fetch the term.
+    val = self.term(term)
+
+    if val then
+
+
+      # Modes
+      if mode = self.get_mode(term) then
+        case mode
+        when "rand"
+          msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
+        when "reply"
+          v = val.sample
+          if v[0] == '*' then
+            msg = [action:v[1..-1].strip,to:to]
+          else
+            msg = [msg:v,to:to]
+          end
+        else
+          msg = [to:to,msg:"Don't know how to handle mode #{mode}!"]
+        end
+
+      # term n
+      elsif n then
+        msg = [msg:"#{term}#{nstr} is: #{val[n]}",to:to]
+
+      # Default mode, only 1 entry
+      elsif val.size == 1 then
+        msg = [msg:"#{term}#{nstr} is: #{val[0]}",to:to]
+
+      # Default mode, several entries
+      else
+        i = -1
+        msg = [msg:"#{term}#{nstr} is: ",to:to] +
+                val.map{|v| {msg:"[%d] %s" % [i+=1,v],to:to} }
+      end
+    else
+      #msg = [msg:"Don't know this term #{from}",to:to]
+      return nil
+    end
+    return msg
+  end
+
   # Get the mode for an entry.
   #
   # Currently entries are either modeless or "rand".
@@ -236,7 +287,8 @@ SQL
 
   def self.help detail=nil
     if not detail then
-      ["topics: add,forget,edit,search,modes"]
+      [ "Allows you to store terms in a database.  Each term has one or more entries.",
+        "Topics: add,forget,edit,search,modes"]
     else
       case detail
       when 'add'
@@ -273,17 +325,14 @@ SQL
     end
   end
 
-  def self.hear msg,to:nil,from:nil,world:nil
+  def self.hear msg,from:nil,to:nil,world:nil
     self.build_tables!
     case msg
-    when /,,(\S+)/
+    when /,,(\S+)(\s+\d+)?/
       term = $1
-      i = -1
-      if val = self.term(term) then
-        msg = [msg:"#{term} is: ",to:to] +
-              val.map{|v| {:msg => "[%d] %s" % [i+=1,v],to:to}}
-        return msg
-      end
+      n = $2
+      n = n.to_i if n
+      return self.reply(term,n,to:to,from:from)
     end
   end
 
@@ -431,50 +480,8 @@ SQL
     when /^(\S+)(\s*\d+)?\s*$/
       term = $1
       n = $2
-
-      # If we find n, then set nstr.
       n = n.to_i if n
-      nstr = n ? "[#{n}]" : ""
-
-      # Fetch the term.
-      val = self.term(term)
-
-      if val then
-
-        if n then # term n
-          msg = [msg:"#{term}#{nstr} is: #{val[n]}",to:to]
-
-        # Modes
-        elsif mode = self.get_mode(term) then
-          case mode
-          when "rand"
-            msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
-          when "reply"
-            v = val.sample
-            if v[0] == '*' then
-              msg = [action:v[1..-1].strip,to:to]
-            else
-              msg = [msg:v,to:to]
-            end
-          else
-            msg = [to:to,msg:"Don't know how to handle mode #{mode}!"]
-          end
-
-        # Default mode, only 1 entry
-        elsif val.size == 1 then
-          msg = [msg:"#{term}#{nstr} is: #{val[0]}",to:to]
-
-        # Default mode, several entries
-        else
-          i = -1
-          msg = [msg:"#{term}#{nstr} is: ",to:to] +
-                val.map{|v| {msg:"[%d] %s" % [i+=1,v],to:to} }
-        end
-      else
-        #msg = [msg:"Don't know this term #{from}",to:to]
-        return nil
-      end
-      return msg
+      return self.reply(term,n,to:to,from:from)
 
     # ",term nomode|rand|reply"
     when /^(\S+)\s+(\S+)\s*$/
