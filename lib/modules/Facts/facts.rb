@@ -339,7 +339,7 @@ SQL
   def self.cmd msg,from:nil,to:nil,me:false,world:nil
 
     self.build_tables!
-    to = me ? from : to
+    replyto = me ? from : to
 
     case msg
 
@@ -351,16 +351,16 @@ SQL
       if ok then
         if rand(2) == 0 then
           msg = "Noted #{from}"
-          return [msg:msg,to:to]
+          return [msg:msg,to:replyto]
         else
           action = "carefully writes it down"
-          return [action:action,to:to]
+          return [action:action,to:replyto]
         end
       else
         if not self.valid_term?(term) then
-          return [to:to,msg:"Failed to store term! Terms should not contain square brackets or start with punctuation."]
+          return [to:replyto,msg:"Failed to store term! Terms should not contain square brackets or start with punctuation."]
         else
-          return [to:to,msg:"Failed to store term!"]
+          return [to:replyto,msg:"Failed to store term!"]
         end
       end
 
@@ -369,7 +369,7 @@ SQL
       term = $1
       fact = $2
       if self.term(term) then
-        return [msg:"Term already exists #{from} use ',<term> is also ...' or ',forget <term>' .",to:to]
+        return [msg:"Term already exists #{from} use ',<term> is also ...' or ',forget <term>' .",to:replyto]
       end
       ok = self.add(term,fact.strip)
       if ok then
@@ -381,7 +381,7 @@ SQL
           msg = "Failed to store term!"
         end
       end
-      return [msg:msg,to:to]
+      return [msg:msg,to:replyto]
 
 
     # ",term swap m n"
@@ -402,7 +402,7 @@ SQL
           msg = "Couldn't make that swap, #{from}"
         end
       end
-      return [to:to,msg:msg]
+      return [to:replyto,msg:msg]
 
 
 
@@ -418,16 +418,16 @@ SQL
           n = n.to_i
           result = self.delete(term,n)
           if result then
-            return [msg:"Deleted #{term}[#{n}]",to:to]
+            return [msg:"Deleted #{term}[#{n}]",to:replyto]
           else
-            return [msg:"Can't delete #{term}[#{n}]",to:to]
+            return [msg:"Can't delete #{term}[#{n}]",to:replyto]
           end
         else
           self.delete(term)
-          return [msg:"Removed entry #{from}",to:to]
+          return [msg:"Removed entry #{from}",to:replyto]
         end
       else
-        return [msg:"Can't find this term #{from}",to:to]
+        return [msg:"Can't find this term #{from}",to:replyto]
       end
 
     # <term> n s///
@@ -439,15 +439,15 @@ SQL
       rx,replacement,flags = self.extract_sed_string(sed)
       if not rx then
         if replacement then
-          return [to:to,msg: replacement]
+          return [to:replyto,msg: replacement]
         else
-          return [to:to,msg:"No dice."]
+          return [to:replyto,msg:"No dice."]
         end
       end
       arr = self.term(term)
-      return [to:to,msg:"Don't know this term."] if not arr
+      return [to:replyto,msg:"Don't know this term."] if not arr
       entry = arr[n]
-      return [to:to,msg:"You sure that index is right?"] if not entry
+      return [to:replyto,msg:"You sure that index is right?"] if not entry
       if flags.rindex('g')
         arr[n] = entry.gsub(rx,replacement)
       else
@@ -457,7 +457,7 @@ SQL
       arr.each {|t|
         self.add(term,t)
       }
-      return [to:to,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
+      return [to:replyto,msg:"#{term}[#{n}] is now '#{arr[n]}'"]
 
 
 
@@ -467,10 +467,10 @@ SQL
       search = $1
       arr = self.search(search)
       if arr.empty? then
-        return [msg:"Can't find anything relevant #{from}",to:to]
+        return [msg:"Can't find anything relevant #{from}",to:replyto]
       else
         return [
-          to:to,
+          to:replyto,
           msg:"You might want to look at these terms #{from}: " + arr.join(', '),
         ]
       end
@@ -481,20 +481,20 @@ SQL
       term = $1
       n = $2
       n = n.to_i if n
-      return self.reply(term,n,to:to,from:from)
+      return self.reply(term,n,to:replyto,from:from)
 
     # ",term nomode|rand|reply"
     when /^(\S+)\s+(\S+)\s*$/
       term = $1
       new_mode = $2
       if not self.term(term) then
-        return [to:to,msg:"Don't know this term, #{from}"]
+        return [to:replyto,msg:"Don't know this term, #{from}"]
       end
       mode = self.get_mode(term)
 
       if mode == new_mode then
         msg = "#{mode} mode already set"
-        return [msg:msg,to:to]
+        return [msg:msg,to:replyto]
       end
 
       case new_mode
@@ -507,7 +507,7 @@ SQL
       else
         msg = "wtf?"
       end
-      return [msg:msg,to:to]
+      return [msg:msg,to:replyto]
 
     else
       return nil
