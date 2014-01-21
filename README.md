@@ -104,6 +104,15 @@ For messages not addressed to the bot, we use:
   def hear msg,from:nil,to:nil,world:nil
 ```
 
+When writing a module, you might want to do:
+```ruby
+  replyto = me ? from : to
+```
+then in your botmsg:
+```ruby
+  {to:replyto,msg:"..."}
+```
+
 The distinction between ```hear``` and ```cmd``` is partly for convenience.
 
 The bot can be addressed directly (when you /query or pm the bot) and this is considered a command.
