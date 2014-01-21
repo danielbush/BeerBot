@@ -258,6 +258,34 @@ SQL
     }
   end
 
+  # Move entry m before n for term.
+
+  def self.before term,m,n
+    arr = self.term(term)
+    if not arr then
+      return nil
+    end
+    if (not arr[m]) || (not arr[n]) then
+      return nil
+    end
+    result = []
+    arr.each_with_index {|entry,idx|
+      case idx
+      when m
+      when n
+        result.push(arr[m])
+        result.push(arr[n])
+      else
+        result.push(entry)
+      end
+    }
+    self.delete(term)
+    result.each{|entry|
+      self.add term,entry
+    }
+    return result
+  end
+
   # Extract regex rx and replacement string str from input string of
   # form "s/rx/str/flag".
   #
@@ -404,7 +432,25 @@ SQL
       end
       return [to:replyto,msg:msg]
 
-
+    # ",term m before n"
+    when /^(\S+)\s+(\d+)\s+before\s+(\d+)\s*$/
+      term = $1
+      m = $2.to_i
+      n = $3.to_i
+      if m == n then
+        msg = [
+          "You serious?",
+          "Srsly?"
+        ].sample
+      else
+        result = self.before(term,m,n)
+        if result then
+          msg = "#{m} is before #{n}"
+        else
+          msg = "Couldn't make that change, #{from}"
+        end
+      end
+      return [to:replyto,msg:msg]
 
     # forget <term>
     # forget <term> n where n = 0,1,2,3,

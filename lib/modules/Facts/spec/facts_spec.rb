@@ -70,6 +70,34 @@ describe "Facts module" do
     end
   end
 
+  describe "insert terms before", :before => true do
+    before(:each) do
+      Facts.delete('term-before')
+      Facts.add("term-before","A")
+      Facts.add("term-before","B")
+      Facts.add("term-before","C")
+      Facts.add("term-before","D")
+    end
+    describe "low level interface" do
+      it "should return false if indices are not valid" do
+        result = Facts.before('term-before',11,3)  # 11 before 3
+        result.should == nil
+      end
+      it "should move first entry before the second entry" do
+        result = Facts.before('term-before',3,1)  # 3 before 1
+        Facts.term('term-before').should == ['A','D','B','C']
+      end
+    end
+    it "should move terms if indices are valid" do
+      Facts.cmd("term-before 3 before 1")[0][:msg]
+      Facts.term('term-before').should == ['A','D','B','C']
+    end
+    it "should complain if indices are not valid" do
+      Facts.cmd("term-before 11 before 3")[0][:msg]
+      Facts.term('term-before').should == ['A','B','C','D']
+    end
+  end
+
   describe "swapping terms" do
 
     before(:each) do
@@ -89,7 +117,7 @@ describe "Facts module" do
         Facts.term('term-swap').should == ['A','B','C','D']
       end
 
-      it "should swap terms if indices are valid" do
+      it "should swap entries if indices are valid" do
         result = Facts.swap('term-swap',1,3)
         result.should == ['A','D','C','B']
         Facts.term('term-swap').should == ['A','D','C','B']
