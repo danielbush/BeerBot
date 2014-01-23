@@ -87,7 +87,13 @@ module BeerBot
       end
 
       # Respond using a module...
-      response = nil
+      if @cmd then
+        botmsg = @cmd.call(msg,from:from,to:to,world:world,me:me)
+        p ['@cmd',botmsg]
+        return self.more(botmsg) if botmsg
+        return nil
+      end
+
       self.with_modules {|m,modname|
         botmsg = m.cmd(msg,from:from,to:to,world:world,me:me)
         p [modname,botmsg]
@@ -245,6 +251,17 @@ module BeerBot
       end
     end
 
+    # Override normal cmd processing with Proc.
+    #
+    # You might want to do this to temporarily stop normal bot command
+    # behaviour in order for the bot to go into some sort of exclusive
+    # mode.
+    #
+    # To unset, just call Bot#set_cmd without the block.
+
+    def set_cmd &block
+      @cmd = block
+    end
 
   end
 
