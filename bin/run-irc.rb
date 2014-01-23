@@ -18,5 +18,5 @@ end
 conffile = ARGV[0]
 config = JSON.load(File.read(conffile))
 
-@run = RunIRC.new(config)
-@run.start
+$runirc = RunIRC.new(config)
+$runirc.start
