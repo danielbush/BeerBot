@@ -140,11 +140,11 @@ class RunIRC
         }
       end
       @scheduler.start
-      # TODO: example scheduling, remove this...
+      # Example scheduling, remove this...
       if false then
         @scheduler.add(
           {msg:"hi",to:"#chan1"},
-          DateTime.now+Rational(0,24*60))
+          DateTime.now+Rational(1,24*60)) # 1 minute
         @scheduler.add_perm(
           lambda{|now,h|
             {to:'#chan1',msg:"#{now}"} })
