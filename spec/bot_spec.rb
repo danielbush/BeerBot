@@ -20,6 +20,9 @@ describe "the Bot class",:bot => true do
     it "can use the test module path" do
       bot = Bot.new('testbot',TEST_MODULE_PATH,modules:['TestModule'])
       expect {BeerBot::Modules::TestModule}.to_not raise_error
+      BeerBot::Modules::TestModule.make('test1')
+      botmsg = bot.cmd('zzzz?',from:'me',to:'you')
+      botmsg[0][:msg].should == 'test1'
     end
 
   end

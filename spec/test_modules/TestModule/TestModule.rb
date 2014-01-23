@@ -12,15 +12,15 @@ module BeerBot::Modules::TestModule
     @instance = TestClass.new(name)
   end
   def self.cmd msg,from:nil,to:nil,world:nil,me:false
-    @instance.cmd msg,from:nil,to:nil,world:nil,me:false
+    @instance.cmd msg,from:from,to:to,world:world,me:me
   end
   def self.hear msg,from:nil,to:nil,world:nil
-    @instance.hear msg,from:nil,to:nil,world:nil
+    @instance.hear msg,from:from,to:to,world:world
   end
 
   class TestClass
     def initialize name
-      @name
+      @name = name
     end
     def cmd msg,from:nil,to:nil,world:nil,me:false
       [to:from,msg:@name]
