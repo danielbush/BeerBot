@@ -188,4 +188,9 @@ class RunIRC
     @conn.writeq.enq(@irc.msg(to,msg))
   end
 
+  # Convenience method to do something (/me).
+  def action to,msg
+    @conn.writeq.enq(@irc.action(to,msg))
+  end
+
 end
