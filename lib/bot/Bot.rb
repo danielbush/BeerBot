@@ -23,14 +23,14 @@ module BeerBot
 
   class Bot
 
-    attr_reader :nick
+    attr_reader :nick,:module_path
 
-    def initialize nick,modules:[]
+    def initialize nick,module_path,modules:[]
       @more = BeerBot::More.new  # to buffer outgoing messages
       @botmsg = BeerBot::Protocol::BotMsg
       @nick = nick
       @dir = File.dirname(__FILE__)
-      @moduledir = "#{@dir}/../modules"
+      @module_path = module_path  # "#{@dir}/../modules"
       self.modules = modules || []
     end
 
@@ -174,7 +174,7 @@ module BeerBot
     #
     # Only return a copy.
     # Every item in @modules is a string representing a
-    # module name in @moduledir.
+    # module name in @module_path.
     # It should be capitalized/camelcase, module or class name.
     #
     # Note: doing self#modules += [...] will work as expected because
@@ -189,28 +189,28 @@ module BeerBot
     # Can be used with '+='.
 
     def modules=(arr)
-      Dir.chdir(@moduledir) {
+      Dir.chdir(@module_path) {
         bad = arr.select{|a|
           /[a-z]/===a[0] || !File.directory?(a)
         }
         if bad.empty? then
           @modules = arr
         else
-          puts "*** ERROR: These module names must start with capital or were not found in #{@moduledir}: #{bad}"
+          puts "*** ERROR: These module names must start with capital or were not found in #{@module_path}: #{bad}"
           @modules
         end
       }
       self.load_modules!
     end
 
-    # Reload all modules found in @moduledir.
+    # Reload all modules found in @module_path.
     #
     # This doesn't mean they will be used.
     # 
     # TODO: we could use autoload perhaps?
 
     def load_modules!
-      Dir.chdir(@moduledir) {
+      Dir.chdir(@module_path) {
         entries = Dir.glob('*')
         dirs = entries.select{|e| File.directory?(e) && (/[A-Z]/===e[0])}
         dirs.each {|dir|

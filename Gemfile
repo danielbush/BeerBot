@@ -1,4 +1,5 @@
 source 'http://rubygems.org'
 gem 'pry'
 gem 'byebug'
+gem 'sqlite3'
 gem 'rspec' #, :require => 'spec'

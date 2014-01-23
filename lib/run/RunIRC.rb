@@ -34,7 +34,9 @@ class RunIRC
 
   def initialize config
     @config = config
-    @path = File.expand_path(File.dirname(__FILE__)+'/..')
+    @path = File.expand_path(File.dirname(__FILE__)+'/../..')
+    @lib_path = File.expand_path(File.dirname(__FILE__)+'/..')
+    @module_path = @path+'/lib/modules'
     @bot = nil # see reload!
     @dispatch = nil # see reload!
     # Set up scheduler (this doesn't start it yet)...
@@ -159,12 +161,12 @@ class RunIRC
   # untouched.
 
   def reload!
-    load @path+'/bot/Bot.rb'
-    load @path+'/dispatchers/irc.rb'
+    load @lib_path+'/bot/Bot.rb'
+    load @lib_path+'/dispatchers/irc.rb'
 
     # Create the bot.
 
-    @bot = BeerBot::Bot.new(@config['nick'],modules:@config['modules'])
+    @bot = BeerBot::Bot.new(@config['nick'],@module_path,modules:@config['modules'])
 
     # Dispatcher which receives messages and interacts with the bot.
 
