@@ -1,5 +1,5 @@
 require 'json'
-module Beerbot
+module BeerBot
   module Utils
     # A class that loads data from a file and allows you to access it
     # using the #data method.

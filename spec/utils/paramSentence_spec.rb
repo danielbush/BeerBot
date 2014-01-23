@@ -75,7 +75,7 @@ describe "param sentence generation" do
   it "should generate sentences with a valid spec" do
     100.times do
       # This is a bit crap.
-      Beerbot::Utils::ParamSentence.gen(spec1)
+      BeerBot::Utils::ParamSentence.gen(spec1)
     end
   end
 

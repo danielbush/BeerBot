@@ -1,8 +1,8 @@
 require File.dirname(__FILE__)+"/../../lib/utils/DataFile.rb"
 require 'pp'
 require 'json'
-DataFile = Beerbot::Utils::DataFile
-JsonDataFile = Beerbot::Utils::JsonDataFile
+DataFile = BeerBot::Utils::DataFile
+JsonDataFile = BeerBot::Utils::JsonDataFile
 
 describe "DataFile class" do
   filepath1 = '/tmp/beerbotDataFile.dat'

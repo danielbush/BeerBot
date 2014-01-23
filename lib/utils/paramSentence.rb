@@ -18,7 +18,7 @@
 # same ':' substitution.
 # 
 
-module Beerbot
+module BeerBot
   module Utils
     module ParamSentence
 
