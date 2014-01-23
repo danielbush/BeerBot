@@ -5,6 +5,9 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
+path = File.expand_path(File.dirname(__FILE__))
+require path+'/../../utils/DataFile'
+
 module BeerBot; module Modules; end; end
 
 # This module responds to messages that end with 2 or more question
@@ -13,76 +16,14 @@ module BeerBot; module Modules; end; end
 # If we're lucky, it may make the bot sound vaguely human :D
 
 module BeerBot::Modules::Oracle
+  @@path = File.expand_path(File.dirname(__FILE__))
+  @@data = BeerBot::Utils::JsonDataFile.new(@@path+'/data.json')
 
   # Answers that tend towards yes/no/in-between type answers.
-  @@binaries = [
-
-    "No",
-    "No.",
-    "Definitely not!",
-    "I don't think so",
-    "Hell no",
-    "Nope",
-    "I have grave doubts",
-    "I have my doubts",
-
-    "Yes",
-    "Yes.",
-    "yup",
-    "Sure",
-    "I concur",
-    "I think so",
-    "I'd say so",
-    #"Clearly",
-    "Absolutely",
-    "Definitely",
-    "fo' shizzle man",
-    "Undoubtedly",
-
-    "Maybe",
-    "pass",
-    "I'll take a pass on that one :from",
-    "Well, maybe",
-    "Meh!",
-    "Perhaps",
-    "Possibly",
-    "Possible perhaps",
-    "I don't know",
-    "I'd have to think about it :from",
-    "I'm not so sure",
-    "I need to think about it some more",
-    "hmmm",
-    "errr...",
-
-  ]
+  @@binaries = @@data.data['yesnomaybe']
 
   # Answers that try to deal with non-binary type questions.
-  @@playfortime = [
-    "It's obvious",
-    #"why not?",
-    #"Because",
-    "I don't know",
-    "I think you must search deep inside yourself to find the answer to that one",
-    "Maybe you're going to have to rephrase that :from",
-    "I know but I'm not sure I should be telling you",
-    "Ask somebody else :from",
-    "Look into my eyes :from",
-    "The truth will emerge eventually :from",
-    "The truth will out some day",
-    "You'll have to find out for yourself :from",
-    "I think the answer is clear to everybody :from",
-    "I think you're going to have to think about this some more :from",
-    "I think we'll all have to ponder on that one",
-    "I'm unable to divulge that information :from",
-    "The answer is elementary",
-    "That's classified",
-    "I can tell you, but I may have to kill you :from",
-    "If I knew that answer... well I'm just saying :from",
-    "I'm afraid I can't say :from",
-    "I think this is a question that will remain unresolved for some time :from",
-    "If you don't know already, then I can't help you",
-    "I think the answer is right in front of you :from",
-  ]
+  @@playfortime = @@data.data['playfortime']
 
   def self.hear msg,to:nil,from:nil,world:nil
     case msg
