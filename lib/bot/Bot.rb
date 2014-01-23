@@ -107,6 +107,11 @@ module BeerBot
     # The bot may decide it is being addressed can call self.cmd.
 
     def hear msg,from:nil,to:nil,world:nil
+      if @hear then
+        botmsg = @hear.call(msg,from:from,to:to,world:world)
+        return self.more(botmsg) if botmsg
+        return
+      end
       self.with_modules {|m,modname|
         next unless m.respond_to?('hear')
         botmsg = m.hear(msg,from:from,to:to,world:world)
@@ -261,6 +266,14 @@ module BeerBot
 
     def set_cmd &block
       @cmd = block
+    end
+
+    # Override normal hear-processing with Proc.
+    #
+    # See set_cmd.
+
+    def set_hear &block
+      @hear = block
     end
 
   end

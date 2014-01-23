@@ -43,7 +43,17 @@ describe "the Bot class",:bot => true do
       bot.cmd('zzzz?',from:'me',to:'you')[0][:msg].should == 'test1'
     end
 
-    it "should be able to override Bot#hear"
+    it "should be able to override Bot#hear" do
+      bot = Bot.new('testbot',TEST_MODULE_PATH,modules:['TestModule'])
+      BeerBot::Modules::TestModule.make('test1')
+      bot.hear('zzzz?',from:'me',to:'you')[0][:msg].should == 'test1'
+      bot.set_hear {|msg,**kargs|
+        [to:kargs[:from],msg:'override']
+      }
+      bot.hear('zzzz?',from:'me',to:'you')[0][:msg].should == 'override'
+      bot.set_hear  # no block
+      bot.hear('zzzz?',from:'me',to:'you')[0][:msg].should == 'test1'
+    end
 
   end
 
