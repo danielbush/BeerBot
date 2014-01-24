@@ -339,7 +339,7 @@ SQL
         ]
       when 'modes'
         [
-          "<term> nomode # turn of modes, and resume default entry listing behaviour",
+          "<term> nomode # turn off modes, and resume default entry listing behaviour",
           "<term> rand # toggle random selection of entry in term",
           "<term> reply # bot selects entry and says it; if entry starts with '*', /me action is performed",
         ]
