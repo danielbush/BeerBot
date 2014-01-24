@@ -24,17 +24,15 @@ module BeerBot
 
       # Generate a sentence.
 
-      def self.gen(spec)
-        sentence,params = spec
+      def self.gen(sentence,params)
         self.transform(sentence,params).strip
       end
 
       def self.expand(str,params)
-        sym = str.to_sym
-        if not params.has_key?(sym) then
+        if not params.has_key?(str) then
           raise "'#{str}' has no corresponding symbol in params #{params}"
         end
-        result = params[str.to_sym].sample
+        result = params[str].sample
         result ? result : ""
       end
 
