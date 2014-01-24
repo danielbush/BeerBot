@@ -371,6 +371,11 @@ SQL
 
     case msg
 
+    # If we see an interpolation and we were commanded eg
+    # "Beerbot, say ,,hi"
+    when /,,(\S+)(\s+\d+)?/
+      return self.hear msg,from:from,to:to,world:world
+
     # ",term is also ..."
     when /^(\S+)\s+is\s+also:\s+(.*)$/
       term = $1
