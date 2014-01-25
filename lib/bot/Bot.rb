@@ -17,6 +17,9 @@ module BeerBot
   # The bot defines 'cmd' and 'hear' methods which it may respond to.
   # The bot also records which modules it may use to respond to messages
   # and the order in which to check them.
+  #
+  # You should be able to instantiate this bot in a repl
+  # and command it or get it to hear things.
   # 
   # TODO
   # 1. not responding to other bots
@@ -262,7 +265,14 @@ module BeerBot
     # behaviour in order for the bot to go into some sort of exclusive
     # mode.
     #
-    # To unset, just call Bot#set_cmd without the block.
+    # To disable normal response behaviour do:
+    #   bot.set_cmd {|msg,**kargs| nil }
+    #   bot.set_hear {|msg,**kargs| nil }
+    # 
+    #
+    # To unset,
+    #   bot.set_cmd
+    #   bot.set_hear
 
     def set_cmd &block
       @cmd = block
