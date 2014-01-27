@@ -24,21 +24,6 @@ module BeerBot
 
     module ParamExpand
 
-      # Generate a sentence and expand parameters that start with
-      # a single colon ':' within that sentence.
-
-      def self.lookup(str,params,raise_error=false)
-        if not params.has_key?(str) then
-          if raise_error then
-            raise "'#{str}' has no corresponding symbol in params #{params}"
-          else
-            return ""
-          end
-        end
-        result = params[str].sample
-        result ? result : ""
-      end
-
       # Recursively expand a sentence with parameters starting with
       # ':' using values sampled from params.
       # 
@@ -66,6 +51,20 @@ module BeerBot
         }.select{|word| word != nil && word != ""}.join(' ').strip
       end
       
+      # Randomly select entry from params.
+
+      def self.lookup(str,params,raise_error=false)
+        if not params.has_key?(str) then
+          if raise_error then
+            raise "'#{str}' has no corresponding symbol in params #{params}"
+          else
+            return ""
+          end
+        end
+        result = params[str].sample
+        result ? result : ""
+      end
+
     end
   end
 end
