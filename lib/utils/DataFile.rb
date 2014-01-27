@@ -18,6 +18,7 @@ module BeerBot
         return @data unless File.exists?(@filepath)
         mtime = File.stat(@filepath).mtime
         return @data if mtime == @mtime
+        puts "Reloading data file #{@filepath}"
         @mtime = mtime
         @data = File.read(@filepath)
         @reloaded = true

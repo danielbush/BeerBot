@@ -16,21 +16,50 @@ module BeerBot; module Modules; end; end
 # If we're lucky, it may make the bot sound vaguely human :D
 
 module BeerBot::Modules::Oracle
+
   @@path = File.expand_path(File.dirname(__FILE__))
   @@data = BeerBot::Utils::JsonDataFile.new(@@path+'/data.json')
 
-  # Answers that tend towards yes/no/in-between type answers.
-  @@binaries = @@data.data['yesnomaybe']
+  def self.hear2 msg,to:nil,from:nil,world:nil
+    unless /\?{2,}\s*$/i === msg
+      return nil
+    end
+    # Answers that tend towards yes/no/in-between type answers.
+    binaries = @@data.data['yesnomaybe']
+    # Answers that try to deal with non-binary type questions.
+    playfortime = @@data.data['playfortime']
+    case msg
+    when /what\s+about\s+/i
+      response = binaries.sample.gsub(/:from/,from)
+      [to:to,msg:response]
+    when /\bwhere/i,
+         /\bwhy/i,
+         /\bwhen/i,
+         /\bwhat[A-z']{0,3}\b/i,
+         /\bwho/i,
+         /\bwhom/i,
+         /\bhow/i
+      response = playfortime.sample.gsub(/:from/,from)
+      [to:to,msg:response]
+    else
+      response = binaries.sample.gsub(/:from/,from)
+      [to:to,msg:response]
+    end
+  end
 
-  # Answers that try to deal with non-binary type questions.
-  @@playfortime = @@data.data['playfortime']
+  # hear2 is simpler and does the same, possibly better job than this.
 
-  def self.hear msg,to:nil,from:nil,world:nil
+  def self.hear1 msg,to:nil,from:nil,world:nil
+    # Answers that tend towards yes/no/in-between type answers.
+    binaries = @@data.data['yesnomaybe']
+    # Answers that try to deal with non-binary type questions.
+    playfortime = @@data.data['playfortime']
+
     case msg
 
     # binary
     when /^(\s*\S+\s+)?what about(\s.*)?\?{2,}\s*$/i
-      response = @@binaries.sample.gsub(/:from/,from)
+      response = binaries.sample.gsub(/:from/,from)
       [to:to,msg:response]
 
     # "why ... ??"
@@ -42,12 +71,12 @@ module BeerBot::Modules::Oracle
          /^(\s*\S+\s+)?what(\S*)?(\s.*)?\?{2,}\s*$/i,
          /^(\s*\S+\s+)?who(\S*)?(\s.*)?\?{2,}\s*$/i,
          /^(\s*\S+\s+)?how(\S*)?(\s.*)?\?{2,}\s*$/i
-      response = @@playfortime.sample.gsub(/:from/,from)
+      response = playfortime.sample.gsub(/:from/,from)
       [to:to,msg:response]
 
     # binary
     when /\?{2,}\s*$/i
-      response = @@binaries.sample.gsub(/:from/,from)
+      response = binaries.sample.gsub(/:from/,from)
       [to:to,msg:response]
     end
   end
@@ -62,6 +91,10 @@ module BeerBot::Modules::Oracle
 
   def self.help details=nil
     ["Ask the bot questions ending in ??"]
+  end
+
+  class << self
+    alias_method :hear , :hear2
   end
 
 end
