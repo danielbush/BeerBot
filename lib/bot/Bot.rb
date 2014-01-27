@@ -8,6 +8,7 @@
 require File.dirname(__FILE__)+'/../more/more'
 require File.dirname(__FILE__)+'/../protocols/irc'
 require File.dirname(__FILE__)+'/../protocols/botmsg'
+require File.dirname(__FILE__)+'/../utils/utils'
 
 module BeerBot
 
@@ -30,7 +31,6 @@ module BeerBot
 
     def initialize nick,module_path,modules:[]
       @more = BeerBot::More.new  # to buffer outgoing messages
-      @botmsg = BeerBot::Protocol::BotMsg
       @nick = nick
       @dir = File.dirname(__FILE__)
       @module_path = module_path  # "#{@dir}/../modules"
@@ -46,7 +46,7 @@ module BeerBot
       return nil unless botmsg
       result = []
       by_to = Hash.new{|h,k| h[k]=[]}
-      arr = @botmsg.botmsg_to_a(botmsg)
+      arr = BeerBot::Utils.botmsg_to_a(botmsg)
 
       arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
       by_to.each_pair{|to,a|

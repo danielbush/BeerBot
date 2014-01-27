@@ -7,6 +7,8 @@
 
 path = File.expand_path(File.dirname(__FILE__))
 require path+'/../../utils/DataFile'
+require path+'/../../protocols/botmsg'
+require path+'/../../utils/utils'
 
 module BeerBot; module Modules; end; end
 
@@ -28,23 +30,23 @@ module BeerBot::Modules::Oracle
     binaries = @@data.data['yesnomaybe']
     # Answers that try to deal with non-binary type questions.
     playfortime = @@data.data['playfortime']
+    selected = nil
     case msg
     when /what\s+about\s+/i
-      response = binaries.sample.gsub(/:from/,from)
-      [to:to,msg:response]
+      selected = binaries
     when /\bwhere/i,
          /\bwhy/i,
          /\bwhen/i,
          /\bwhat[A-z']{0,3}\b/i,
-         /\bwho/i,
+         /\bwho[A-z']{0,3}\b/i,
          /\bwhom/i,
          /\bhow/i
-      response = playfortime.sample.gsub(/:from/,from)
-      [to:to,msg:response]
+      selected = playfortime
     else
-      response = binaries.sample.gsub(/:from/,from)
-      [to:to,msg:response]
+      selected = binaries
     end
+    response = BeerBot::Utils::expand(selected.sample,from:from,to:to)
+    BeerBot::Utils::actionify([to:to,msg:response])
   end
 
   # hear2 is simpler and does the same, possibly better job than this.
