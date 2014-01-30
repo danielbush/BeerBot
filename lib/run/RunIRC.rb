@@ -24,7 +24,7 @@ require path+'/scheduler/scheduler'
 #
 # See bin/* .
 
-class RunIRC
+class BeerBot::RunIRC
 
   attr_accessor :config,:bot,:scheduler,:dispatch,:world,:conn,:parse
 
