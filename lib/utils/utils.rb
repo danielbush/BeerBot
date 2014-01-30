@@ -6,7 +6,7 @@ module BeerBot
     def self.expand msg,**kargs
       #matches = msg.scan(/\b::[A-z][A-z0-9]*\?\b/)
       kargs.each_pair{|key,val|
-        msg = msg.gsub(/::#{key}/,val)
+        msg = msg.gsub(/::#{key}/,val.to_s)
       }
       msg
     end
