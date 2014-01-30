@@ -1,0 +1,66 @@
+{
+
+  "beerclock":{
+
+    // Messages for scheduled reminders...
+
+    "reminder":{
+      "announce":[
+        "It's beer o'clock",
+        "Hey, it's beer o'clock",
+        "Beer o'clock time"
+      ],
+      "warning":[
+        "Beer o'clock is starting soon, do we have supplies?",
+        "Beer o'clock proximity warning!!!"
+      ]
+    },
+
+    // If it's already beer o'clock...
+    "now":[
+      "It's beer o'clock ::nick",
+      "It is beer o'clock ::nick",
+      "Now!"
+    ],
+
+    "main":[
+      "Beeroclock is T-minus ::days days, ::hours hours, ::minutes minutes and ::seconds seconds ::nick"
+    ],
+
+    "other":[
+      "By my reckoning ::nick, I'd say it's a good ::totalsecs seconds from now",
+      "I'd say it's at least another ::totalminutes minutes away, ::nick",
+      "Quite possibly we're looking at another ::totalhours hours, ::nick",
+      "::nick it's only ::totalhours hours from now",
+      "If you really want to know ::nick, it's ::totalsecs seconds away.",
+      "Struggling are we ::nick ?  Only ::totalminutes minutes to go!",
+      "Stay with us ::nick you've just got another ::totalminutes minutes to go!"
+    ],
+    "supplementary":[
+      "* steadies ::nick's shaking hands",
+    ]
+  },
+
+  "beer":{
+
+    "actions":[
+      "delivers","teleports","DCC SENDs","pours","serves","gives",
+      "hands","slides","throws"
+    ],
+
+    "states":[
+      "frosty","tepid","cool","cold","lukewarm","warm","foaming","frothing"
+    ],
+
+    "receptacles":[
+      "bottle","can","mug","beaker","flask","cup","bucket",
+      "stein","30-gallon drum","pitcher",
+      //"flagon",
+      "tankard"
+    ],
+
+    "beers":[
+      "Cooper's Original Pale Ale"
+    ]
+  }
+}
