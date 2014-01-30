@@ -20,7 +20,14 @@ module BeerBot; module Modules; end; end
 module BeerBot::Modules::Oracle
 
   @@path = File.expand_path(File.dirname(__FILE__))
-  @@data = BeerBot::Utils::JsonDataFile.new(@@path+'/data.json')
+  filepath = @@path+'/data.json'
+  begin
+    @@data = BeerBot::Utils::JsonDataFile.new(@@path+'/data.json')
+  rescue => e
+    puts "Can't find or parse data file: #{filepath}"
+    puts "Error: #{e}"
+    exit 1
+  end
 
   def self.hear2 msg,to:nil,from:nil,world:nil
     unless /\?{2,}\s*$/i === msg
