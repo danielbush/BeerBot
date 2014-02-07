@@ -22,10 +22,14 @@ module BeerBot
         # See: http://tools.ietf.org/html/rfc1459.html sec 2.3.1
 
         CMD = Regexp.new(
-          '^(:(?<prefix>\S+)\s+)?'+ # nick!~user@host
-          '(?<command>\S+)'+  # eg 'PRIVMSG' , 3-digit code
-          '(\s+(?<params>.*))?\s*'+ # bit after the command (one or more words)
-          '\s:\s*(?<trailing>.*)$' # bit after second ':' the msg in PRIVMSG
+          # nick!~user@host:
+          '^(:(?<prefix>[^:\s]+(@\S+)?)\s+)?'+
+          # eg 'PRIVMSG' , 3-digit code:
+          '(?<command>[^:\s]+)'+
+          # Bit after the command (one or more words):
+          '(\s+(?<params>[^:\s]+(\s+[^:\s]+)*))?\s*'+
+          # Bit after second ':' the msg in PRIVMSG
+          '\s:\s*(?<trailing>.*)$'
           )
 
         def initialize raw

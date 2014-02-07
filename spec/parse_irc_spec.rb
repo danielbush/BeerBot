@@ -3,7 +3,7 @@ require 'pp'
 
 describe "IRC parsing" do
 
-  describe "main irc regex parser" do
+  describe "main irc regex parser",:parse => true do
     it "should parse prefixed and unprefixed irc strings" do
 
       IRC = BeerBot::Protocol::IRC::IRCMessage
@@ -15,6 +15,8 @@ describe "IRC parsing" do
         ":timprice!~tprice@172.17.217.13 PART :#sydney\r\n",
         ":irc.localhost 020 * :Please wait while we process your connection.\r\n",
         ":thursday!~bevan@172.17.217.13 QUIT foo bar :Quit: Leaving.\r\n",
+        # Colons in this example:
+        ":danb!~danb@localhost.iiNet PRIVMSG #chan1 :,test1 is also:* hugs ::1\r\n",
       ]
 
       IRC.new(samples[0])[:prefix][:nick].should eq('thursday')
@@ -40,6 +42,10 @@ describe "IRC parsing" do
       IRC.new(samples[4])[:prefix][:user].should eq(nil)
 
       IRC.new(samples[5])[:params].should eq(['foo','bar'])
+
+      IRC.new(samples[6])[:command].should == 'PRIVMSG'
+      IRC.new(samples[6])[:params].should == ['#chan1']
+      IRC.new(samples[6])[:trailing].should == ",test1 is also:* hugs ::1"
 
       # No prefix
       samples = [
