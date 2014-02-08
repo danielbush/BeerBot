@@ -52,33 +52,32 @@ describe "Facts module" do
       Facts.delete('term-f-1')
       Facts.delete('term-f-n')
       Facts.delete('action-f')
-
-      # Nomode
-      Facts.add("term-f","foo")
-      Facts.add("term-f","bar")
-
-      # Reply-mode
-      Facts.add("action-f","* does something")
-      Facts.set_mode('action-f','reply')
-      Facts.add("term-f-1","hi ::from")
-      Facts.set_mode('term-f-1','reply')
     end
 
     it "should fetch all entries if no number specified" do
+      Facts.add("term-f","foo")
+      Facts.add("term-f","bar")
       Facts.term('term-f').should == ['foo','bar']
     end
 
     it "should fetch nth entry if n is specified" do
+      Facts.add("term-f","foo")
+      Facts.add("term-f","bar")
       Facts.cmd("term-f 0")[0][:msg].should == "term-f[0] is: foo"
       Facts.cmd("term-f 1")[0][:msg].should == "term-f[1] is: bar"
     end
 
     it "should actionify term entries that start with * when in reply mode" do
+      Facts.add("action-f","* does something")
+      Facts.set_mode('action-f','reply')
       Facts.cmd('action-f',to:'chan')[0][:action].should == "does something"
     end
 
     it "should substitute ::from with the sender's nick" do
+      Facts.add("term-f-1","hi ::from")
+
       # Reply mode.
+      Facts.set_mode('term-f-1','reply')
       botmsg = Facts.cmd('term-f-1',from:'from',to:'chan')
       botmsg[0][:msg].should == "hi from"
 
@@ -92,9 +91,16 @@ describe "Facts module" do
       #botmsg[0][:msg].should match(/hi from/)
 
       # Rand mode:
-      Facts.set_mode('term-f-1','rand') # no mode
+      Facts.set_mode('term-f-1','rand')
       botmsg = Facts.cmd('term-f-1',from:'from',to:'chan')
       botmsg[0][:msg].should match(/hi from/)
+    end
+
+    it "should substitute correctly if non-character text is next to the parameters" do
+      Facts.add('term-f-n','a ::from, foo')
+      Facts.set_mode('term-f-n','reply')
+      botmsg = Facts.cmd('term-f-n',from:'from',to:'chan')
+      botmsg[0][:msg].should match("a from, foo")
     end
 
     it "should substitute ::n (n numeric) with parameters" do
