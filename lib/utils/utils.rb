@@ -2,6 +2,12 @@
 module BeerBot
   module Utils
 
+    # Look for parameters in a string.
+    #
+    # Numeric parameters => "... ::1 ... ::2 "
+    # Key parameters => "... ::foo ... ::bar "
+    # Multi => "... ::foo|::1 ... ::bar|::foo|::1 "
+    # 
     # (?: ) is a non-capturing group.
 
     def self.scan_param msg
@@ -20,7 +26,21 @@ module BeerBot
       }
     end
 
+    # Expand a string with numeric and key parameters using data
+    # provided.
+    #
+    # Parameters should be preceded with a double-color in the msg.
+    # Numeric parameters are matched to 'args'.
+    # So ::1 => args[0] etc
+    #
+    # 'expand' will return the expanded string as best it can and an
+    # error object.
+    # The error object will tell you if there weren't enough
+    # parameters in args to satisfy the numeric parameters in the
+    # string.
+    # 
     # "::1 ::foo ::bar|::1",'a',foo:'b' => "a b a"
+
     def self.expand msg,*args,**kargs
       err = []
       params = self.scan_param(msg)
