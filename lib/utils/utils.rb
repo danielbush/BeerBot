@@ -73,8 +73,8 @@ module BeerBot
       case botmsg
       when Hash
         case botmsg[:msg]
-        when /^\s*\*\s*/
-          botmsg[:action] = botmsg[:msg].sub(/^\s*\*\s*/,'')
+        when /^\*\s*/
+          botmsg[:action] = botmsg[:msg].sub(/^\*\s*/,'')
           botmsg[:msg] = nil
         end
         botmsg
