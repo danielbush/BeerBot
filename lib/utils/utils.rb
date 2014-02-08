@@ -11,7 +11,7 @@ module BeerBot
     # (?: ) is a non-capturing group.
 
     def self.scan_param msg
-      matches = msg.scan(/(?:::[^\s:|]+(?:\|::[^\s:|]+)*)/)
+      matches = msg.scan(/(?:::[^\W\s:|]+(?:\|::[^\W\s:|]+)*)/)
       matches.map{|m|
         a = m.split('|').map{|m2|
           m2 = m2.sub('::','')
@@ -29,7 +29,7 @@ module BeerBot
     # Expand a string with numeric and key parameters using data
     # provided.
     #
-    # Parameters should be preceded with a double-color in the msg.
+    # Parameters should be preceded with a double-colon in the msg.
     # Numeric parameters are matched to 'args'.
     # So ::1 => args[0] etc
     #
@@ -39,7 +39,7 @@ module BeerBot
     # parameters in args to satisfy the numeric parameters in the
     # string.
     # 
-    # "::1 ::foo ::bar|::1",'a',foo:'b' => "a b a"
+    # ("::1 ::foo ::bar|::1",'a',foo:'b') => "a b a"
 
     def self.expand msg,*args,**kargs
       err = []

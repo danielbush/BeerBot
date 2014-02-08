@@ -22,6 +22,10 @@ describe "general utils", :utils => true do
       m = Utils.scan_param("bar ::1|::baz|::3")
       m.should == [['::1|::baz|::3',[1,'baz',3]]]
     end
+    it "should ignore non-text characters in params" do
+      m = Utils.scan_param("bar ::1,")
+      m.should == [['::1',[1]]]
+    end
   end
 
   describe "num expand" do
