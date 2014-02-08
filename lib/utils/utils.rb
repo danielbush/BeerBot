@@ -2,16 +2,53 @@
 module BeerBot
   module Utils
 
-    # Expand a string containing parameters starting with '::'.
-    def self.expand msg,**kargs
-      #matches = msg.scan(/\b::[A-z][A-z0-9]*\?\b/)
-      kargs.each_pair{|key,val|
-        msg = msg.gsub(/::#{key}/,val.to_s)
+    # (?: ) is a non-capturing group.
+
+    def self.scan_param msg
+      matches = msg.scan(/(?:::[^\s:|]+(?:\|::[^\s:|]+)*)/)
+      matches.map{|m|
+        a = m.split('|').map{|m2|
+          m2 = m2.sub('::','')
+          case m2
+          when /\d+/
+            m2.to_i
+          else
+            m2
+          end
+        }
+        [m,a]
       }
-      msg
+    end
+
+    # "::1 ::foo ::bar|::1",'a',foo:'b' => "a b a"
+    def self.expand msg,*args,**kargs
+      err = []
+      params = self.scan_param(msg)
+      # Do the big ones first.
+      params = params.sort{|a,b|b[1].size<=>a[1].size}
+      params.each {|i| # "::1|::foo",[1,'foo']
+        pattern,parts = i
+        parts.each {|part|
+          v = nil
+          case part
+          when Fixnum
+            v = args[part-1]
+            unless v then
+              err.push(part) # missing this index
+            end
+          else
+            v = kargs[part.to_sym]
+          end
+          if v then
+            msg = msg.gsub(pattern,v)
+          end
+        }
+      }
+      [msg,err]
     end
 
     # Convert botmsg to an action if it starts with '*'.
+
     def self.actionify botmsg
       case botmsg
       when Hash
@@ -50,8 +87,6 @@ module BeerBot
         return []
       end
     end
-
-
 
   end
 end
