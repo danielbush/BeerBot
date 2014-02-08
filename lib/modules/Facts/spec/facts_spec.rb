@@ -1,5 +1,6 @@
 require 'pp'
 require File.dirname(__FILE__)+"/../facts.rb"
+require 'byebug'
 
 dbfile = File.expand_path(File.dirname(__FILE__))+'/facts.db'
 Facts = ::BeerBot::Modules::Facts
@@ -36,7 +37,6 @@ describe "Facts module" do
       /noted/i.should === Facts.cmd("term2 is: foo")[0][:msg]
     end
 
-    # Add may sometimes delete the term and build a new one.
     it "should preserve mode" do
       Facts.add 'term4','val4'
       Facts.set_mode 'term4','rand'
@@ -46,11 +46,25 @@ describe "Facts module" do
 
   end
 
-  describe "fetching terms" do
+  describe "fetching terms",:fetching => true do
+    before(:each) do
+      Facts.delete('term-f')
+      Facts.delete('term-f-1')
+      Facts.delete('term-f-n')
+      Facts.delete('action-f')
+
+      # Nomode
+      Facts.add("term-f","foo")
+      Facts.add("term-f","bar")
+
+      # Reply-mode
+      Facts.add("action-f","* does something")
+      Facts.set_mode('action-f','reply')
+      Facts.add("term-f-1","hi ::from")
+      Facts.set_mode('term-f-1','reply')
+    end
 
     it "should fetch all entries if no number specified" do
-      Facts.add('term-f','foo')
-      Facts.add('term-f','bar')
       Facts.term('term-f').should == ['foo','bar']
     end
 
@@ -58,6 +72,57 @@ describe "Facts module" do
       Facts.cmd("term-f 0")[0][:msg].should == "term-f[0] is: foo"
       Facts.cmd("term-f 1")[0][:msg].should == "term-f[1] is: bar"
     end
+
+    it "should actionify term entries that start with * when in reply mode" do
+      Facts.cmd('action-f',to:'chan')[0][:action].should == "does something"
+    end
+
+    it "should substitute ::from with the sender's nick" do
+      # Reply mode.
+      botmsg = Facts.cmd('term-f-1',from:'from',to:'chan')
+      botmsg[0][:msg].should == "hi from"
+
+      # Not sure if I want to do the other modes...
+
+      # Nomode:
+      Facts.set_mode('term-f-1',nil) # no mode
+      botmsg = Facts.cmd('term-f-1',from:'from',to:'chan')
+      botmsg[0][:msg].should match(/hi ::from/)
+      botmsg = Facts.cmd('term-f-1 0',from:'from',to:'chan')
+      #botmsg[0][:msg].should match(/hi from/)
+
+      # Rand mode:
+      Facts.set_mode('term-f-1','rand') # no mode
+      botmsg = Facts.cmd('term-f-1',from:'from',to:'chan')
+      botmsg[0][:msg].should match(/hi from/)
+    end
+
+    it "should substitute ::n (n numeric) with parameters" do
+      Facts.add('term-f-n',"args are ::1")
+      Facts.set_mode('term-f-n','reply')
+      Facts.cmd("term-f-n test")[0][:msg].should == "args are test"
+    end
+
+    it "should not substitute ::n if not in parameters" do
+      Facts.add('term-f-n',"args are ::3")
+      Facts.set_mode('term-f-n 1 2','reply')
+      Facts.cmd("term-f-n test")[0][:msg].should match("args are ::3")
+    end
+
+    it "should substitute ::n|::from with ::from if ::n (numeric) not provided" do
+      Facts.add('term-f-n',"args are ::1|::from")
+      Facts.set_mode('term-f-n','reply')
+      Facts.cmd("term-f-n test")[0][:msg].should == "args are test"
+      Facts.cmd("term-f-n",from:'foo')[0][:msg].should == "args are foo"
+    end
+
+    # Might do this at some point.
+
+    it "should substitute ::n|? (n numeric) if they're available" 
+
+    it "should randomly substitute ::from|?" 
+
+
 
   end
 

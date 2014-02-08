@@ -38,6 +38,8 @@ module BeerBot::Modules::Facts
   # the way we load modules?
 
   @@path = File.expand_path(File.dirname(__FILE__))
+  require @@path+'/../../utils/utils'
+  Utils = ::BeerBot::Utils
 
   # TODO: use BLOB instead of TEXT for values?
   def self.build_tables!
@@ -106,7 +108,7 @@ SQL
   #
   # If term has a mode, we process it here.
 
-  def self.reply term,n=nil,to:nil,from:nil
+  def self.reply term,n=nil,to:nil,from:nil,params:nil
 
     nstr = n ? "[#{n}]" : ""
 
@@ -115,19 +117,17 @@ SQL
 
     if val then
 
-
       # Modes
       if mode = self.get_mode(term) then
         case mode
         when "rand"
-          msg = [msg:"#{term}#{nstr} is: #{val.sample}",to:to]
+          v,err = Utils.expand(val.sample,from:from)
+          msg = [msg:"#{term}#{nstr} is: #{v}",to:to]
         when "reply"
           v = val.sample
-          if v[0] == '*' then
-            msg = [action:v[1..-1].strip,to:to]
-          else
-            msg = [msg:v,to:to]
-          end
+          params = [] unless params
+          v,err = Utils.expand(v,*params,from:from)
+          msg = Utils.actionify([msg:v,to:to])
         else
           msg = [to:to,msg:"Don't know how to handle mode #{mode}!"]
         end
@@ -371,13 +371,8 @@ SQL
 
     case msg
 
-    # If we see an interpolation and we were commanded eg
-    # "Beerbot, say ,,hi"
-    when /,,(\S+)(\s+\d+)?/
-      return self.hear msg,from:from,to:to,world:world
-
-    # ",term is also ..."
-    when /^(\S+)\s+is\s+also:\s+(.*)$/
+    # ",term is also: ..."
+    when /^(\S+)\s+is\s+also:\s*(.*)$/
       term = $1
       fact = $2
       ok = self.add(term,fact,false)
@@ -397,8 +392,8 @@ SQL
         end
       end
 
-    # ",term is ..."
-    when /^(\S+)\s+is:\s+(.*)$/
+    # ",term is: ..."
+    when /^(\S+)\s+is:\s*(.*)$/
       term = $1
       fact = $2
       if self.term(term) then
@@ -416,6 +411,10 @@ SQL
       end
       return [msg:msg,to:replyto]
 
+    # If we see an interpolation and we were commanded eg
+    # "Beerbot, say ,,hi"
+    when /,,(\S+)(\s+\d+)?/
+      return self.hear msg,from:from,to:to,world:world
 
     # ",term swap m n"
     when /^(\S+)\s+swap\s+(\d+)\s+(\d+)\s*$/
@@ -535,7 +534,7 @@ SQL
       return self.reply(term,n,to:replyto,from:from)
 
     # ",term nomode|rand|reply"
-    when /^(\S+)\s+(\S+)\s*$/
+    when /^(\S+)\s+(nomode|rand|reply)\s*$/
       term = $1
       new_mode = $2
       if not self.term(term) then
@@ -559,6 +558,12 @@ SQL
         msg = "wtf?"
       end
       return [msg:msg,to:replyto]
+
+    when /^(\S+)\s+(\S+.*)$/
+      term = $1
+      params = $2
+      params = params.split(/\s+/)
+      self.reply(term,nil,to:to,from:from,params:params)
 
     else
       return nil
