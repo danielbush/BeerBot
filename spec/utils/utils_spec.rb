@@ -42,6 +42,7 @@ describe "general utils", :utils => true do
       msg,err = Utils.expand("::1 => ::3",'a','b')
       err.should == [3]
     end
+
   end
 
   describe "key expand" do
@@ -50,11 +51,19 @@ describe "general utils", :utils => true do
     end
   end
 
-  describe "multi expand" do
+  describe "optional expand" do
+
     it "should expand large items first" do
       #byebug
       Utils.expand("::1 ::foo ::bar|::1",'a',foo:'b')[0].should == "a b a"
     end
+
+    it "should not set err with missing num parameter is substitued by other optional" do
+      msg,err = Utils.expand("::2|::foo",'a',foo:'b')
+      msg.should == "b"
+      err.should == []
+    end
+
   end
 
 end

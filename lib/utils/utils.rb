@@ -46,23 +46,31 @@ module BeerBot
       params = self.scan_param(msg)
       # Do the big ones first.
       params = params.sort{|a,b|b[1].size<=>a[1].size}
-      params.each {|i| # "::1|::foo",[1,'foo']
+      params.each {|i|
+        # pattern: "::1|::foo"
+        # parts: [1,'foo']
         pattern,parts = i
+        found = false
+        errargs = []
+        errkargs = []
         parts.each {|part|
           v = nil
           case part
           when Fixnum
             v = args[part-1]
-            unless v then
-              err.push(part) # missing this index
-            end
+            errargs.push(part) unless v
           else
             v = kargs[part.to_sym]
+            errkargs.push(part) unless v
           end
           if v then
             msg = msg.gsub(pattern,v)
+            found = true
           end
         }
+        unless found then
+          err += errargs
+        end
       }
       [msg,err]
     end
