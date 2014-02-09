@@ -371,11 +371,17 @@ SQL
   def self.hear msg,from:nil,to:nil,world:nil
     self.build_tables!
     case msg
-    when /,,(\S+)(\s+\d+)?/
+    when /,,(\S+)(\s+\d+)/
       term = $1
       n = $2
       n = n.to_i if n
       return self.reply(term,n,to:to,from:from)
+    when /,,(\S+)\s(.*)$/
+      term = $1
+      params = $2
+      params = params.split(/\s+/)
+      #byebug
+      return self.reply(term,n,to:to,from:from,params:params)
     end
   end
 

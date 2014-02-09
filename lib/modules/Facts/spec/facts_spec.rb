@@ -322,4 +322,21 @@ describe "Facts module" do
 
   end
 
+  describe "interpolation",:interpolation => true do
+    before(:each) do
+      Facts.delete('term-1')
+    end
+    it "should interpolate ',,'" do
+      Facts.add('term-1','foo')
+      msg1,*other = Facts.cmd("... ,,term-1 ...")
+      msg1[:msg].should match('foo')
+    end
+    it "should handle arguments in reply mode" do
+      Facts.add('term-1','foo ::1 ::2 ::from')
+      Facts.set_mode('term-1','reply')
+      msg1,*other = Facts.cmd("... ,,term-1 a b ...",from:'from')
+      msg1[:msg].should match('foo a b from')
+    end
+  end
+
 end
