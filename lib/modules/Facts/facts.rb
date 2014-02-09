@@ -127,7 +127,11 @@ SQL
           v = val.sample
           params = [] unless params
           v,err = Utils.expand(v,*params,from:from)
-          msg = Utils.actionify([msg:v,to:to])
+          if err.size > 0 then
+            msg = [to:to,msg:"Need at least #{err.max} arguments #{from}"]
+          else
+            msg = Utils.actionify([msg:v,to:to])
+          end
         else
           msg = [to:to,msg:"Don't know how to handle mode #{mode}!"]
         end
@@ -316,7 +320,7 @@ SQL
   def self.help detail=nil
     if not detail then
       [ "Allows you to store terms in a database.  Each term has one or more entries.",
-        "Topics: add,forget,edit,search,modes"]
+        "Topics: add,forget,edit,search,modes,swap,parameters"]
     else
       case detail
       when 'add'
@@ -346,6 +350,17 @@ SQL
       when 'swap'
         [
           "<term> swap m n # swap mth and nth terms in entry",
+          "<term> m before n ",
+        ]
+      when 'parameters'
+        [
+          "When in reply-mode certain patterns starting with '::' will get expanded:",
+          "an entry that starts with '*' becomes a /me-style action",
+          "::from will expand to the person messaging the bot",
+          "::n where n=1,2,3.. will expand to args passed after the term, eg <term> arg1 arg2 etc",
+          ":: expands to nothing",
+          "combinations are pipe-delimited, the first existing one is used:",
+          "eg ::2|::1 will expand 1st if 2nd arg not provided",
         ]
       else
         ["No information"]
