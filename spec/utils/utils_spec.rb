@@ -26,6 +26,10 @@ describe "general utils", :utils => true do
       m = Utils.scan_param("bar ::1,")
       m.should == [['::1',[1]]]
     end
+    it "should handle blank ('::') param" do
+      m = Utils.scan_param("bar :: ::baz")
+      m.should == [['::',['']],['::baz',['baz']]]
+    end
   end
 
   describe "num expand" do
@@ -54,7 +58,6 @@ describe "general utils", :utils => true do
   describe "optional expand" do
 
     it "should expand large items first" do
-      #byebug
       Utils.expand("::1 ::foo ::bar|::1",'a',foo:'b')[0].should == "a b a"
     end
 
@@ -64,6 +67,18 @@ describe "general utils", :utils => true do
       err.should == []
     end
 
+  end
+  describe "blank expand" do
+    it "should expand '::' to nothing" do
+      msg,err = Utils.expand("foo :: bar")
+      msg.should == "foo bar"
+    end
+    it "can be used in an optional expand where all other args are not found" do
+      #byebug
+      msg,err = Utils.expand("foo ::foo|::1|:: bar")
+      msg.should == "foo bar"
+      err.should == []
+    end
   end
 
 end

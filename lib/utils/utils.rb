@@ -11,7 +11,7 @@ module BeerBot
     # (?: ) is a non-capturing group.
 
     def self.scan_param msg
-      matches = msg.scan(/(?:::[^\W\s:|]+(?:\|::[^\W\s:|]+)*)/)
+      matches = msg.scan(/(?:::[^\W\s:|]*(?:\|::[^\W\s:|]*)*)/)
       matches.map{|m|
         a = m.split('|').map{|m2|
           m2 = m2.sub('::','')
@@ -42,7 +42,7 @@ module BeerBot
     # ("::1 ::foo ::bar|::1",'a',foo:'b') => "a b a"
 
     def self.expand msg,*args,**kargs
-      err = []
+      errargs = []
       params = self.scan_param(msg)
       # Do the big ones first.
       params = params.sort{|a,b|b[1].size<=>a[1].size}
@@ -51,28 +51,38 @@ module BeerBot
         # parts: [1,'foo']
         pattern,parts = i
         found = false
-        errargs = []
-        errkargs = []
+        _errargs = []
+        _errkargs = []
         parts.each {|part|
           v = nil
           case part
           when Fixnum
             v = args[part-1]
-            errargs.push(part) unless v
+            _errargs.push(part) unless v
           else
-            v = kargs[part.to_sym]
-            errkargs.push(part) unless v
+            if part == '' then  # pattern is or contains '::' which has part ''.
+              v = ''
+            else
+              v = kargs[part.to_sym]
+              _errkargs.push(part) unless v
+            end
           end
           if v then
-            msg = msg.gsub(pattern,v)
+            if v == '' then
+              #byebug
+              # Squeeze spaces.  Not perfect, but it'll do.
+              msg = msg.gsub(/ ?#{pattern.gsub('|','\|')} ?/,' ')
+            else
+              msg = msg.gsub(pattern,v)
+            end
             found = true
           end
         }
         unless found then
-          err += errargs
+          errargs += _errargs
         end
       }
-      [msg,err]
+      [msg,errargs]
     end
 
     # Convert botmsg to an action if it starts with '*'.
