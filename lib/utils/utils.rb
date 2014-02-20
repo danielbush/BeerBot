@@ -73,7 +73,7 @@ module BeerBot
               # Squeeze spaces.  Not perfect, but it'll do.
               msg = msg.gsub(/ ?#{pattern.gsub('|','\|')} ?/,' ')
             else
-              msg = msg.gsub(pattern,v)
+              msg = msg.gsub(pattern,v.to_s)
             end
             found = true
           end
