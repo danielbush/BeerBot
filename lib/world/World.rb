@@ -40,14 +40,14 @@ module BeerBot
       end
     end
 
-    # Someone joins nick.
+    # Someone joins channel.
     def join nick,channel
       self[:channels][channel][:users].add(nick)
       self[:users][nick][:channels].add(channel)
       self
     end
 
-    # Someone leaves nick.
+    # Someone leaves channel.
     def part nick,channel
       self[:channels][channel][:users].delete(nick)
       self[:users][nick][:channels].delete(channel)
