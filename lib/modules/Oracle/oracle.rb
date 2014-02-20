@@ -46,13 +46,14 @@ module BeerBot::Modules::Oracle
          /\bwhen/i,
          /\bwhat[A-z']{0,3}\b/i,
          /\bwho[A-z']{0,3}\b/i,
+         /\bwhich/i,  # which + ?? = probably a question with which
          /\bwhom/i,
          /\bhow/i
       selected = playfortime
     else
       selected = binaries
     end
-    response = BeerBot::Utils::expand(selected.sample,from:from,to:to)
+    response,err = BeerBot::Utils::expand(selected.sample,from:from,to:to)
     BeerBot::Utils::actionify([to:to,msg:response])
   end
 

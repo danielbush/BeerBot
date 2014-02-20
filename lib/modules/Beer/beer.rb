@@ -64,12 +64,8 @@ module BeerBot::Modules::Beer
       now = DateTime.now
       diff = self.beerdate_diff(now)
       if not diff
-        return [
-          msg:BeerBot::Utils.expand(
-            data['now'].sample,
-            nick:nick),
-          to:to
-        ]
+        msg,err = BeerBot::Utils.expand(data['now'].sample,nick:nick)
+        return [ msg:msg, to:to ]
       end
       if rand(10) < 3 then
         arr = data['other']
@@ -77,11 +73,11 @@ module BeerBot::Modules::Beer
         arr = data['main']
       end
       a = arr.sample
-      a = BeerBot::Utils.expand(a, nick:nick)
-      a = BeerBot::Utils.expand(a, diff)
+      a,err = BeerBot::Utils.expand(a, nick:nick)
+      a,err = BeerBot::Utils.expand(a, diff)
       a = [msg:a,to:to]
 
-      b = BeerBot::Utils.expand(
+      b,err = BeerBot::Utils.expand(
         data['supplementary'].sample,
         {nick:nick}
       )
@@ -126,7 +122,8 @@ module BeerBot::Modules::Beer
   def self.send_beer nick
     action = ":actions ::nick a :states :receptacles of :beers"
     msg = BeerBot::Utils::ParamExpand.expand(action,@@datafile.data['beer'])
-    BeerBot::Utils.expand(msg, nick:nick )
+    msg,err = BeerBot::Utils.expand(msg, nick:nick )
+    msg
   end
 
   # Get the next beer o'clock datetime from 'now'.
