@@ -35,7 +35,7 @@ Install the required gems
   bundle install
 ```
 
-Most of the bot functionality is in lib/modules/.
+Most of the bot functionality is in modules/.
 Specify the ones you want to load using the 'modules' property in your
 conf (see conf/ for examples).
 
@@ -168,7 +168,7 @@ or more times to the same recipient.
 
 will get the bot to say 'hi there' and 'oh crap'.
 
-The spec for a valid botmsg is pretty much defined in ```lib/protocols/botmsg.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
+The spec for a valid botmsg is pretty much defined in ```lib/BeerBot/01.protocols/botmsg.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
 
 ```ruby
 BeerBot::Protocol::BotMsg.to_irc
@@ -184,7 +184,7 @@ dispatcher class that worries about the details of the protocol and
 mediates between the bot and the irc (or potentially other)
 connection.
 
-See ```lib/dispatchers```. For irc we have
+See ```lib/BeerBot/06.dispatchers```. For irc we have
 ```ruby
 dispatch = BeerBot::Dispatchers::makeIRCDispatcher
 ```
@@ -217,8 +217,8 @@ The major components (modules/classes) in bot-land:
     as much
 * Bot
   * the bot itself, implements ```hear```/```cmd```/```help``` methods
-  * manages modules, loading them in ```lib/modules/```
-* ```lib/modules/...```
+  * manages modules, loading them in ```modules/```
+* ```modules/...```
   * modules used by the bot (your code goes here)
   * have the same method hear/cmd/help signatures as ```Bot```
 
@@ -233,7 +233,7 @@ These are:
     write these
   * 'receive' should output nil or a valid IRC response string
     or an array of these
-* RunIRC class (in ```lib/run/RunIRC```)
+* RunIRC class (in ```lib/RunIRC```)
 
 Also see: ```bin/run-irc.rb``` pretty much introduces you to the major parts of
 the system and how they are put together to create the bot.
@@ -261,21 +261,18 @@ You need to create module like this:
 And then store it here (with folder being the same name as the module):
 
 ```
-  lib/modules/MyMod/MyMod.rb
+  modules/MyMod/MyMod.rb
 ```
 
 The bot loads modules into memory by loading this file
 
 ```
-  lib/modules/MyMod/init.rb
+  modules/MyMod/init.rb
 ```
 
 init.rb should load whatever could you require and the MyMod module.
 
 Finally you need to add "MyMod" to the 'modules' array in your json conf.
-You can also add the module to the bot after it starts using the pry
-repl.  For the ```run-irc.rb``` example, you can access ```@bot.modules``` and
-```@bot.modules=``` .  See example session below.
 
 ## Example session
 
