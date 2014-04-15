@@ -112,9 +112,13 @@ module BeerBot
           end
 
           if msg2 then
-            if msg2 =~ /^\s*help\s+(.*)$/ then
+            if msg2 =~ /^\s*help(?:\s+(.*))?$/ then
               replies = @bot.help(
-                $1.strip.split(/\s+/),
+                if $1.nil? then
+                  []
+                else
+                  $1.strip.split(/\s+/)
+                end,
                 from:from,to:to,me:me,world:world)
             else
               replies = @bot.cmd(

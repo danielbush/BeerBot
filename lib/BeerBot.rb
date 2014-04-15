@@ -1,4 +1,5 @@
 require_relative 'BeerBot/00.utils/utils'
+require_relative 'BeerBot/00.utils/paramExpand'
 require_relative 'BeerBot/00.utils/DataFile'
 require_relative 'BeerBot/00.utils/InOut'
 require_relative 'BeerBot/00.utils/world/IRCWorld'

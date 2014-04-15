@@ -98,7 +98,7 @@ module BeerBot::Modules::Oracle
     self.hear msg,from:from,to:to,world:world
   end
 
-  def self.help details=nil
+  def self.help arr=[]
     ["Ask the bot questions ending in ??"]
   end
 

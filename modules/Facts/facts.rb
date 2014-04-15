@@ -334,12 +334,13 @@ module BeerBot::Modules::Facts
     return msg
   end
 
-  def self.help detail=nil
-    if not detail then
+  def self.help arr=[]
+    topic,*subtopics = arr
+    if not topic then
       [ "Allows you to store terms in a database.  Each term has one or more entries.",
         "Topics: add,forget,edit,search,modes,swap,parameters"]
     else
-      case detail
+      case topic
       when 'add'
         [
           "<term> is: ...  # to create a new term",

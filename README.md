@@ -16,6 +16,11 @@ Be careful about using this on a public network.
 I wrote it partly in frustration with another ruby irc bot and
 partly for an internal irc server.
 
+## Note
+* ```lib/``` contains the core bot code
+* ```ext/``` contains external libraries / git submodules
+* ```modules/``` where you should put any bot modules; there are naming and method signature conventions you have to follow
+
 ## Setup
 
 Get ruby 2.0
@@ -76,8 +81,9 @@ The actual bot and the modules it uses are agnostic to the chat protocol eg irc.
 What do we mean by bot?
 
 A bot is
-* an object that has a 'cmd' method,
-* and optionally 'hear' and 'help' methods.
+* an array of bot modules
+* has a 'cmd'/'hear'/'help' methods
+* the modules it contains should also have these methods
 
 For messages addressed to the bot, we use:
 

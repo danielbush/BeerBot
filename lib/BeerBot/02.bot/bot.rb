@@ -139,11 +139,11 @@ module BeerBot
 
       if arr.empty? then
         helplist = self.valid_modules.select {|bot_module|
-          bot_module.respond_to?(:help)
+          bot_module[:mod].respond_to?(:help)
         }.map{|bot_module|
           bot_module[:name]
         }
-        m = [
+        reply = [
           {
             to:from,
             msg:"To issue commands to the bot over a channel, you need to start with a command prefix like ','."
@@ -158,7 +158,9 @@ module BeerBot
 
       else
 
-        bot_module = self.valid_modules.find{|bot_module| bot_module[:name]==modname}
+        bot_module = self.valid_modules.find{|bot_module|
+          bot_module[:name]==modname
+        }
 
         # Can't find module...
         if bot_module.nil? then
@@ -170,9 +172,6 @@ module BeerBot
           mod = bot_module[:mod]
           reply = []
 
-          if not me then
-            reply += [to:to,msg:"pm'ing you #{from}"]
-          end
 
           # Module has help...
           if mod.respond_to?(:help) then
@@ -195,6 +194,9 @@ module BeerBot
 
       end
 
+      if not me then
+        reply += [to:to,msg:"pm'ing you #{from}"]
+      end
       return reply
     end
 
