@@ -171,7 +171,7 @@ will get the bot to say 'hi there' and 'oh crap'.
 The spec for a valid botmsg is pretty much defined in ```lib/protocols/botmsg.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
 
 ```ruby
-BeerBot::Protocol::BotMsg.botmsg2irc
+BeerBot::Protocol::BotMsg.to_irc
 ```
 
 Note that ```Proc``` instances will also be accepted and
@@ -199,7 +199,7 @@ The major components (modules/classes) in bot-land:
   * the Protocol::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
   * the Protocol::IRC.msg creates a PRIVMSG which you can send to the irc server
   * the Protocol::IRC.action creates an action /me-style PRIVMSG
-  * the Protocol::BotMsg.botmsg2irc converts a botmsg to a valid irc string to send to the server
+  * the Protocol::BotMsg.to_irc converts a botmsg to a valid irc string to send to the server
 * IRCConnection < Connection
   * connects to irc
   * does ping/pong, and provides a ready? hook for you to do things

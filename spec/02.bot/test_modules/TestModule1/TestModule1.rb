@@ -5,17 +5,14 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-raise "Needs ruby 2" if /^1/===RUBY_VERSION
-require_relative '../lib/RunIRC'
+require_relative '../lib'
 
-if ARGV.size == 0 then
-  puts "Usage: ruby beerbot.rb path/to/ircconf.json"
-  puts "See conf/irc.json"
-  exit 1
+module BeerBot; module Modules; end; end
+
+module BeerBot::Modules::TestModule1
+
+  def self.instance
+    TestClass.new('testmodule1')
+  end
+
 end
-
-conffile = ARGV[0]
-BeerBot::Config = JSON.load(File.read(conffile))
-
-$runirc = BeerBot::RunIRC.new(BeerBot::Config)
-$runirc.start
