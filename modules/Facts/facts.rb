@@ -38,14 +38,22 @@ module BeerBot::Modules::Facts
 
   Utils  = ::BeerBot::Utils
   BotMsg = ::BeerBot::Protocol::BotMsg
-  @@db   = ::FactsDb
+  Config = ::BeerBot::Config
+
+  def self.dbfile
+    File.join(Config.module('Facts'),'facts.db')
+  end
 
   def self.db
-    @@db
+    return @db if @db
+
+    @db   = ::FactsDb
+    @db.dbfile = self.dbfile
+    @db
   end
 
   def self.db= obj
-    @@db = obj
+    @db = obj
   end
 
   def self.cmd msg,from:nil,to:nil,me:false,world:nil

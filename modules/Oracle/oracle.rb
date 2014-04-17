@@ -16,12 +16,12 @@ module BeerBot; module Modules; end; end
 
 module BeerBot::Modules::Oracle
 
+  Config = ::BeerBot::Config
   BotMsg = ::BeerBot::Protocol::BotMsg
 
-  @@path = File.expand_path(File.dirname(__FILE__))
-  filepath = @@path+'/data.json'
+  filepath = File.join(Config.module('Oracle'),'data.json')
   begin
-    @@data = BeerBot::Utils::JsonDataFile.new(@@path+'/data.json')
+    @@data = BeerBot::Utils::JsonDataFile.new(filepath)
   rescue => e
     puts "Can't find or parse data file: #{filepath}"
     puts "Error: #{e}"

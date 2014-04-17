@@ -36,21 +36,22 @@ SQL
   end
 
   # By default, we create facts.db in this directory, but you can
-  # override it here for testing purposes.
+  # set it here.
 
   def self.dbfile= dbfile
-    @@db = nil  # force new database instance
-    @@dbfile = dbfile
+    @db = nil  # force new database instance
+    @dbfile = dbfile
   end
 
   def self.dbfile
-    @@dbfile
+    @dbfile
   end
 
   def self.db
-    @@dbfile ||= @@pwd+'/facts.db'
-    @@db ||= SQLite3::Database.new(@@dbfile)
-    @@db
+    raise "dbfile not set" unless @dbfile
+    p @dbfile
+    @db ||= SQLite3::Database.new(@dbfile)
+    @db
   end
 
   # Returns nil if table doesn't exist.
