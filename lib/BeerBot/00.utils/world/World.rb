@@ -14,8 +14,7 @@ module BeerBot
 
     class World < Hash
 
-      def initialize name,nick
-        self[:name] = name
+      def initialize nick
         self[:nick] = nick
 
         # An index/lookup for channels we know about.

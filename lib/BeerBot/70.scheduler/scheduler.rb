@@ -6,11 +6,24 @@
 # see <http://www.gnu.org/licenses/>.
 
 require_relative '../../../ext/RubyCron/lib/RubyCron'
+require 'rubygems'
+require 'active_support'
+#require 'active_support/time_with_zone'
+#require 'active_support/values/time_zone'
+require 'active_support/core_ext/time/zones'
 
 module BeerBot
   module Scheduler
-    def self.instance
+    def self.instance timezone=nil
       @@instance ||= RubyCron::Cron.new
+      if timezone then
+        @@instance.time {
+          Time.use_zone(timezone) {
+            Time.zone.now
+          }
+        }
+      end
+      @@instance
     end
   end
 end

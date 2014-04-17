@@ -15,7 +15,8 @@ if ARGV.size == 0 then
 end
 
 conffile = ARGV[0]
-BeerBot::Config = JSON.load(File.read(conffile))
+BeerBot::Config.load JSON.load(File.read(conffile))
+BeerBot::Config.validate!
 
-$runirc = BeerBot::RunIRC.new(BeerBot::Config)
+$runirc = BeerBot::RunIRC.new
 $runirc.start

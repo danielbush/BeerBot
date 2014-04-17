@@ -10,5 +10,6 @@ require_relative 'BeerBot/02.bot/bot'
 require_relative 'BeerBot/03.more/BotMsgMore'
 require_relative 'BeerBot/06.dispatchers/irc'
 require_relative 'BeerBot/70.scheduler/scheduler'
+require_relative 'BeerBot/Config'
 
 require_relative '../modules/init.rb'

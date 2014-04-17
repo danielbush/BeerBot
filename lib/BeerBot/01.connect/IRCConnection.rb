@@ -21,10 +21,9 @@ module BeerBot
 
     # Queue containing received messages from the server.
     attr_accessor :queue,:writeq,:readyq
-    attr_accessor :name,:connection,:server,:port,:nick,:thread
+    attr_accessor :connection,:server,:port,:nick,:thread
 
-    def initialize name,server:nil,port:6667,nick:'beerbot'
-      @name = name
+    def initialize server:nil,port:6667,nick:'beerbot'
       @server = server
       @port = port
       @nick = nick

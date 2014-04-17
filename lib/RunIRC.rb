@@ -22,6 +22,7 @@ module BeerBot; end
 
 class BeerBot::RunIRC
 
+  Config        = BeerBot::Config
   Utils         = BeerBot::Utils
   IRCWorld      = BeerBot::Utils::IRCWorld
   InOut         = BeerBot::Utils::InOut
@@ -32,42 +33,40 @@ class BeerBot::RunIRC
   IRCDispatcher = BeerBot::Dispatchers::IRCDispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatch,:world,:conn,:postq,:parse,:more
+  attr_accessor :bot,:scheduler,:dispatch,:world,:conn,:postq,:parse,:more
 
   # Initialize all parts of the system here.
   #
   # config: Hash of irc json config
 
-  def initialize config
+  def initialize
 
-    @config = config
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
     @module_path = @path+'/modules'
 
     # Create the bot.
-    @bot = Bot.new(@module_path,@config['modules'])
+    @bot = Bot.new(@module_path,Config['modules'])
 
     # Dispatcher which receives messages and interacts with the bot.
     @dispatch = IRCDispatcher.new(
       @bot,
-      @config['nick'],
-      prefix:@config['cmd_prefix'],
+      Config['nick'],
+      prefix:Config['cmd_prefix'],
       world:@world
     )
 
     @more = BotMsgMore.new
 
     # Set up scheduler (this doesn't start it yet)...
-    @scheduler = Scheduler.instance
+    @scheduler = Scheduler.instance(Config['timezone'])
     # Create a world associated with this irc connection.
     # (lists channels and users we know about)
-    @world = IRCWorld.new(@config['name'],@config['nick'])
+    @world = IRCWorld.new(Config['nick'])
 
     # Create but don't open the irc connection.
     @conn = IRCConnection.new(
-      @config['name'],
-      nick:@config['nick'],
-      server:@config['server'])
+      nick:Config['nick'],
+      server:Config['server'])
 
     # Dispatcher thread takes stuff from @conn queue and processes
     # it...
@@ -117,7 +116,7 @@ class BeerBot::RunIRC
     # Start the scheduler.
 
     @conn.ready? {
-      channels = @config['channels']
+      channels = Config['channels']
       if channels then
         channels.each{|chan|
           @conn.writeq.enq(IRC.join(chan))
