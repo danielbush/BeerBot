@@ -7,6 +7,7 @@
 
 require_relative '../00.utils/utils'
 require_relative '../01.protocols/irc'
+require_relative '../03.more/BotMsgMore'
 
 module BeerBot
 
@@ -28,11 +29,13 @@ module BeerBot
 
       IRC   = BeerBot::Protocol::IRC
       Utils = BeerBot::Utils
+      BotMsgMore    = BeerBot::BotMsgMore
       
-      attr_accessor :bot,:nick,:prefix,:world
+      attr_accessor :bot,:nick,:prefix,:world,:more
 
       def initialize bot,nick,prefix:',',world:nil,&block
         @bot = bot
+        @more = BotMsgMore.new
 
         @nick = nick
         @get_nick_cmd   = Utils.make_prefix_parser(nick)
@@ -134,7 +137,15 @@ module BeerBot
           puts "protocol/irc unrecognised event: '#{event}'"
         end
 
-        replies
+        case replies
+        when String # assume irc string
+          replies
+        when Hash,Array,Proc
+          replies = @more.filter(replies)
+          BeerBot::Protocol::IRC.to_irc(replies)
+        else
+          nil
+        end
 
       end
 

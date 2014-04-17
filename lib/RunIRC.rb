@@ -22,51 +22,50 @@ module BeerBot; end
 
 class BeerBot::RunIRC
 
-  Config        = BeerBot::Config
   Utils         = BeerBot::Utils
   IRCWorld      = BeerBot::Utils::IRCWorld
   InOut         = BeerBot::Utils::InOut
   IRCConnection = BeerBot::IRCConnection
   IRC           = BeerBot::Protocol::IRC
   Bot           = BeerBot::Bot
-  BotMsgMore    = BeerBot::BotMsgMore
   IRCDispatcher = BeerBot::Dispatchers::IRCDispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :bot,:scheduler,:dispatch,:world,:conn,:postq,:parse,:more
+  attr_accessor :config,:bot,:scheduler,:dispatch,:world,:conn,:postq,:parse,:more
 
   # Initialize all parts of the system here.
   #
-  # BeerBot::Config should already be set before we get here.
+  # config should be a hash, normally BeerBot::Config.
+  # 
+  # Note BeerBot::Config should be loaded before we initialize here.
 
-  def initialize
+  def initialize config
 
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
     @module_path = @path+'/modules'
+    @config = config
 
     # Create the bot.
-    @bot = Bot.new(@module_path,Config['modules'])
+    @bot = Bot.new(@module_path,config['modules'])
 
     # Dispatcher which receives messages and interacts with the bot.
     @dispatch = IRCDispatcher.new(
       @bot,
-      Config['nick'],
-      prefix:Config['cmd_prefix'],
+      config['nick'],
+      prefix:config['cmd_prefix'],
       world:@world
     )
 
-    @more = BotMsgMore.new
-
     # Set up scheduler (this doesn't start it yet)...
-    @scheduler = Scheduler.instance(Config['timezone'])
+    @scheduler = Scheduler.instance(config['timezone'])
     # Create a world associated with this irc connection.
     # (lists channels and users we know about)
-    @world = IRCWorld.new(Config['nick'])
+    @world = IRCWorld.new(config['nick'])
 
     # Create but don't open the irc connection.
     @conn = IRCConnection.new(
-      nick:Config['nick'],
-      server:Config['server'])
+      nick:config['nick'],
+      server:config['server'])
 
     # Dispatcher thread takes stuff from @conn queue and processes
     # it...
@@ -74,16 +73,6 @@ class BeerBot::RunIRC
     @dispatcher_thread = InOut.new(inq:@conn.queue,outq:@conn.writeq) {|input|
       str,raw = input
       replies = @dispatch.receive(str)
-
-      case replies
-      when String # assume irc string
-        replies
-      when Hash,Array,Proc
-        replies = @more.filter(replies)
-        BeerBot::Protocol::IRC.to_irc(replies)
-      else
-        nil
-      end
     }
     @dispatcher_thread.start!
 
@@ -116,7 +105,7 @@ class BeerBot::RunIRC
     # Start the scheduler.
 
     @conn.ready? {
-      channels = Config['channels']
+      channels = config['channels']
       if channels then
         channels.each{|chan|
           @conn.writeq.enq(IRC.join(chan))
@@ -142,6 +131,15 @@ class BeerBot::RunIRC
 
   def action to,msg
     @conn.writeq.enq(IRC.action(to,msg))
+  end
+
+  # Reload @bot using module list 'modules'.
+  #
+  # You could use
+
+  def reload! modules=[]
+    @config['modules'] = modules
+    @bot = Bot.new(@module_path,modules)
   end
 
 end

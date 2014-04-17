@@ -18,5 +18,5 @@ conffile = ARGV[0]
 BeerBot::Config.load JSON.load(File.read(conffile))
 BeerBot::Config.validate!
 
-$runirc = BeerBot::RunIRC.new
+$runirc = BeerBot::RunIRC.new BeerBot::Config
 $runirc.start
