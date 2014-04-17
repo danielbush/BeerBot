@@ -49,7 +49,6 @@ SQL
 
   def self.db
     raise "dbfile not set" unless @dbfile
-    p @dbfile
     @db ||= SQLite3::Database.new(@dbfile)
     @db
   end

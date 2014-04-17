@@ -179,7 +179,6 @@ module BeerBot::Modules::Facts
       n = $2.to_i
       sed = $3.strip
       m = Utils.sed_regex.match(sed)
-      p m
       unless m then
         return [to:replyto,msg:"No dice."]
       end
