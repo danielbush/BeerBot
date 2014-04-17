@@ -52,14 +52,15 @@ module BeerBot
           ok = (err.size == 0)
 
           if ok then
+            puts "loading #{initfile}..."
             load(initfile)
             mod = Object.const_get(modname)
             if mod.respond_to?(:instance) then
               mod = mod.instance
             end
           else
-            p err
-            raise "Can't load modules."
+            p [initfile,err]
+            raise "Can't load (some) modules."
           end
 
           bm = BotModule.new(
