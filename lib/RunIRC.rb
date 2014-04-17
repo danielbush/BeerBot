@@ -37,7 +37,7 @@ class BeerBot::RunIRC
 
   # Initialize all parts of the system here.
   #
-  # config: Hash of irc json config
+  # BeerBot::Config should already be set before we get here.
 
   def initialize
 
