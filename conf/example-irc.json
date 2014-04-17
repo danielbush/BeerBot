@@ -3,7 +3,7 @@
   "server":"localhost",
   "port":6667,
   "cmd_prefix":",",
-  "modules":["Beer","Facts","Oracle"],
+  "modules":["Facts","Oracle"],
   "datadir":"/path/to/datadir",
   "timezone":"Australia/Sydney",
   "channels":["#chan1","#chan2"]
