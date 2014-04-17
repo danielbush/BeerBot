@@ -34,6 +34,14 @@ Get ruby 2.0
 
 Clone this project, and cd into it.
 
+Beware, I'm currently using a git submodule for RubyCron in ext/.
+So you need to fetch this.
+
+```
+  git submodule init
+  git submodule update
+```
+
 Install the required gems
 
 ```
@@ -49,6 +57,8 @@ And run
   bundle install
 ```
 on these.
+
+You might also need to run bundle install within RubyCron.
 
 
 ## Usage
@@ -73,6 +83,8 @@ eg @bot, @conn, @dispatch, @world.
 
 And you can reload the bot or its modules and alter which modules are
 used to reply to messages.
+
+TODO: need to document this.
 
 ## Bot (and modules)
 
@@ -244,9 +256,22 @@ These are:
 Also see: ```bin/run-irc.rb``` pretty much introduces you to the major parts of
 the system and how they are put together to create the bot.
 
-## Adding a module
+## Modules
+
+Bot modules live in ```modules/```.
+
+Bot configuration and database files should be in ```conf['datadir']```.
+Make sure this is set in your config.
+
+Data files for your module should occupy
+
+```conf['datadir']/modules/ModuleName/```
+
+
+### Adding a module
 
 You need to create module like this:
+
 ```ruby
   module BeerBot
     module Modules

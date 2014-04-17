@@ -1,0 +1,13 @@
+{
+  "yesnomaybe":[
+    "No",
+    "Yes",
+    "Maybe"
+  ],
+
+  "playfortime":[
+    "Are you sure you should be asking that question ::from?",
+    "* remains silent"
+  ]
+
+}
