@@ -1,10 +1,10 @@
 {
-  "datadir":"/path/to/datadir",
   "nick":"beerbot",
   "server":"localhost",
   "port":6667,
   "cmd_prefix":",",
   "modules":["Beer","Facts","Oracle"],
-  "channels":["#chan1","#chan2"],
-  "timezone":"Australia/Perth"
+  "datadir":"/path/to/datadir",
+  "timezone":"Australia/Sydney",
+  "channels":["#chan1","#chan2"]
 }
