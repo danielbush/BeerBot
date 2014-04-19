@@ -41,6 +41,8 @@ Git clone this code (using your git-fu).
 
 Then do ```bundle install```.
 
+## Configure / Setup
+
 Outside of the code somewhere...
 
 1. create a configuration file (like example conf in ```conf/```)
