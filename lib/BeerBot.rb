@@ -14,4 +14,7 @@ require_relative 'BeerBot/06.dispatchers/irc'
 require_relative 'BeerBot/70.scheduler/scheduler'
 require_relative 'BeerBot/Config'
 
-require_relative '../modules/init.rb'
+module BeerBot
+  module Modules
+  end
+end
