@@ -106,7 +106,7 @@ module BeerBot::Modules::Facts
     # If we see an interpolation and we were commanded eg
     # "Beerbot, say ,,hi"
     when /,,(\S+)(\s+\d+)?/
-      return self.hear msg,from:from,to:to,world:world
+      return self.hear msg,from:from,to:to,me:me,world:world
 
     # ",term swap m n"
     when /^(\S+)\s+swap\s+(\d+)\s+(\d+)\s*$/
@@ -267,7 +267,7 @@ module BeerBot::Modules::Facts
 
   end
 
-  def self.hear msg,from:nil,to:nil,world:nil
+  def self.hear msg,from:nil,to:nil,me:false,world:nil
     self.db.build_tables!
     case msg
     when /,,(\S+)(\s+\d+)/
