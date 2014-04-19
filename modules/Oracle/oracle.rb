@@ -19,7 +19,7 @@ module BeerBot::Modules::Oracle
   Config = ::BeerBot::Config
   BotMsg = ::BeerBot::Protocol::BotMsg
 
-  filepath = File.join(Config.module('Oracle'),'data.json')
+  filepath = File.join(Config.module_data('Oracle'),'data.json')
   begin
     @@data = BeerBot::Utils::JsonDataFile.new(filepath)
   rescue => e

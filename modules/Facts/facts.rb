@@ -41,7 +41,7 @@ module BeerBot::Modules::Facts
   Config = ::BeerBot::Config
 
   def self.dbfile
-    File.join(Config.module('Facts'),'facts.db')
+    File.join(Config.module_data('Facts'),'facts.db')
   end
 
   def self.db

@@ -42,7 +42,7 @@ class BeerBot::RunIRC
   def initialize config
 
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
-    @module_path = @path+'/modules'
+    @module_path = config['moduledir']
     @config = config
 
     # Create the bot.

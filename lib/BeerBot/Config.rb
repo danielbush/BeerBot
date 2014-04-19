@@ -27,14 +27,21 @@ module BeerBot
       if not self['datadir'] then
         raise "'datadir' not set in config."
       end
-      if not File.exists?(self['datadir'])
+      if not self['moduledir'] then
+        raise "'moduledir' not set in config."
+      end
+      unless File.exists?(self['datadir']) then
         raise "datadir:'#{self['datadir']}' doesn't exist."
+      end
+      unless File.exists?(self['moduledir']) then
+        raise "config['moduledir']=#{@module_path} doesn't exist, make one (bot modules will go here)!"
       end
     end
 
-    # Return path for module subdir.
+    # Return path for module data dir -- a place where the module can
+    # stash data.
 
-    def module name,&block
+    def module_data name,&block
       self.validate!
       datadir = self['datadir']
       path = File.join(datadir,'modules',name)

@@ -1,10 +1,41 @@
 {
+
+  // ------------------------------------------------------------
+  // Required
+  // ------------------------------------------------------------
+
   "nick":"beerbot",
   "server":"localhost",
   "port":6667,
   "cmd_prefix":",",
+
+  // Need to point this to a directory.  All your bot modules goes
+  // here.  Some example modules are provided in /modules of the code,
+  // copy these over:
+
+  "moduledir":"/path/to/modules",
+
+  // Names of the bot modules you want to use in the order they will
+  // be checked for a response.
+  // These will be located in moduledir/ModName and ModName should
+  // exist as a ruby constant.
+
   "modules":["Facts","Oracle"],
+
+  // This directory stores data.  It's good to keep data separate from
+  // code and version control :)  BeerBot::Config#module_data
+  // determines where bot modules can stash there data.
+
   "datadir":"/path/to/datadir",
-  "timezone":"Australia/Sydney",
+
+  // ------------------------------------------------------------
+  // Optional
+  // ------------------------------------------------------------
+
+  // Channels you want to join when you start up.
   "channels":["#chan1","#chan2"]
+
+  // The scheduler (cron-like library) will use this timezone when
+  // calling Time.
+  "timezone":"Australia/Sydney",
 }
