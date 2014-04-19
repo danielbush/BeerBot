@@ -124,8 +124,11 @@ Note, that ```@bot``` is just an array of bot modules.  Neat.
 
 ## Goodies
 
-So there are 2 modules included. One is the ```Facts``` module and the
-other is the ```Oracle``` module.
+So there are 2 modules in ```modules/``` included. One is the
+```Facts``` module and the other is the ```Oracle``` module.
+
+If you want to use them, you should probably copy them over to your
+```moduledir``` that you specified in your conf.
 
 The ```Facts``` module is by far the more complicated of the two and
 provides a way for people to add one or more facts for a given term or
