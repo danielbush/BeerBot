@@ -1,13 +1,13 @@
 # BeerBot
 
 An irc bot written in ruby 2.0 and some bits of thread.
-Use at your own risk..
 
 * Uses ruby 2.0
+* includes IRC
+* Structured to be independent of IRC, the bot itself is agnostic
+  * you know, if you want to make BeerBot do xmpp, please do so and let me know :D
 * Uses pry as a repl for administering the bot while running
-* Structured to be independent of irc, the bot itself is agnostic
-* Modules are hot-reloadable
-* Bot and the dispatcher are also hot-reloadable
+* Contains a scheduler based on ```CronR``` gem; this should make it easy to get BeerBot to do recurring tasks like reminders
 
 ## Status
 
@@ -16,365 +16,195 @@ Be careful about using this on a public network.
 I wrote it partly in frustration with another ruby irc bot and
 partly for an internal irc server.
 
-## Note
+## Layout
+
 * ```lib/``` contains the core bot code
-* ```ext/``` contains external libraries / git submodules
-* ```modules/``` where you should put any bot modules; there are naming and method signature conventions you have to follow
+* ```modules/``` some example bot modules
+* ```datadir/``` example location for data directory; bot modules should store their data here (see example below)
+* ```conf/``` example configuration file here; some settings are mandatory, take a look at it
+* ```bin/``` contains ```run-irc.rb```
 
-## Setup
+## Installing
 
-Get ruby 2.0
+Clone this code.
 
-* Get rvm, see TODO
-* Then set it up
+Then do ```bundle install```.
 
-```
- rvm use ruby-2.0.0
-```
+Outside of the code somewhere...
 
-Install the required gems
+1. create a configuration file
+2. specify and make a directory to contain bot modules (like ```modules/```
+3. specify and make a data directory (like ```datadir```)
 
-```
-  bundle install
-```
+## Running
 
-Most of the bot functionality is in modules/.
-Specify the ones you want to load using the 'modules' property in your
-conf (see conf/ for examples).
-
-And run
-```
-  bundle install
-```
-on these.
-
-## Usage
-
-Create an irc conf, use example conf in ```conf/``` as an example.
-
-If you want to test or play with it with a real irc server, on
-linux it is pretty easy to install an irc server and run it
-on localhost.
-
-Use irssi or your favourite irc client to connect and create
-channels.
+If you're working with the code (not a gem), then you'll probably want
+to do something like this:
 
 ```
-  ruby bin/run-irc.rb conf/your-conf.json
+ruby -Ip/t/b/lib p/t/b/bin/run-irc.rb path/to/conf.json
 ```
 
-Should start the bot and launch the pry repl.
+where p/t/b = path/to/beerbot
 
-You can interrogate all key parts of the system from this repl
-eg @bot, @conn, @dispatch, @world.
+Your ```path/to/conf.json``` should be a json file that specifies
+things like a ```moduledir``` and a ```datadir``` and some other
+things - see ```conf/``` for example.
 
-And you can reload the bot or its modules and alter which modules are
-used to reply to messages.
+Note that the bot modules in ```moduledir``` may require beerbot:
 
-TODO: need to document this.
+```
+  require 'BeerBot'
+```
 
-## Bot (and modules)
+...so that is why we add the ```-I``` to the above invocation so as to
+modify the ```load path``` to include the core bot code.
 
-The actual bot and the modules it uses are agnostic to the chat protocol eg irc.
+You should see some irc lines whizz by on your terminal.
 
-What do we mean by bot?
+Amongst these you should see some some scary numbers like ```020```
+(that means the irc server likes the cut of our gib), and ```353``` /
+```366```... you'll get those if you specified any channels in your
+```conf``` that beerbot will have joined.
 
-A bot is
-* an array of bot modules
-* has a 'cmd'/'hear'/'help' methods
-* the modules it contains should also have these methods
+## Talking to the bot
 
-For messages addressed to the bot, we use:
+On irc, the ```cmd_prefix``` you specified in your ```conf``` can be used as a short to address the bot.
+
+You can say:
+
+```
+  beerbot: help
+```
+
+or just
+
+```
+  ,help
+```
+
+where ```,``` is the ```cmd_prefix```.
+
+If you do this on a channel, beerbot will tell you that it is
+messaging you directly with help.
+
+## Repl
+
+Yeh, repl is cool.  Way cool.  If you got beerbot running, you already have one.  Try typing:
 
 ```ruby
-  def cmd msg,from:nil,to:nil,me:false,world:nil
+  @scheduler
+  @bot
+  @config
 ```
 
-This is the way to send commands to the bot.
+Note, that ```@bot``` is just an array of bot modules.  Neat.
 
-* msg = the trailing component of PRIVMSG, a string with the message
-* from = the nick extracted from PRIVMSG prefix
-* to = the first parameter of PRIVMSG
-* me = true if 'to' is the bot's nick
-  * ordinarily the bot might reply to 'to' when on a
-    channel, but there is no point it replying to itself,
-    so modules should test for 'me' and if true
-    reply to 'from' not 'to'.
-  * the irc dispatcher (see below) will set this
-    before calling Bot#cmd .
+```@scheduler``` is an instance of ```CronR::Cron``` which is also an array.  You can add jobs to it from this repl if you feel so inclined.  See the ```CronR``` gem.
 
-For messages not addressed to the bot, we use:
+## Goodies
 
-```ruby
-  def hear msg,from:nil,to:nil,world:nil
+So there are 2 modules included. One is the ```Facts``` module and the
+other is the ```Oracle``` module.
+
+The ```Facts``` module is by far the more complicated of the two and
+provides a way for people to add one or more facts for a given term or
+keyword. At this point, maybe just look at the specs or use beerbot's
+```,help``` command to check this out.
+
+There's also a ```Beer``` module that I haven't included here. In fact
+both the ```Facts``` module and the ```Beer``` module were somewhat
+inspired by functionality resident in #emac's fsbot on freenode.
+
+## Hodor!
+
+Ok, enough of the dry stuff.  Let's make a bot module.
+
+```
+  mkdir moduledir/Hodor
 ```
 
-When writing a module, you might want to do:
+In ```moduledir/Hodor/init.rb``` put:
+
 ```ruby
-  replyto = me ? from : to
-```
-then in your botmsg:
-```ruby
-  {to:replyto,msg:"..."}
+  require_relative 'Hodor'
 ```
 
-The distinction between ```hear``` and ```cmd``` is partly for convenience.
-
-The bot can be addressed directly (when you /query or pm the bot) and this is considered a command.
-But by convention the bot will also respond to any request over a channel that starts with a a character like ```,``` called the ```cmd_prefix```, or beerbot's nick eg "Beerbot: get me some beer!".  This can be configured in the conf file.
-
-The dispatcher will look for these cases automatically and dispatch them to ```Bot#cmd```, making the bot code easier to write.
-
-If you don't want this, you can easily write your own dispatcher and have everything passed through unprocessed to either #hear or #cmd.
-
-### Botmsg - the language the bot speaks in
-
-```cmd``` and ```hear``` methods should return a hash or an array of hashes where each hash is a message or action (called ```botmsg```).
-
-The botmsg hash has several keys:
-* :msg the message
-* :action the action  (use either msg or action, not both)
-* :to the intended recipient of the message (channel or nick)
-
-Example:
-
-A message could be a single ```botmsg``` hash:
+In ```moduledir/Hodor/Hodor.rb``` put:
 
 ```ruby
-{:msg => "hi there",:to => "#chan1"}
-```
+  require 'BeerBot'
+  module BeerBot::Modules::Hodor
+    # This is called when the bot is addressed directly...
+    def self.cmd msg,**kargs
+      replyto = kargs[:me] ? kargs[:from] : kargs[:to]
+      [to:replyto,msg:"Hodor!"]
+    end
 
-Or it could be an array of one or more such hashes:
+    # This is called when the bot isn't addressed directly...
+    def self.hear msg,**kargs
+      replyto = kargs[:me] ? kargs[:from] : kargs[:to]
+      [to:replyto,msg:"Hodor?"]
+    end
 
-```ruby
-  [msg:'hi there',to:"#chan1"]
+    # Only need to return an array of msgs (no to's/from's):
 
-  => [{:msg => "hi there",:to => "#chan1"}]
-```
-
-Actions use ```:action``` instead of message.
-
-```ruby
-  [action:'runs up the stairs',to:"nick1"]
-
-  => [{:action => 'runs up the stairs',to:"nick1"}]
-```
-
-You can reply with multiple responses and actions to different
-recipients. In practice, you're probably more likely to reply to one
-or more times to the same recipient.
-
-
-```ruby
-  [msg:'hi there',to:"nick1"] + [msg:'oh crap!',to:"nick1"]
-
-  => [{msg:'hi there',...},{msg:...}]
-```
-
-will get the bot to say 'hi there' and 'oh crap'.
-
-The spec for a valid botmsg is pretty much defined in ```lib/BeerBot/01.protocols/botmsg.rb``` in the form of this function that generates irc messages from ```botmsg``` hashes.
-
-```ruby
-BeerBot::Protocol::BotMsg.to_irc
-```
-
-Note that ```Proc``` instances will also be accepted and
-called for a ```botmsg``` hash.
-
-### Dispatching
-
-The bot and its modules are protocol agnostic. Instead, there is a
-dispatcher class that worries about the details of the protocol and
-mediates between the bot and the irc (or potentially other)
-connection.
-
-See ```lib/BeerBot/06.dispatchers```. For irc we have
-```ruby
-dispatch = BeerBot::Dispatchers::makeIRCDispatcher
-```
-* this function returns a lambda that closes over an instance of Bot and IRCWorld.
-* ```dispatch.call(ircmsg)``` then receives and routes messages ```Protocol::IRC::IRCMessage```'s.
-
-## Major components
-
-The major components (modules/classes) in bot-land:
-
-* Protocol modules
-  * the Protocol::IRC::IRCMessage a specialised hash representing a prefixed or non-prefixed IRC command
-  * the Protocol::IRC.msg creates a PRIVMSG which you can send to the irc server
-  * the Protocol::IRC.action creates an action /me-style PRIVMSG
-  * the Protocol::BotMsg.to_irc converts a botmsg to a valid irc string to send to the server
-* IRCConnection < Connection
-  * connects to irc
-  * does ping/pong, and provides a ready? hook for you to do things
-    once connection is established
-* IRCWorld < World
-  * the bot's world, the channels and people he knows about
-* More
-  * a generic buffer using hash to provide key-based storage
-  * ```Bot``` will use an instance of ```More``` to limit the
-    size of messages and buffer the remainder for later access
-    using the command ```more```.
-* Scheduler
-  * allows scheduling of messages eg reminders or regular messages
-  * you can add a botmsg hash/array or a Proc that returns
-    as much
-* Bot
-  * the bot itself, implements ```hear```/```cmd```/```help``` methods
-  * manages modules, loading them in ```modules/```
-* ```modules/...```
-  * modules used by the bot (your code goes here)
-  * have the same method hear/cmd/help signatures as ```Bot```
-
-There are 2 components that know about the others and manage and
-orchestrate all the interactions.
-
-These are:
-* Dispatchers.makeIRCDispatcher
-  * routes messages to the Bot instance and route the replies
-    back to the irc connection
-  * instantiate one of these and have the IRCConnection
-    write these
-  * 'receive' should output nil or a valid IRC response string
-    or an array of these
-* RunIRC class (in ```lib/RunIRC```)
-
-Also see: ```bin/run-irc.rb``` pretty much introduces you to the major parts of
-the system and how they are put together to create the bot.
-
-## Modules
-
-Bot modules live in ```modules/```.
-
-Bot configuration and database files should be in ```conf['datadir']```.
-Make sure this is set in your config.
-
-Data files for your module should occupy
-
-```conf['datadir']/modules/ModuleName/```
-
-
-### Adding a module
-
-You need to create module like this:
-
-```ruby
-  module BeerBot
-    module Modules
-      module MyMod
-        def self.cmd msg,from:nil,to:nil,me:false,world:nil
-        end
-        # Optional
-        def self.hear msg,from:nil,to:nil,world:nil
-        end
-        # Optional
-        def self.help detail=nil
-        end
-      end
+    def self.help arr=[]
+      topic,*subtopics = arr
+      ['HODOR!']
     end
   end
 ```
 
-And then store it here (with folder being the same name as the module):
-
-```
-  modules/MyMod/MyMod.rb
-```
-
-The bot loads modules into memory by loading this file
-
-```
-  modules/MyMod/init.rb
-```
-
-init.rb should load whatever could you require and the MyMod module.
-
-Finally you need to add "MyMod" to the 'modules' array in your json conf.
-
-## Example session
-
-Set up an irc server on your computer.
-
-Then connect to it:
-```
-  ruby bin/run-irc.rb conf/example-irc.json
-```
-
-You will see the bot receiving strings and the pry repl telling
-you its position.  This should change.  We're just using pry to
-pry on the variables in run-irc.rb.
-
-The pry repl will allow you to see everything in run-irc.rb.
+Ok, so some things to note.
 
 ```ruby
-  @world # shows the bot's world so far
-  @conn  # shows IRCConnection
-  @bot   # shows the bot instance
-  @dispatch  # the dispatcher that mediates between @bot and @conn
-  @irc   # irc protocol
-
-  reload! ['modName1',...] # hot reload the bot and dispatcher
-  say to,msg # convenience for making the bot say something
-  @bot.load_modules! # reload the modules used by @bot
+  [to:replyto,msg:"..."]
 ```
 
-You can talk to the bot directly, no irc
+is sugar for:
 
 ```ruby
-  @bot.cmd "do something!",from:someone
+  [{to:replyto,msg:"..."}]
 ```
 
-You can send any irc command you want by using `write`:
+In fact: 
 
 ```ruby
-  @conn.write "JOIN #channel1"
+   {to:replyto,msg:"..."}
 ```
 
-or
+will do just fine. Both forms are referred to as a ```botmsg```.
+```#cmd``` and ```#hear``` can return either a single hash or an array
+of such.
+
+Now, if you were to return ```nil``` rather thana ```botmsg```, then
+BeerBot will move on and look at the next bot module to see if it has
+a response.
+
+What constitutes "the next bot module" you ask?
+
+Well, in the pry repl, look at ```@bot```.  It's an array (take a look at the source code for bot.rb in ```lib/*/```).  BeerBot will start with the first bot module in the array, and look for a response, and continue working through the array till it hits the first module to respond.
+
+At the moment, the first module to response with non-nil terminates
+any further look ups.
+
+### Scheduling
+
+Now let's get really annoying. If saying "Hodor" all the time won't
+get you and Beerbot banned from the channel, you can perhaps try going
+the unsolicited route...
+
+You can grab the ```CronR``` scheduler like this in your module:
 
 ```ruby
-  @conn.write @irc.join("#channel1")
+  scheduler = BeerBot::Scheduler.instance
+  # Cron parameters: 5 = 'friday', 0,16 = 4pm 
+  cronargs = [0,16,true,true,5]
+  # Add a job...
+  scheduler.suspend {|arr|
+    arr << CronR::CronJob.new('timesheet',*cronargs) {
+      [to:'#chan',msg:"OMG! it's like 4pm friday..."]
+    }
+  }
 ```
-
-
-## Understanding PRIVMSG and Bot#cmd / Bot#hear
-
-For IRC messages, PRIVMSG is the main way to talk:
-
-```
-  :prefix PRIVSMG to-nick :message here
-```
-
-where prefix can be expanded:
-
-```
-  :nick!~user@host PRIVSMG to :message here
-```
-
-* !~ is a separator
-* ":" is also separator
-
-Here are some examples:
-
-1) danb1 says "yo" on #chan1:
-  ":danb1!~danb@127.0.0.1 PRIVMSG #chan1 :yo\r\n"
-
-2) danb1 says "yo" to beerbot privately:
-  ":danb1!~danb@127.0.0.1 PRIVMSG beerbot :yo\r\n"
-
-3) danb1 says "beerbot yo!" on #chan1:
-  ":danb1!~danb@127.0.0.1 PRIVMSG #chan1 :beerbot yo!\r\n"
-
-Our bot instance doesn't want to know about the niceties of the irc
-protocol and PRIVMSG in particular, it just wants to receive and
-possibly respond to messages. They could for instance be coming over
-xmpp, who knows...
-
-* case 1 uses 'hear'.
-* case 2 uses 'cmd'.
-* case 3 uses 'cmd'
-
-Case 3 is really a special case of case 1. But it is very common way
-to request actions from the bot.
-
