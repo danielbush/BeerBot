@@ -31,7 +31,7 @@ class BeerBot::RunIRC
   IRCDispatcher = BeerBot::Dispatchers::IRCDispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatch,:world,:conn,:postq,:parse,:more
+  attr_accessor :config,:bot,:scheduler,:dispatcher,:world,:conn,:postq,:parse,:more
 
   # Initialize all parts of the system here.
   #
@@ -49,7 +49,7 @@ class BeerBot::RunIRC
     @bot = Bot.new(@module_path,config['modules'])
 
     # Dispatcher which receives messages and interacts with the bot.
-    @dispatch = IRCDispatcher.new(
+    @dispatcher = IRCDispatcher.new(
       @bot,
       config['nick'],
       prefix:config['cmd_prefix'],
@@ -72,7 +72,7 @@ class BeerBot::RunIRC
 
     @dispatcher_thread = InOut.new(inq:@conn.queue,outq:@conn.writeq) {|input|
       str,raw = input
-      replies = @dispatch.receive(str)
+      replies = @dispatcher.receive(str)
     }
     @dispatcher_thread.start!
 
@@ -83,7 +83,7 @@ class BeerBot::RunIRC
 
     @scheduler_thread = InOut.new(inq:@scheduler.queue,outq:@conn.writeq) {|cron_job|
       puts "<< scheduler #{cron_job.inspect}"
-      puts "<< scheduler #{Time.now}"
+      puts "<< scheduler #{@scheduler.time}"
       IRC.to_irc(cron_job.job)
     }
     @scheduler_thread.start!
@@ -94,7 +94,7 @@ class BeerBot::RunIRC
     #   @conn.writeq.enq IRC.join('#chan1')
     #   @conn.write IRC.join('#chan1')
 
-    Pry.config.prompt = Proc.new {|_| ""}
+    Pry.config.prompt = Proc.new {|_| "pry> "}
     @pry_thread = Thread.new {
       binding.pry
     }
@@ -140,6 +140,7 @@ class BeerBot::RunIRC
   def reload! modules=[]
     @config['modules'] = modules
     @bot = Bot.new(@module_path,modules)
+    @dispatcher.bot = @bot
   end
 
 end

@@ -108,25 +108,28 @@ module BeerBot
           me = (@nickrx === to)
 
           # Somebody talking to us on channel: "Beerbot: ..."
-          msg2 = @get_nick_cmd.call(msg)
-          if not msg2 then
+          cmd = @get_nick_cmd.call(msg)
+          if not cmd then
             # Somebody commanding us on channel: ",command ..."
-            msg2 = @get_prefix_cmd.call(msg)
+            cmd = @get_prefix_cmd.call(msg)
           end
 
-          if msg2 then
-            if msg2 =~ /^\s*help(?:\s+(.*))?$/ then
-              replies = @bot.help(
-                if $1.nil? then
-                  []
-                else
-                  $1.strip.split(/\s+/)
-                end,
-                from:from,to:to,me:me,world:world)
+          if cmd then
+            case cmd
+            # dispatch more-filtering...
+            when /^more!*|moar!*$/i
+              replies = @more.more(to)
+            # dispatch help...
+            when /^\s*help(?:\s+(.*))?$/
+              if $1.nil? then
+                args = []
+              else
+                args = $1.strip.split(/\s+/)
+              end
+              replies = @bot.help(args,from:from,to:to,me:me,world:world)
+            # dispatch cmd...
             else
-              replies = @bot.cmd(
-                msg2,
-                from:from,to:to,me:me,world:world)
+              replies = @bot.cmd(cmd,from:from,to:to,me:me,world:world)
             end
           else
             # We're just hearing something on a channel...
@@ -141,8 +144,9 @@ module BeerBot
         when String # assume irc string
           replies
         when Hash,Array,Proc
+          # more-filter the reply...
           replies = @more.filter(replies)
-          BeerBot::Protocol::IRC.to_irc(replies)
+          IRC.to_irc(replies)
         else
           nil
         end
