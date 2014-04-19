@@ -48,6 +48,10 @@ class BeerBot::RunIRC
     # Create the bot.
     @bot = Bot.new(@module_path,config['modules'])
 
+    # Create a world associated with this irc connection.
+    # (lists channels and users we know about)
+    @world = IRCWorld.new(config['nick'])
+
     # Dispatcher which receives messages and interacts with the bot.
     @dispatcher = IRCDispatcher.new(
       @bot,
@@ -58,9 +62,6 @@ class BeerBot::RunIRC
 
     # Set up scheduler (this doesn't start it yet)...
     @scheduler = Scheduler.instance(config['timezone'])
-    # Create a world associated with this irc connection.
-    # (lists channels and users we know about)
-    @world = IRCWorld.new(config['nick'])
 
     # Create but don't open the irc connection.
     @conn = IRCConnection.new(
