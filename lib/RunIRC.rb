@@ -108,7 +108,7 @@ class BeerBot::RunIRC
       channels = config['channels']
       if channels then
         channels.each{|chan|
-          @conn.writeq.enq(IRC.join(chan))
+          self.join(chan)
         }
       end
       @scheduler.start
@@ -131,6 +131,12 @@ class BeerBot::RunIRC
 
   def action to,msg
     @conn.writeq.enq(IRC.action(to,msg))
+  end
+
+  # Convenience method to join a channel.
+
+  def join chan
+    @conn.writeq.enq(IRC.join(chan))
   end
 
   # Reload @bot using module list 'modules'.
