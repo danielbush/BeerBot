@@ -314,11 +314,9 @@ The pry repl will allow you to see everything in run-irc.rb.
   @dispatch  # the dispatcher that mediates between @bot and @conn
   @irc   # irc protocol
 
-  reload! # hot reload the bot and dispatcher
+  reload! ['modName1',...] # hot reload the bot and dispatcher
   say to,msg # convenience for making the bot say something
   @bot.load_modules! # reload the modules used by @bot
-  @bot.modules = [...]  # change the modules the bot uses to respond
-  @bot.modules += [...] # add more modules (if they are present)
 ```
 
 You can talk to the bot directly, no irc
