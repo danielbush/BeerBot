@@ -26,17 +26,33 @@ partly for an internal irc server.
 
 ## Installing
 
-Clone this code.
+Install the gem
+
+```
+  gem install 'beerbot'
+  type run-irc.rb
+  # => run-irc.rb is hashed (/home/danb/.rvm/gems/ruby-2.0.0-p247/bin/run-irc.rb)
+
+```
+  
+Or, if you want the code...
+
+Git clone this code (using your git-fu).
 
 Then do ```bundle install```.
 
 Outside of the code somewhere...
 
-1. create a configuration file
+1. create a configuration file (like example conf in ```conf/```)
 2. specify and make a directory to contain bot modules (like ```modules/```
 3. specify and make a data directory (like ```datadir```)
 
 ## Running
+
+If you installed the gem, with a bit of luck, all you need to do (once
+you've done the above preparatory stuff) is...
+
+  run-irc.rb path/to/conf.json
 
 If you're working with the code (not a gem), then you'll probably want
 to do something like this:
