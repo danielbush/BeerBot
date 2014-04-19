@@ -28,7 +28,9 @@ module BeerBot::Modules::Oracle
     exit 1
   end
 
-  def self.hear2 msg,to:nil,from:nil,world:nil
+  def self.hear msg,to:nil,from:nil,me:false,world:nil
+    replyto = me ? from : to
+    p ['oracle/hear',from,to,me,replyto]
     unless /\?{2,}\s*$/i === msg
       return nil
     end
@@ -53,41 +55,7 @@ module BeerBot::Modules::Oracle
       selected = binaries
     end
     response,err = BeerBot::Utils::expand(selected.sample,from:from,to:to)
-    BotMsg.actionify([to:to,msg:response])
-  end
-
-  # hear2 is simpler and does the same, possibly better job than this.
-
-  def self.hear1 msg,to:nil,from:nil,world:nil
-    # Answers that tend towards yes/no/in-between type answers.
-    binaries = @@data.data['yesnomaybe']
-    # Answers that try to deal with non-binary type questions.
-    playfortime = @@data.data['playfortime']
-
-    case msg
-
-    # binary
-    when /^(\s*\S+\s+)?what about(\s.*)?\?{2,}\s*$/i
-      response = binaries.sample.gsub(/:from/,from)
-      [to:to,msg:response]
-
-    # "why ... ??"
-    # "so why ... ??"
-    # "what's ... ??"
-    when /^(\s*\S+\s+)?where(\S*)?(\s.*)?\?{2,}\s*$/i,
-         /^(\s*\S+\s+)?why(\S*)?(\s.*)?\?{2,}\s*$/i,
-         /^(\s*\S+\s+)?when(\S*)?(\s.*)?\?{2,}\s*$/i,
-         /^(\s*\S+\s+)?what(\S*)?(\s.*)?\?{2,}\s*$/i,
-         /^(\s*\S+\s+)?who(\S*)?(\s.*)?\?{2,}\s*$/i,
-         /^(\s*\S+\s+)?how(\S*)?(\s.*)?\?{2,}\s*$/i
-      response = playfortime.sample.gsub(/:from/,from)
-      [to:to,msg:response]
-
-    # binary
-    when /\?{2,}\s*$/i
-      response = binaries.sample.gsub(/:from/,from)
-      [to:to,msg:response]
-    end
+    BotMsg.actionify([to:replyto,msg:response])
   end
 
   # Route messages like "beerbot: why ... " etc
@@ -100,10 +68,6 @@ module BeerBot::Modules::Oracle
 
   def self.help arr=[]
     ["Ask the bot questions ending in ??"]
-  end
-
-  class << self
-    alias_method :hear , :hear2
   end
 
 end
