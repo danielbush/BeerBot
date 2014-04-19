@@ -1,0 +1,3 @@
+This is an example module dir where bot modules are stored.
+Some examples are given here, note the format: use of init.rb etc.
+You should make your own and set it in config (moduledir).

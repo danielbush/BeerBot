@@ -1,0 +1,2 @@
+This is an example data dir where bot modules can dump their data (json files, databases etc).
+You should make your own and set it in config (datadir).
