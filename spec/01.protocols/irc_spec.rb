@@ -1,4 +1,4 @@
-require_relative "../../lib/01.protocols/irc"
+require_relative "../../lib/BeerBot/01.protocols/irc"
 require 'pp'
 
 # http://www.mirc.org/mishbox/reference/rawhelp3.htm#raw353

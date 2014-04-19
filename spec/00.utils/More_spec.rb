@@ -1,4 +1,4 @@
-require_relative "../../lib/00.utils/More"
+require_relative "../../lib/BeerBot/00.utils/More"
 require 'pp'
 
 More = ::BeerBot::Utils::More

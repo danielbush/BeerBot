@@ -4,6 +4,8 @@
 # If we pass a non-string msg, it will be returned.
 # (This is to help with testing/mocking).
 
+require_relative '../../../lib/BeerBot'
+
 class TestClass
 
   def initialize name
@@ -22,7 +24,7 @@ class TestClass
     end
   end
 
-  def hear msg,from:nil,to:nil,world:nil
+  def hear msg,from:nil,to:nil,me:false,world:nil
     case msg
     when String
       [to:from,msg:"hear #{@name}"]

@@ -1,4 +1,4 @@
-require_relative "../../lib/02.bot/bot.rb"
+require_relative "../../lib/BeerBot/02.bot/bot.rb"
 require 'pp'
 
 Bot = ::BeerBot::Bot

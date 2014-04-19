@@ -1,4 +1,4 @@
-require_relative "../../lib/06.dispatchers/irc.rb"
+require_relative "../../lib/BeerBot/06.dispatchers/irc.rb"
 require 'pp'
 
 describe "dispatchers" do

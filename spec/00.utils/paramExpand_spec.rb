@@ -1,4 +1,4 @@
-require_relative "../../lib/00.utils/paramExpand.rb"
+require_relative "../../lib/BeerBot/00.utils/paramExpand.rb"
 require 'pp'
 
 describe "param sentence generation", :param_expand => true do

@@ -1,4 +1,4 @@
-require_relative "../../lib/01.connect/IRCConnection"
+require_relative "../../lib/BeerBot/01.connect/IRCConnection"
 
 describe 'IRCConnection' do
 
@@ -47,7 +47,7 @@ describe 'IRCConnection' do
   end
 
   before(:each) {
-    @conn = IRCConnection.new('foo')
+    @conn = IRCConnection.new
     @mock = MockConnection.new
   }
 
