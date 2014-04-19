@@ -33,7 +33,7 @@ require 'sqlite3'
 
 module BeerBot::Modules::Facts
 
-  require_relative '../../lib/BeerBot'
+  require 'BeerBot'
   require_relative 'factsdb/factsdb.rb'
 
   Utils  = ::BeerBot::Utils
