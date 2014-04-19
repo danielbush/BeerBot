@@ -43,6 +43,9 @@ Then do ```bundle install```.
 
 ## Configure / Setup
 
+First, take a look at the example configuration file in ```conf/```.
+Hopefully that is mostly self-explanatory.
+
 Outside of the code somewhere...
 
 1. create a configuration file (like example conf in ```conf/```)
@@ -178,6 +181,27 @@ In ```moduledir/Hodor/Hodor.rb``` put:
     end
   end
 ```
+
+So what does the above do?
+
+If you say anything directly:
+
+```
+  <danb> ,hi
+  <beerbot> Hodor!
+  <danb> beerbot: hi
+  <beerbot> Hodor!
+```
+
+If you say something on a channel not to the bot:
+
+```
+  <danb> hi
+  <beerbot> Hodor?
+  <danb> oh wow, that's annoying can we ban this plz??
+```
+
+Finally if you said: ```,help Hodor```, well, you can guess...
 
 Ok, so some things to note.
 
