@@ -47,14 +47,16 @@ Outside of the code somewhere...
 
 1. create a configuration file (like example conf in ```conf/```)
 2. specify and make a directory to contain bot modules (like ```modules/```
-3. specify and make a data directory (like ```datadir```)
+3. specify and make a data directory (like ```datadir/```)
 
 ## Running
 
 If you installed the gem, with a bit of luck, all you need to do (once
 you've done the above preparatory stuff) is...
 
+```
   run-irc.rb path/to/conf.json
+```
 
 If you're working with the code (not a gem), then you'll probably want
 to do something like this:
