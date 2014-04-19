@@ -133,7 +133,7 @@ module BeerBot
             end
           else
             # We're just hearing something on a channel...
-            replies = @bot.hear(msg,from:from,to:to,world:world)
+            replies = @bot.hear(msg,from:from,to:to,me:me,world:world)
           end
 
         else

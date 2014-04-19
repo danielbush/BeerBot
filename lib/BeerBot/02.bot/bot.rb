@@ -123,12 +123,12 @@ module BeerBot
       end
     end
 
-    def hear msg,from:nil,to:nil,world:nil
+    def hear msg,from:nil,to:nil,me:false,world:nil
       if @hear then
-        botmsg = @hear.call(msg,from:from,to:to,world:world)
+        botmsg = @hear.call(msg,from:from,to:to,me:me,world:world)
         return botmsg
       else
-        self.run(:hear,msg,from:from,to:to,world:world)
+        self.run(:hear,msg,from:from,to:to,me:me,world:world)
       end
     end
 
