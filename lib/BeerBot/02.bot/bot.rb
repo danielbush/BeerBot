@@ -114,7 +114,7 @@ module BeerBot
       }
     end
 
-    def cmd msg,from:nil,to:nil,world:nil,me:false
+    def cmd msg,from:nil,to:nil,me:false,world:nil
       if @cmd then
         botmsg = @cmd.call(msg,from:from,to:to,world:world,me:me)
         return botmsg
