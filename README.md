@@ -48,12 +48,9 @@ And run
 ```
 on these.
 
-You might also need to run bundle install within CronR.
-
-
 ## Usage
 
-Create an irc conf, use ```conf/``` as an example.
+Create an irc conf, use example conf in ```conf/``` as an example.
 
 If you want to test or play with it with a real irc server, on
 linux it is pretty easy to install an irc server and run it
