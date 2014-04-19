@@ -1,3 +1,5 @@
+require 'CronR' # For scheduler
+
 require_relative 'BeerBot/00.utils/utils'
 require_relative 'BeerBot/00.utils/paramExpand'
 require_relative 'BeerBot/00.utils/DataFile'

@@ -32,16 +32,6 @@ Get ruby 2.0
  rvm use ruby-2.0.0
 ```
 
-Clone this project, and cd into it.
-
-Beware, I'm currently using a git submodule for RubyCron in ext/.
-So you need to fetch this.
-
-```
-  git submodule init
-  git submodule update
-```
-
 Install the required gems
 
 ```
@@ -58,7 +48,7 @@ And run
 ```
 on these.
 
-You might also need to run bundle install within RubyCron.
+You might also need to run bundle install within CronR.
 
 
 ## Usage
