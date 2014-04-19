@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # The files in this directory are part of BeerBot, a a ruby irc bot library.
 # Copyright (C) 2013,2014 Daniel Bush
 # This program is distributed under the terms of the GNU
