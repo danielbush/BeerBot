@@ -87,7 +87,7 @@ describe "IRC parsing" do
     it "should handle privmsg's" do
       result = []
       IRC.parse(samples[:privmsg][0]) {|event,*args|
-          result.push(args) if event == :privmsg
+          result.push(args) if event == :msg
       }
       result[0].should == ['adamr','#sydney','because we have?']
     end

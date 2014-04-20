@@ -27,9 +27,9 @@ module BeerBot
 
     class IRCDispatcher
 
-      IRC   = BeerBot::Protocol::IRC
-      Utils = BeerBot::Utils
-      BotMsgMore    = BeerBot::BotMsgMore
+      IRC        = BeerBot::Protocol::IRC
+      Utils      = BeerBot::Utils
+      BotMsgMore = BeerBot::BotMsgMore
       
       attr_accessor :bot,:nick,:prefix,:world,:more
 
@@ -100,7 +100,7 @@ module BeerBot
             }
           end
 
-        when :privmsg
+        when :msg
 
           from,to,msg = args
 

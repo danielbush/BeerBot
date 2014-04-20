@@ -31,7 +31,7 @@ describe "dispatchers" do
         case event
         when :nick
           [event,*args]
-        when :privmsg
+        when :msg
           [event,*args]
         end
       }
@@ -39,7 +39,7 @@ describe "dispatchers" do
       response = @dispatcher.receive(":tom!~tom@2404:130::1000:abc:4abc:fabc:fabc NICK :tom_is_away\r\n")
       response.should == [:nick,'tom','tom_is_away']
       response = @dispatcher.receive(":adamr!~adam@172.17.217.13 PRIVMSG #sydney :because we have?\r\n")
-      response.should == [:privmsg,'adamr','#sydney','because we have?']
+      response.should == [:msg,'adamr','#sydney','because we have?']
       
     end
 

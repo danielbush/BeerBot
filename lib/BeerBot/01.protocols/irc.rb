@@ -11,8 +11,11 @@ module BeerBot
 
     module IRC
 
-      # In coming IRC messages are parsed into hashes with several
-      # additional methods.
+      # This class represents an irc message broken down into its
+      # major constituent parts.
+      #
+      # These include the prefix, command, parameters and trailing
+      # components of an irc message.
 
       class IRCMessage < Hash
 
@@ -110,7 +113,14 @@ module BeerBot
 
       end
 
-      # Parse raw irc string and then yield for various events. 
+      # Parse raw irc string and then yield or return for various events.
+      #
+      # Parse's job is to take the constituents parts of an irc
+      # message, identify the type of event and return a generic
+      # representation of it.
+      #
+      # So for instance, a message is represented as
+      #   [:msg,from,to,msg]
       # 
       # The lambda receives an incoming irc string, tries to parse
       # it and act on it.
@@ -180,7 +190,7 @@ module BeerBot
           msg  = m[:trailing].strip
           from = m[:prefix][:nick].strip
           to   = m[:params][0].strip unless m[:params].empty?
-          result = [:privmsg,from,to,msg]
+          result = [:msg,from,to,msg]
 
         else # command we don't handle
           result = [:default,m]
