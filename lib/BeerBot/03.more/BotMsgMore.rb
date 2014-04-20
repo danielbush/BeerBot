@@ -18,7 +18,7 @@ module BeerBot
       return nil unless botmsg
       replies = []
       by_to = Hash.new{|h,k| h[k]=[]}
-      arr = BeerBot::Protocol::BotMsg.to_a(botmsg)
+      arr = BeerBot::BotMsg.to_a(botmsg)
 
       arr.inject(by_to){|h,v| h[v[:to]].push(v); h}
       by_to.each_pair{|to,a|

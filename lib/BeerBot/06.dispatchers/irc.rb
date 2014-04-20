@@ -6,7 +6,7 @@
 # see <http://www.gnu.org/licenses/>.
 
 require_relative '../00.utils/utils'
-require_relative '../01.protocols/irc'
+require_relative '../02.protocols/irc'
 require_relative '../03.more/BotMsgMore'
 
 module BeerBot

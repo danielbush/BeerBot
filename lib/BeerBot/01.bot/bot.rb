@@ -5,11 +5,9 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-require_relative '../01.protocols/botmsg.rb'
+require_relative '../01.bot/botmsg.rb'
 
 module BeerBot
-
-  BotMsg = BeerBot::Protocol::BotMsg
 
   # Represents a bot module and may contain a reference to the loaded
   # ruby module or any errors associated with loading it.

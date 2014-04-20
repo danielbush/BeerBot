@@ -7,8 +7,6 @@
 
 module BeerBot
 
-  module Protocol
-
     # BotMsg's are hashes or arrays of hashes.
     #
     # The hash is generally expected to have the following keys:
@@ -67,7 +65,5 @@ module BeerBot
       end
       
     end
-
     
-  end
 end

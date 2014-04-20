@@ -37,7 +37,7 @@ module BeerBot::Modules::Facts
   require_relative 'factsdb/factsdb.rb'
 
   Utils  = ::BeerBot::Utils
-  BotMsg = ::BeerBot::Protocol::BotMsg
+  BotMsg = ::BeerBot::BotMsg
   Config = ::BeerBot::Config
 
   def self.dbfile

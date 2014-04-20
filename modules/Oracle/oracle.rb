@@ -17,7 +17,7 @@ module BeerBot; module Modules; end; end
 module BeerBot::Modules::Oracle
 
   Config = ::BeerBot::Config
-  BotMsg = ::BeerBot::Protocol::BotMsg
+  BotMsg = ::BeerBot::BotMsg
 
   filepath = File.join(Config.module_data('Oracle'),'data.json')
   begin
