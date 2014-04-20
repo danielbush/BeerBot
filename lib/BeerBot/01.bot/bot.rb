@@ -112,22 +112,35 @@ module BeerBot
       }
     end
 
+    # Process messages addressed directly to the bot.
+
     def cmd msg,from:nil,to:nil,me:false,world:nil
       if @cmd then
-        botmsg = @cmd.call(msg,from:from,to:to,world:world,me:me)
-        return botmsg
+        @cmd.call(msg,from:from,to:to,world:world,me:me)
       else
         self.run(:cmd,msg,from:from,to:to,world:world,me:me)
       end
     end
 
+    # Process messages the bot overhears.
+
     def hear msg,from:nil,to:nil,me:false,world:nil
       if @hear then
-        botmsg = @hear.call(msg,from:from,to:to,me:me,world:world)
-        return botmsg
+        @hear.call(msg,from:from,to:to,me:me,world:world)
       else
         self.run(:hear,msg,from:from,to:to,me:me,world:world)
       end
+    end
+
+    # Handle events other than being messaged.
+    #
+    # IRC events like joining channels, changing nicks etc.
+    #
+    # Both event and kargs is dependent on the dispatcher which in
+    # turn is dependent on how the protocol (eg irc) is parsed.
+
+    def event event,**kargs
+      self.run(:event,event,**kargs)
     end
 
     def help arr,from:nil,to:nil,world:nil,me:false

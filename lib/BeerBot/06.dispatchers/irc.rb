@@ -16,19 +16,24 @@ module BeerBot
 
   module Dispatchers
 
-    # This dispatcher calls BeerBot::Protocol::IRC.parse on what it
-    # receives and then processes the response.
+    # This irc dispatcher receives IRC messages (strings) and does
+    # something with them.
     #
-    # There are several ways to specify how the result of parse is
-    # processed.  You can:
+    # IRCDispatcher#receive receives the messages.
+    # 
+    # There are several ways to specify what the dispatcher should do:
+    # 1) just get the result of #receive
+    # 
+    # Or, override #receive's behaviour:
     # 1) pass in a block at instantiation time
-    # 2) set a block using #set_receive
+    # 2) pass in a block using #set_receive
     # 3) subclass this class and write your own #receive
 
     class IRCDispatcher
 
       IRC        = BeerBot::Protocol::IRC
       Utils      = BeerBot::Utils
+      BotMsg     = BeerBot::BotMsg
       BotMsgMore = BeerBot::BotMsgMore
       
       attr_accessor :bot,:nick,:prefix,:world,:more
@@ -75,30 +80,38 @@ module BeerBot
           return self.instance_exec(event,*args,&@block)
         end
 
+        replies = nil
+
         # Otherwise, here is the default behaviour...
 
         case event
         when :unknown
           #puts "protocol/irc :unknown"
+          replies = @bot.event(event,args:args)
         when :default
           #puts "protocol/irc :default"
+          replies = @bot.event(event,args:args)
         when :nick
           old,nick = args
           @world.nick(old,nick) if @world
+          replies = @bot.event(event,old:old,nick:nick)
         when :part
           nick,channel = args
           @world.part(nick,channel) if @world
+          replies = @bot.event(event,nick:nick,channel:channel)
         when :join
           nick,channel = args
+          me = (@nickrx === nick)
           @world.join(nick,channel) if @world
+          replies = @bot.event(event,me:me,nick:nick,channel:channel)
         when :chanlist
-          #p "[dispatcher] :chanlist"
           channel,users = args
           if @world then
             users.each {|user|
               @world.join(user,channel)
             }
           end
+          replies = @bot.event(event,channel:channel,users:users)
 
         when :msg
 

@@ -23,7 +23,33 @@ module BeerBot
 
     module BotMsg
 
+      # Determine if botmsg is a valid botmsg.
+
+      def self.valid? botmsg
+        case botmsg
+        when Hash
+          a = botmsg.has_key?(:to)
+          b = (botmsg.has_key?(:msg) || botmsg.has_key?(:action))
+          a && b
+        when Array
+          botmsg.inject(true){|s,v|
+            # Members must be hash... 
+            break false unless v.kind_of?(Hash)
+            s = s && self.valid?(v);
+            break false unless s;
+            s
+          }
+        when Proc
+          false
+        else
+          false
+        end
+      end
+
       # Convert botmsg to an array of one or more botmsg hashes.
+      #
+      # Returns array of botmsg's or empty array if not given
+      # something that is a botmsg.
       #
       # Proc's are executed to retrieve an array or hash.
       #
@@ -34,8 +60,10 @@ module BeerBot
       def self.to_a botmsg
         case botmsg
         when Hash
+          return [] unless self.valid?(botmsg)
           return [botmsg]
         when Array
+          return [] unless self.valid?(botmsg)
           return botmsg
         when Proc
           return self.to_a(botmsg.call)

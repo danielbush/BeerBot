@@ -33,6 +33,15 @@ class TestClass
     end
   end
 
+  def event event,**kargs
+    case event
+    when :join
+      unless kargs[:me] then
+        [to:kargs[:channel],msg:kargs[:nick]]
+      end
+    end
+  end
+
   # Here we'll just reflect back the topic and subtopics...
   #
   # Remember, help should return an array of lines ie strings
