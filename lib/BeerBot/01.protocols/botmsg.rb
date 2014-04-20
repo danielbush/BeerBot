@@ -9,6 +9,20 @@ module BeerBot
 
   module Protocol
 
+    # BotMsg's are hashes or arrays of hashes.
+    #
+    # The hash is generally expected to have the following keys:
+    #   :msg
+    #   :to
+    # but may carry additional ones like
+    #   :action (will be used instead of :msg)
+    #
+    # The array-form of the botmsg might look like this:
+    #   [msg:'ho!',to:'#chan1']
+    # and it is easy to add extra messages this way:
+    #   [msg:'ho!',to:'#chan1'] + [msg:'ho again!',to:'#chan1']
+    # etc
+
     module BotMsg
 
       # Convert botmsg to an array of one or more botmsg hashes.
