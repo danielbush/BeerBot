@@ -36,9 +36,10 @@ module BeerBot::Modules::Facts
   require 'BeerBot'
   require_relative 'factsdb/factsdb.rb'
 
-  Utils  = ::BeerBot::Utils
-  BotMsg = ::BeerBot::BotMsg
-  Config = ::BeerBot::Config
+  Utils       = ::BeerBot::Utils
+  ParamExpand = ::BeerBot::Utils::ParamExpand
+  BotMsg      = ::BeerBot::BotMsg
+  Config      = ::BeerBot::Config
 
   def self.dbfile
     File.join(Config.module_data('Facts'),'facts.db')
@@ -305,12 +306,12 @@ module BeerBot::Modules::Facts
       if mode = self.db.get_mode(term) then
         case mode
         when "rand"
-          v,err = Utils.expand(val.sample,from:from)
+          v,err = ParamExpand.expand(val.sample,from:from)
           msg = [msg:"#{term}#{nstr} is: #{v}",to:to]
         when "reply"
           v = val.sample
           params = [] unless params
-          v,err = Utils.expand(v,*params,from:from)
+          v,err = ParamExpand.expand(v,*params,from:from)
           if err.size > 0 then
             msg = [to:to,msg:"Need at least #{err.max} arguments #{from}"]
           else

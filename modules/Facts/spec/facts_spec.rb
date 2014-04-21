@@ -19,7 +19,7 @@ class MockDB
       nil
     when :term
       @terms.push([method,[*args],kargs])
-      [args[0]+'1',args[0]+'2']
+      ['entry 1','entry 2']
     else
       [method,*args]
     end
@@ -50,8 +50,8 @@ describe "Facts module" do
 
     it "should handle ',term'" do
       r = Facts.cmd('foo',from:'from',to:'to',me:true)
-      r[1][:msg].should == "[0] foo1"
-      r[2][:msg].should == "[1] foo2"
+      r[1][:msg].should == "[0] entry 1"
+      r[2][:msg].should == "[1] entry 2"
     end
 
     it "should handle ',term n'"
@@ -70,6 +70,23 @@ describe "Facts module" do
 
     it "should handle ',term <mode>'"
     it "should handle ',term m s///'"
+
+    describe "param expansion" do
+      it "should substitute" do
+        puts "\n--------\n"
+        def @db.term *args,**kargs
+          ["::1 ::2 ::from ::unk|::1 ::unk2 ::3|::1"]
+        end
+        def @db.get_mode *args,**kargs
+          'reply'  # so param expansion will work
+        end
+        r = Facts.cmd('foo arg1 arg2',from:'from1',to:'to1',me:true)
+        r.size.should == 1
+        reply = r[0]
+        reply[:msg].should == "arg1 arg2 from1 arg1 ::unk2 arg1"
+      end
+    end
+
   end
 
 end
