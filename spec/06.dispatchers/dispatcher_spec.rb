@@ -1,9 +1,10 @@
-require_relative "../../lib/BeerBot/06.dispatchers/irc.rb"
+require_relative "../../lib/BeerBot/02.protocols/irc.rb"
+require_relative "../../lib/BeerBot/06.dispatchers/dispatcher.rb"
 require 'pp'
 
-describe "dispatchers" do
+describe "dispatchers",:dispatchers => true do
 
-  IRCDispatcher = BeerBot::Dispatchers::IRCDispatcher
+  Dispatcher = BeerBot::Dispatchers::Dispatcher
 
   class MockBot
     attr_accessor :output
@@ -32,11 +33,11 @@ describe "dispatchers" do
 
     before(:each) {
       @bot = MockBot.new
-      @dispatcher = IRCDispatcher.new(@bot,'beerbot')
+      @dispatcher = Dispatcher.new(@bot,'beerbot')
     }
 
     it "should dispatch valid IRCMessage instances" do
-      @dispatcher = IRCDispatcher.new(@bot,'beerbot') {|event,*args|
+      @dispatcher = Dispatcher.new(@bot,'beerbot') {|event,*args|
         case event
         when :nick
           [event,*args]
@@ -44,15 +45,16 @@ describe "dispatchers" do
           [event,*args]
         end
       }
-      response = @dispatcher.receive(":tom!~tom@2404:130::1000:abc:4abc:fabc:fabc NICK :tom_is_away\r\n")
+      response = @dispatcher.receive(:nick,['tom','tom_is_away'])
       response.should == [:nick,'tom','tom_is_away']
-      response = @dispatcher.receive(":adamr!~adam@172.17.217.13 PRIVMSG #sydney :because we have?\r\n")
+
+      response = @dispatcher.receive(:msg,["adamr", "#sydney", "because we have?"])
       response.should == [:msg,'adamr','#sydney','because we have?']
       
     end
 
     it "should handle join events" do
-      @dispatcher.receive(":danb!~danb@localhost.iiNet JOIN :#chan1\r\n")
+      @dispatcher.receive(:join,['danb','#chan1'])
       @bot.output[:event].size.should == 1
       event,kargs = @bot.output[:event][0]
       event.should == :join
@@ -60,7 +62,7 @@ describe "dispatchers" do
     end
 
     it "should detect me in join events" do
-      @dispatcher.receive(":beerbot!~foo@localhost.iiNet JOIN :#chan1\r\n")
+      @dispatcher.receive(:join,['beerbot','#chan1']).should == []
       @bot.output[:event].size.should == 1
       event,kargs = @bot.output[:event][0]
       event.should == :join
@@ -69,15 +71,13 @@ describe "dispatchers" do
 
     it "should gracefully handle bad bot replies (non-nil / not botmsg)" do
       def @bot.cmd msg,**kargs
-        [1,2,3]
+        [1,2,3] # invalid
       end
       def @bot.event event,**kargs
-        [1,2,3]
+        [1,2,3] # invalid
       end
-      expect {
-        @dispatcher.receive(":foo!~foo@localhost.iiNet PRIVMSG beerbot :,do something!\r\n")
-        @dispatcher.receive(":beerbot!~foo@localhost.iiNet JOIN :#chan1\r\n")
-      }.not_to raise_error
+      @dispatcher.receive(:msg,["foo", "beerbot", ",do something!"]).should == []
+      @dispatcher.receive(:join,["beerbot", "#chan1"]).should == []
     end
 
   end

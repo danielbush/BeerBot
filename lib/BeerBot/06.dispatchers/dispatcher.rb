@@ -6,7 +6,6 @@
 # see <http://www.gnu.org/licenses/>.
 
 require_relative '../00.utils/utils'
-require_relative '../02.protocols/irc'
 require_relative '../03.more/BotMsgMore'
 
 module BeerBot
@@ -16,10 +15,10 @@ module BeerBot
 
   module Dispatchers
 
-    # This irc dispatcher receives IRC messages (strings) and does
-    # something with them.
+    # This dispatcher receives generic events (provided by a parser
+    # for a given protocol eg irc) and does something with them.
     #
-    # IRCDispatcher#receive receives the messages.
+    # Dispatcher#receive receives the messages.
     # 
     # There are several ways to specify what the dispatcher should do:
     # 1) just get the result of #receive
@@ -29,9 +28,8 @@ module BeerBot
     # 2) pass in a block using #set_receive
     # 3) subclass this class and write your own #receive
 
-    class IRCDispatcher
+    class Dispatcher
 
-      IRC        = BeerBot::Protocol::IRC
       Utils      = BeerBot::Utils
       BotMsg     = BeerBot::BotMsg
       BotMsgMore = BeerBot::BotMsgMore
@@ -68,13 +66,7 @@ module BeerBot
         end
       end
 
-      def parse irc_str
-        IRC.parse(irc_str)
-      end
-
-      def receive irc_str
-
-        event,*args = self.parse(irc_str)
+      def receive event,args
 
         if @block then
           return self.instance_exec(event,*args,&@block)
@@ -86,10 +78,8 @@ module BeerBot
 
         case event
         when :unknown
-          #puts "protocol/irc :unknown"
           replies = @bot.event(event,args:args)
         when :default
-          #puts "protocol/irc :default"
           replies = @bot.event(event,args:args)
         when :nick
           old,nick = args
@@ -150,18 +140,17 @@ module BeerBot
           end
 
         else
-          puts "protocol/irc unrecognised event: '#{event}'"
+          puts "[dispatcher] unrecognised event: '#{event}'"
         end
 
         case replies
-        when String # assume irc string
+        when String # assume protocol string eg irc
           replies
         when Hash,Array,Proc
           # more-filter the reply...
           replies = @more.filter(replies)
-          IRC.to_irc(replies)
         else
-          nil
+          []
         end
 
       end

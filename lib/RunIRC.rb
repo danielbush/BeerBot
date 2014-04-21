@@ -28,7 +28,7 @@ class BeerBot::RunIRC
   IRCConnection = BeerBot::IRCConnection
   IRC           = BeerBot::Protocol::IRC
   Bot           = BeerBot::Bot
-  IRCDispatcher = BeerBot::Dispatchers::IRCDispatcher
+  Dispatcher    = BeerBot::Dispatchers::Dispatcher
   Scheduler     = BeerBot::Scheduler
 
   attr_accessor :config,:bot,:scheduler,:dispatcher,:world,:conn,:postq,:parse,:more
@@ -53,7 +53,7 @@ class BeerBot::RunIRC
     @world = IRCWorld.new(config['nick'])
 
     # Dispatcher which receives messages and interacts with the bot.
-    @dispatcher = IRCDispatcher.new(
+    @dispatcher = Dispatcher.new(
       @bot,
       config['nick'],
       prefix:config['cmd_prefix'],
@@ -68,12 +68,14 @@ class BeerBot::RunIRC
       nick:config['nick'],
       server:config['server'])
 
-    # Dispatcher thread takes stuff from @conn queue and processes
-    # it...
+    # Dispatcher thread takes stuff coming from the irc connection and does
+    # something with it...
 
     @dispatcher_thread = InOut.new(inq:@conn.queue,outq:@conn.writeq) {|input|
       str,raw = input
-      replies = @dispatcher.receive(str)
+      event,*args = IRC.parse(str)
+      replies = @dispatcher.receive(event,args)
+      IRC.to_irc(replies)
     }
     @dispatcher_thread.start!
 
@@ -85,7 +87,7 @@ class BeerBot::RunIRC
     @scheduler_thread = InOut.new(inq:@scheduler.queue,outq:@conn.writeq) {|cron_job|
       puts "<< scheduler #{cron_job.inspect}"
       puts "<< scheduler #{@scheduler.time}"
-      IRC.to_irc(cron_job.job)
+      IRC.to_irc(cron_job.run)
     }
     @scheduler_thread.start!
 

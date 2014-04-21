@@ -10,7 +10,7 @@ require_relative 'BeerBot/01.bot/botmsg'
 require_relative 'BeerBot/01.bot/bot'
 require_relative 'BeerBot/02.protocols/irc'
 require_relative 'BeerBot/03.more/BotMsgMore'
-require_relative 'BeerBot/06.dispatchers/irc'
+require_relative 'BeerBot/06.dispatchers/dispatcher'
 require_relative 'BeerBot/70.scheduler/scheduler'
 require_relative 'BeerBot/Config'
 
