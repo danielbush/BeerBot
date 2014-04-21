@@ -9,6 +9,7 @@ Gem::Specification.new do |s|
   s.executables << 'run-irc.rb'
   s.files       = [
     "lib/BeerBot/00.utils/utils.rb",
+    "lib/BeerBot/00.utils/param_expand.rb",
     "lib/BeerBot/00.utils/sentence_expand.rb",
     "lib/BeerBot/00.utils/DataFile.rb",
     "lib/BeerBot/00.utils/InOut.rb",
