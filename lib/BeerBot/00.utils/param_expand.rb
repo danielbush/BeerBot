@@ -57,7 +57,6 @@ module BeerBot
       def self.expand msg,*args,**kargs
         errargs = []
         params = self.scan_param(msg)
-        p ['scan',params]
         # Do the big ones first.
         params = params.sort{|a,b|b[1].size<=>a[1].size}
         params.each {|i|
