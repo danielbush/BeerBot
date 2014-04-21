@@ -29,7 +29,7 @@ module BeerBot
     # The entry from <value> will also undergo the
     # same ':' substitution.
 
-    module ParamExpand
+    module SentenceExpand
 
       # Recursively expand a sentence with parameters starting with
       # ':' using values sampled from params.

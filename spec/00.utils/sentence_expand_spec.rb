@@ -1,7 +1,7 @@
-require_relative "../../lib/BeerBot/00.utils/paramExpand.rb"
+require_relative "../../lib/BeerBot/00.utils/sentence_expand.rb"
 require 'pp'
 
-describe "param sentence generation", :param_expand => true do
+describe "sentence sentence expansion", :param_expand => true do
 
   params1 = {
     'ithink' => [nil,"I think","Perhaps","Clearly"],
@@ -72,19 +72,19 @@ describe "param sentence generation", :param_expand => true do
     100.times do
       # This is a bit crap.
       sentence = ":ithink :youmust :dothis :toget :this ::from"
-      BeerBot::Utils::ParamExpand.expand(sentence,params1)
+      BeerBot::Utils::SentenceExpand.expand(sentence,params1)
     end
   end
 
   it "should omit param lookups that don't exist by default" do
     sentence = ":zzz :youmust :dothis :toget :this ::from"
-    BeerBot::Utils::ParamExpand.expand(sentence,params1)
+    BeerBot::Utils::SentenceExpand.expand(sentence,params1)
   end
 
   it "can raise an error if key lookups don't exist" do
     sentence = ":zzz :youmust :dothis :toget :this ::from"
     expect{
-      BeerBot::Utils::ParamExpand.expand(sentence,params1,true)
+      BeerBot::Utils::SentenceExpand.expand(sentence,params1,true)
     }.to raise_error
   end
 
