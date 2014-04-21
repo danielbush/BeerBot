@@ -255,3 +255,30 @@ You can grab the ```CronR``` scheduler like this in your module:
     }
   }
 ```
+
+### Events
+
+We've covered messages the bot hears and messages that are interpreted
+directly by the bot.  But what about other events like somebody joining
+a channel or conference room?
+
+Taking the Hodor module above we can add:
+
+```ruby
+    def self.event event,**kargs
+      case event
+      when :join
+        unless kargs[:me] then
+          [to:kargs[:channel],msg:"Greetings #{kargs[:nick]}!"]
+        end
+      end
+    end
+```
+
+Events are dispatched by the dispatcher - see
+```lib/BeerBot/06.dispatchers``` and ```lib/BeerBot/02.protocols```.
+The parse function in 02.protocols/irc.rb tries to return a generic
+representation of a particular irc event.
+The dispatcher in 06.dispatchers/irc.rb takes this and decides what to
+do with it.
+TODO:
