@@ -11,6 +11,8 @@ describe "param expansion" do
     it "should handle single :: params" do
       m = ParamExpand.scan_param("bar ::foo ::baz")
       m.should == [['::foo',['foo']],['::baz',['baz']]]
+      m = ParamExpand.scan_param("bar ::unk2")
+      m.should == [['::unk2',['unk2']]]
     end
 
     it "should handle numeric :: params" do
