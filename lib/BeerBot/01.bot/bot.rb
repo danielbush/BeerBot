@@ -5,22 +5,10 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-require_relative '../01.bot/botmsg.rb'
+require_relative 'botmsg.rb'
+require_relative 'BotModule.rb'
 
 module BeerBot
-
-  # Represents a bot module and may contain a reference to the loaded
-  # ruby module or any errors associated with loading it.
-
-  class BotModule < Hash
-    def initialize name,status:false,mod:nil,modname:nil,errors:[]
-      self[:status] = status
-      self[:name] = name  # The module name.
-      self[:mod] = mod  # The loaded ruby module.
-      self[:modname] = modname
-      self[:errors] = errors
-    end
-  end
 
   # Represents a sequence of BotModule instances.
 
