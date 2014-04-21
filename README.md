@@ -65,7 +65,7 @@ If you're working with the code (not a gem), then you'll probably want
 to do something like this:
 
 ```
-ruby -Ip/t/b/lib p/t/b/bin/run-irc.rb path/to/conf.json
+  ruby -Ip/t/b/lib p/t/b/bin/run-irc.rb path/to/conf.json
 ```
 
 where p/t/b = path/to/beerbot
@@ -279,6 +279,5 @@ Events are dispatched by the dispatcher - see
 ```lib/BeerBot/06.dispatchers``` and ```lib/BeerBot/02.protocols```.
 The parse function in 02.protocols/irc.rb tries to return a generic
 representation of a particular irc event.
-The dispatcher in 06.dispatchers/irc.rb takes this and decides what to
+The dispatcher in 06.dispatchers/dispatcher.rb takes this and decides what to
 do with it.
-TODO:
