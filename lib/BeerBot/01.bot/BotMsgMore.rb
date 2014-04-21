@@ -9,15 +9,15 @@ require_relative '../00.utils/More'
 
 module BeerBot
 
-  # More-based filter that can be applies to botmsg's.
+  # More-based filter that can be applied to botmsg's.
   #
-  # #filter expects a botmsg and returns an array botmsg.
+  # #filter expects a botmsg and returns an array, either of botmsg's
+  # or emtpy.
 
   class BotMsgMore < ::BeerBot::Utils::More
     def filter botmsg
-      return nil unless botmsg
       arr = BeerBot::BotMsg.to_a(botmsg)
-      return nil unless arr
+      # At this point if arr isn't a valid bot msg we'll get [].
       replies = []
       by_to = Hash.new{|h,k| h[k]=[]}
 

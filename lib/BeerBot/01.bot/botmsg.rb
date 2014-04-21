@@ -7,18 +7,26 @@
 
 module BeerBot
 
-    # BotMsg's are hashes or arrays of hashes.
+    # BotMsg's are hashes or arrays of hashes and represent a bot
+    # response (usually to some input eg from an irc server).
     #
     # The hash is generally expected to have the following keys:
+    # 
     #   :msg
     #   :to
+    #   
     # but may carry additional ones like
+    # 
     #   :action (will be used instead of :msg)
     #
     # The array-form of the botmsg might look like this:
+    # 
     #   [msg:'ho!',to:'#chan1']
+    #   
     # and it is easy to add extra messages this way:
+    # 
     #   [msg:'ho!',to:'#chan1'] + [msg:'ho again!',to:'#chan1']
+    #   
     # etc
 
     module BotMsg
@@ -48,8 +56,8 @@ module BeerBot
 
       # Convert botmsg to an array of one or more botmsg hashes.
       #
-      # Returns array of botmsg's or empty array if not given
-      # something that is a botmsg.
+      # Returns array of botmsg hashes or empty array if not given
+      # something that is valid.
       #
       # Proc's are executed to retrieve an array or hash.
       #
