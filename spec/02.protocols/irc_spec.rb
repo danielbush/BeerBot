@@ -85,19 +85,15 @@ describe "IRC parsing" do
   describe "parse",:parse => true do
 
     it "should handle privmsg's" do
-      result = []
-      IRC.parse(samples[:privmsg][0]) {|event,*args|
-          result.push(args) if event == :msg
-      }
-      result[0].should == ['adamr','#sydney','because we have?']
+      event,*args = IRC.parse(samples[:privmsg][0])
+      event.should == :msg
+      args.should == ['adamr','#sydney','because we have?']
     end
 
     it "should handle 353's" do
-      result = []
-      IRC.parse(samples[:irc353][0]) {|event,*args|
-        result.push(args) if event == :chanlist
-      }
-      result[0].should == ['#chan1',['foo','bar','baz','danb']]
+      event,*args = IRC.parse(samples[:irc353][0])
+      event.should == :chanlist
+      args.should == ['#chan1',['foo','bar','baz','danb']]
     end
   
   end

@@ -113,25 +113,24 @@ module BeerBot
 
       end
 
-      # Parse raw irc string and then yield or return for various events.
+      # Parse raw irc string and then yield or return a generic
+      # representation of the event.
+      #
+      # Returns [event,*args]
       #
       # Parse's job is to take the constituents parts of an irc
       # message, identify the type of event and return a generic
       # representation of it.
       #
-      # So for instance, a message is represented as
+      # So for instance, an irc privmsg (message) is represented as
       #   [:msg,from,to,msg]
       # 
-      # The lambda receives an incoming irc string, tries to parse
-      # it and act on it.
-      # The lambda should return nil or a botmsg hash.
       # Note that connection readiness and PONG protocol are handled by
       # the irc connection, not here.
 
-      def self.parse str,&block
+      def self.parse str
 
         m = IRCMessage.new(str)
-        #puts "[parse] #{m}"
         result = []
 
         case m[:command]
@@ -196,11 +195,7 @@ module BeerBot
           result = [:default,m]
         end
 
-        if block_given? then
-          yield result
-        else
-          result
-        end
+        result
       end
 
       # Return irc-conformat string from a botmsg hash.
