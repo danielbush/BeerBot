@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'beerbot'
-  s.version     = '0.1.2'
+  s.version     = '0.1.3'
   s.date        = '2014-04-21'
   s.summary     = "An ruby 2.0 bot"
   s.description = "Out of the box you get an irc bot, but beerbot could be so much more...",
