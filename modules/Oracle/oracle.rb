@@ -18,6 +18,7 @@ module BeerBot::Modules::Oracle
 
   Config = ::BeerBot::Config
   BotMsg = ::BeerBot::BotMsg
+  ParamExpand = ::BeerBot::Utils::ParamExpand
 
   filepath = File.join(Config.module_data('Oracle'),'data.json')
   begin
@@ -54,7 +55,7 @@ module BeerBot::Modules::Oracle
     else
       selected = binaries
     end
-    response,err = BeerBot::Utils::expand(selected.sample,from:from,to:to)
+    response,err = ParamExpand.expand(selected.sample,from:from,to:to)
     BotMsg.actionify([to:replyto,msg:response])
   end
 
