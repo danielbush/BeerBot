@@ -7,7 +7,6 @@
 
 require 'socket'
 require 'set'
-require_relative 'Connection'
 
 module BeerBot
 
