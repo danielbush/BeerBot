@@ -17,7 +17,7 @@ module BeerBot
   # We also do some low-level bookkeeping, like returning pong and
   # looking for welcome message.
 
-  class IRCConnection < Connection
+  class IRCConnection
 
     # Queue containing received messages from the server.
     attr_accessor :queue,:writeq,:readyq
