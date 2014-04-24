@@ -49,8 +49,13 @@ Hopefully that is mostly self-explanatory.
 Outside of the code somewhere...
 
 1. create a configuration file (like example conf in ```conf/```)
-2. specify and make a directory to contain bot modules (like ```modules/```
-3. specify and make a data directory (like ```datadir/```)
+2. specify ```moduledir``` in the conf: make a directory to contain bot modules (like ```modules/```
+   * you can use the example ```modules/``` directory in this project
+   * but if you are going to use this bot in anger, I'd recommend
+     creating a separate directory outside of the bot code;
+   * if you want to use the ```Facts``` or ```Oracle``` modules, you
+     can copy or symlink them to your actual ```moduledir```
+3. specify ```datadir``` in the conf; make a data directory (like ```datadir/```)
 
 ## Running
 
@@ -85,7 +90,7 @@ modify the ```load path``` to include the core bot code.
 
 You should see some irc lines whizz by on your terminal.
 
-Amongst these you should see some some scary numbers like ```020```
+Amongst these you should see some some scary numbers like ```001```
 (that means the irc server likes the cut of our gib), and ```353``` /
 ```366```... you'll get those if you specified any channels in your
 ```conf``` that beerbot will have joined.
@@ -233,7 +238,7 @@ What constitutes "the next bot module" you ask?
 
 Well, in the pry repl, look at ```@bot```.  It's an array (take a look at the source code for bot.rb in ```lib/*/```).  BeerBot will start with the first bot module in the array, and look for a response, and continue working through the array till it hits the first module to respond.
 
-At the moment, the first module to response with non-nil terminates
+At the moment, the first module to respond with non-nil terminates
 any further look ups.
 
 ### Scheduling
@@ -255,6 +260,8 @@ You can grab the ```CronR``` scheduler like this in your module:
     }
   }
 ```
+
+Note, ```@scheduler``` should be available to you in the pry repl.
 
 ### Events
 
