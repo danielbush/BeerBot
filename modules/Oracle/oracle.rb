@@ -31,7 +31,6 @@ module BeerBot::Modules::Oracle
 
   def self.hear msg,to:nil,from:nil,me:false,world:nil
     replyto = me ? from : to
-    p ['oracle/hear',from,to,me,replyto]
     unless /\?{2,}\s*$/i === msg
       return nil
     end
