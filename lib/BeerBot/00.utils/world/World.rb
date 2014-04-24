@@ -25,26 +25,11 @@ module BeerBot
 
       end
 
-      # Fetch a user.
-      def user user
-        if self[:users].has_key?(user) then
-          self[:users][user]
-        else
-        end
-      end
-
-      # Fetch a channel.
-      def channel channel
-        if self[:channels].has_key?(channel) then
-          self[:channels][channel]
-        else
-        end
-      end
-
       # Someone joins channel.
       def join nick,channel
         self[:channels][channel][:users].add(nick)
         self[:users][nick][:channels].add(channel)
+        self[:users][nick][:quit] = false
         self
       end
 
@@ -58,9 +43,9 @@ module BeerBot
       # Someone changes nick.
       def nick oldnick,nick
         self[:channels].each_pair{|name,chan|
-          if chan.member?(oldnick) then
-            chan.delete(oldnick)
-            chan.add(nick)
+          if chan[:users].member?(oldnick) then
+            chan[:users].delete(oldnick)
+            chan[:users].add(nick)
           end
         }
         self[:users][nick] = self[:users][oldnick]
@@ -72,8 +57,13 @@ module BeerBot
         self
       end
 
-      # TODO: User quits altogether.
-      def quit user
+      def quit nick
+        self[:channels].each_pair{|name,chan|
+          chan[:users].delete(nick)
+        }
+        self[:users][nick][:channels] = Set.new
+        self[:users][nick][:quit] = true
+        self
       end
 
     end

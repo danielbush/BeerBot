@@ -21,11 +21,6 @@ module BeerBot
         nick.sub(/^@/,'')
       end
 
-      def user nick
-        nick = self.remove_op(nick)
-        super
-      end
-
       def nick oldnick,nick
         oldnick = self.remove_op(oldnick)
         nick = self.remove_op(nick)
@@ -38,6 +33,11 @@ module BeerBot
       end
       
       def join nick,channel
+        nick = self.remove_op(nick)
+        super
+      end
+
+      def quit nick
         nick = self.remove_op(nick)
         super
       end
