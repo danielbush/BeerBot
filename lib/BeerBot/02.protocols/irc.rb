@@ -9,7 +9,98 @@ module BeerBot
 
   module Protocol
 
+    # IRC Protcol module.
+    #
+    # Main method is parse, whose job is to receive incoming irc
+    # strings and convert to a generalised format that higher layers
+    # like the dispatcher can use.
+
     module IRC
+
+      # Parse raw irc string and then yield or return a generic
+      # representation of the event.
+      #
+      # Returns [event,*args]
+      #
+      # Parse's job is to take the constituents parts of an irc
+      # message, identify the type of event and return a generic
+      # representation of it.
+      #
+      # So for instance, an irc privmsg (message) is represented as
+      #   [:msg,from,to,msg]
+      # 
+      # Note that connection readiness and PONG protocol are handled by
+      # the irc connection, not here.
+
+      def self.parse str
+
+        m = IRCMessage.new(str)
+        result = []
+
+        case m[:command]
+
+        when 'NICK'  # change of nick
+          case s=m.check(:prefix,:nick,:trailing)
+          when Symbol
+            puts "* NICK expected #{s}"
+            return nil
+          end
+          old = m[:prefix][:nick]
+          nick = m[:trailing]
+          result = [:nick,old,nick]
+
+        when 'PART' # someone leaves channel
+          case s=m.check(:prefix,:nick,:params)
+          when Symbol
+            puts "* PART expected #{s}"
+            return nil
+          end
+          channel = m[:params][0]
+          nick = m[:prefix][:nick]
+          result = [:part,nick,channel]
+
+        when 'JOIN' # someone joins channel
+          case s=m.check(:prefix,:nick,:trailing)
+          when Symbol
+            puts "* JOIN expected #{s}"
+            return nil
+          end
+          channel = m[:trailing]
+          nick = m[:prefix][:nick]
+          result = [:join,nick,channel]
+
+        when '353'  # channel user list when we join the channel
+          case s=m.check(:params,:trailing)
+          when Symbol
+            puts "* 353 expected #{s}"
+            return nil
+          end
+          channel = m[:params][2]
+          users = m[:trailing].split(/\s+/)
+          result = [:chanlist,channel,users]
+          #puts "[parse/353] #{result}"
+
+        when '366'  # end of 353
+          result = [:chanlistend]
+
+        when 'PRIVMSG'
+          case s=m.check(:prefix,:nick,:params,:trailing)
+          when Symbol
+            #puts "* PRIVMSG expected #{s}"
+            return nil
+          end
+
+          msg  = m[:trailing].strip
+          from = m[:prefix][:nick].strip
+          to   = m[:params][0].strip unless m[:params].empty?
+          result = [:msg,from,to,msg]
+
+        else # command we don't handle
+          result = [:default,m]
+        end
+
+        result
+      end
 
       # This class represents an irc message broken down into its
       # major constituent parts.
@@ -113,90 +204,6 @@ module BeerBot
 
       end
 
-      # Parse raw irc string and then yield or return a generic
-      # representation of the event.
-      #
-      # Returns [event,*args]
-      #
-      # Parse's job is to take the constituents parts of an irc
-      # message, identify the type of event and return a generic
-      # representation of it.
-      #
-      # So for instance, an irc privmsg (message) is represented as
-      #   [:msg,from,to,msg]
-      # 
-      # Note that connection readiness and PONG protocol are handled by
-      # the irc connection, not here.
-
-      def self.parse str
-
-        m = IRCMessage.new(str)
-        result = []
-
-        case m[:command]
-
-        when 'NICK'  # change of nick
-          case s=m.check(:prefix,:nick,:trailing)
-          when Symbol
-            puts "* NICK expected #{s}"
-            return nil
-          end
-          old = m[:prefix][:nick]
-          nick = m[:trailing]
-          result = [:nick,old,nick]
-
-        when 'PART' # someone leaves channel
-          case s=m.check(:prefix,:nick,:params)
-          when Symbol
-            puts "* PART expected #{s}"
-            return nil
-          end
-          channel = m[:params][0]
-          nick = m[:prefix][:nick]
-          result = [:part,nick,channel]
-
-        when 'JOIN' # someone joins channel
-          case s=m.check(:prefix,:nick,:trailing)
-          when Symbol
-            puts "* JOIN expected #{s}"
-            return nil
-          end
-          channel = m[:trailing]
-          nick = m[:prefix][:nick]
-          result = [:join,nick,channel]
-
-        when '353'  # channel user list when we join the channel
-          case s=m.check(:params,:trailing)
-          when Symbol
-            puts "* 353 expected #{s}"
-            return nil
-          end
-          channel = m[:params][2]
-          users = m[:trailing].split(/\s+/)
-          result = [:chanlist,channel,users]
-          #puts "[parse/353] #{result}"
-
-        when '366'  # end of 353
-          result = [:chanlistend]
-
-        when 'PRIVMSG'
-          case s=m.check(:prefix,:nick,:params,:trailing)
-          when Symbol
-            #puts "* PRIVMSG expected #{s}"
-            return nil
-          end
-
-          msg  = m[:trailing].strip
-          from = m[:prefix][:nick].strip
-          to   = m[:params][0].strip unless m[:params].empty?
-          result = [:msg,from,to,msg]
-
-        else # command we don't handle
-          result = [:default,m]
-        end
-
-        result
-      end
 
       # Return irc-conformat string from a botmsg hash.
       #
