@@ -81,10 +81,15 @@ module BeerBot
           replies = @bot.event(event,args:args)
         when :default
           replies = @bot.event(event,args:args)
+
         when :nick
           old,nick = args
           @world.nick(old,nick) if @world
           replies = @bot.event(event,old:old,nick:nick)
+
+        when :quit
+          nick,msg = args
+          @world.quit(nick) if @world
         when :part
           nick,channel = args
           @world.part(nick,channel) if @world
@@ -102,6 +107,8 @@ module BeerBot
             }
           end
           replies = @bot.event(event,channel:channel,users:users)
+        when :chanlistend
+          # ignore
 
         when :msg
 

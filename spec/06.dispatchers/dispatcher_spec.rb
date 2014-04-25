@@ -29,7 +29,7 @@ describe "dispatchers",:dispatchers => true do
     end
   end
 
-  describe "irc dispatcher" do
+  describe "irc dispatcher",:dispatcher => true do
 
     before(:each) {
       @bot = MockBot.new
