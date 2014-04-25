@@ -49,15 +49,37 @@ module BeerBot
           nick = m[:trailing]
           result = [:nick,old,nick]
 
+
+        when 'QUIT' # someone leaves irc
+          case s=m.check(:prefix,:nick,:trailing)
+          when Symbol
+            puts "* QUIT expected #{s}"
+            return nil
+          end
+          nick = m[:prefix][:nick]
+          msg = m[:trailing]
+          result = [:quit,nick,msg]
+
         when 'PART' # someone leaves channel
           case s=m.check(:prefix,:nick,:params)
           when Symbol
             puts "* PART expected #{s}"
             return nil
           end
-          channel = m[:params][0]
+          if channel=m[:params][0] then
+          elsif channel=m[:trailing].strip.split(/\s+/).first then
+          else
+            channel=nil
+            puts "* PART can't determine what is being parted from: '#{str}'"
+            return nil
+          end
           nick = m[:prefix][:nick]
           result = [:part,nick,channel]
+
+        when 'INVITE' # someone invites us, oo
+          ournick = m[:params][0]
+          chan = m[:trailing].strip.split(/\s+/).first
+          result = [:invite,chan]
 
         when 'JOIN' # someone joins channel
           case s=m.check(:prefix,:nick,:trailing)
@@ -254,6 +276,12 @@ module BeerBot
 
       def self.join chan
         "JOIN #{chan}"
+      end
+
+      # Leave channel. 
+
+      def self.leave chan
+        "PART #{chan}"
       end
 
     end

@@ -3,16 +3,29 @@ require 'pp'
 
 # http://www.mirc.org/mishbox/reference/rawhelp3.htm#raw353
 
-describe "IRC parsing" do
+describe "IRC parsing",:irc => true do
 
   IRC = BeerBot::Protocol::IRC
   Message = BeerBot::Protocol::IRC::IRCMessage
 
   samples = {
     :quit => [
+      # QUIT always seems to use trailing, unlike PART which seems to
+      # vary.
       ":thursday!~bevan@172.17.217.13 QUIT :Quit: Leaving.\r\n",
+      # But throw some params in anyway...
       ":thursday!~bevan@172.17.217.13 QUIT foo bar :Quit: Leaving.\r\n",
     ],
+    :part => [
+      # I get param-based PART on debian irc server...
+      ":timprice!~tprice@172.17.217.13 PART #sydney :\r\n",
+      # I get trailing on cat server...
+      ":timprice!~tprice@172.17.217.13 PART :#sydney\r\n",
+    ],
+    :invite => [
+      ":danb!~danb@127.0.0.1 INVITE beerbot :#chan3\r\n",
+    ],
+
     :nick => [
       # ip6
       ":tom!~tom@2404:130::1000:222:4dff:fe56:f81d NICK :tom_is_away\r\n",
@@ -22,9 +35,6 @@ describe "IRC parsing" do
       ":adamr!~adam@172.17.217.13 PRIVMSG #sydney :because we have?\r\n",
       # Colons in this example:
       ":danb!~danb@localhost.iiNet PRIVMSG #chan1 :,test1 is also:* hugs ::1\r\n",
-    ],
-    :part => [
-      ":timprice!~tprice@172.17.217.13 PART :#sydney\r\n",
     ],
     :misc => [
       ":irc.localhost 020 * :Please wait while we process your connection.\r\n",
@@ -84,18 +94,46 @@ describe "IRC parsing" do
 
   describe "parse",:parse => true do
 
-    it "should handle privmsg's" do
+    it "should handle PRIVMSG's" do
       event,*args = IRC.parse(samples[:privmsg][0])
       event.should == :msg
       args.should == ['adamr','#sydney','because we have?']
     end
 
-    it "should handle 353's" do
+    it "should handle 353's (chanlists)" do
       event,*args = IRC.parse(samples[:irc353][0])
       event.should == :chanlist
       args.should == ['#chan1',['foo','bar','baz','danb']]
     end
+
+    it "should handle QUIT's" do
+      event,*args = IRC.parse(samples[:quit][0])
+      event.should == :quit
+      args.should == ['thursday','Quit: Leaving.']
+
+      # Variation 1:
+      event,*args = IRC.parse(samples[:quit][1])
+      event.should == :quit
+      args.should == ['thursday','Quit: Leaving.']
+    end
+
+    it "should handle PART's" do
+      event,*args = IRC.parse(samples[:part][0])
+      event.should == :part
+      args.should == ['timprice','#sydney']
+
+      # Variation 1:
+      event,*args = IRC.parse(samples[:part][1])
+      event.should == :part
+      args.should == ['timprice','#sydney']
+    end
   
+    it "should handle INVITE's" do
+      event,*args = IRC.parse(samples[:invite][0])
+      event.should == :invite
+      args.should == ['#chan3']
+    end
+
   end
 
 end
