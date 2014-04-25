@@ -18,15 +18,48 @@ module BeerBot::Modules::Oracle
 
   Config = ::BeerBot::Config
   BotMsg = ::BeerBot::BotMsg
-  ParamExpand = ::BeerBot::Utils::ParamExpand
+  Utils  = ::BeerBot::Utils
+  ParamExpand  = Utils::ParamExpand
+  JsonDataFile = Utils::JsonDataFile
 
-  filepath = File.join(Config.module_data('Oracle'),'data.json')
-  begin
-    @@data = BeerBot::Utils::JsonDataFile.new(filepath)
-  rescue => e
-    puts "Can't find or parse data file: #{filepath}"
-    puts "Error: #{e}"
-    exit 1
+  # Get or set the datafile.
+  #
+  # If you don't specify filepath, BeerBot::Config's module_data will
+  # be used, which is what should be used when running normally.
+
+  def self.datafile filepath=nil
+    if filepath then
+      @filepath = filepath
+      @data = nil
+    else
+      @filepath ||= File.join(Config.module_data('Oracle'),'data.json')
+    end
+  end
+
+  # Create skeleton oracle conf file, enough for us to function.
+  #
+  # Returns instance of JsonDataFile with 'data' loaded into it.
+  # 
+  # Relies on self.datafile.
+
+  def self.create_datafile! filepath,data=nil
+    unless data then
+      data = {
+        yesnomaybe:["No","Yes","Maybe"],
+        playfortime:[
+          "Are you sure you should be asking that question ::from?",
+          "* remains silent"
+        ]
+      }
+    end
+    JsonDataFile.create!(filepath,data)
+  end
+
+  # Relies on self.datafile.
+
+  def self.data
+    @data ||= JsonDataFile.new(self.datafile)
+    @data.data
   end
 
   def self.hear msg,to:nil,from:nil,me:false,world:nil
@@ -35,9 +68,9 @@ module BeerBot::Modules::Oracle
       return nil
     end
     # Answers that tend towards yes/no/in-between type answers.
-    binaries = @@data.data['yesnomaybe']
+    binaries = self.data['yesnomaybe']
     # Answers that try to deal with non-binary type questions.
-    playfortime = @@data.data['playfortime']
+    playfortime = self.data['playfortime']
     selected = nil
     case msg
     when /what\s+about\s+/i
