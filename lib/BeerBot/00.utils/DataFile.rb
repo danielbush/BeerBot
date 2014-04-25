@@ -6,20 +6,34 @@
 # see <http://www.gnu.org/licenses/>.
 
 require 'json'
+
 module BeerBot
+
   module Utils
+
     # A class that loads data from a file and allows you to access it
     # using the #data method.
     #
     # If the file is updated (after >=1 sec), #data will reload.
+
     class DataFile
+
       attr_reader :reloaded  # true if last call to #data reloaded file
+
+      def self.create! filepath
+        File.open(filepath,'w'){}
+        self.new(filepath)
+      end
+
       def initialize filepath
         @filepath = filepath
         @data = File.read(filepath)
         @mtime = File.stat(filepath).mtime
         @reloaded = false
       end
+
+      # Load data from file.
+
       def data
         @reloaded = false
         return @data unless File.exists?(@filepath)
@@ -31,14 +45,33 @@ module BeerBot
         @reloaded = true
         @data
       end
+
+      def save thing
+        File.open(@filepath,'w') {|f|
+          f.write(thing)
+        }
+      end
+
     end
+
     # Specialised DataFile that parses json.
+
     class JsonDataFile < DataFile
+
       attr_reader :json
+
+      def self.create! filepath,data={}
+        File.open(filepath,'w') {|f| f.puts(data.to_json)}
+        self.new(filepath)
+      end
+
       def initialize filepath
         super
         @json = JSON.parse(@data)
       end
+
+      # Load data from file and parse as json data.
+
       def data
         super
         begin
@@ -51,6 +84,17 @@ module BeerBot
         end
         @json
       end
+
+      # Save thing back to file.
+      #
+      # Thing is assumed to be a hash or array that we call to_json on.
+
+      def save thing
+        super(thing.to_json)
+      end
+
     end
+
   end
+
 end
