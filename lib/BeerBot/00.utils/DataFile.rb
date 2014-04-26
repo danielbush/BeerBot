@@ -89,7 +89,10 @@ module BeerBot
       #
       # Thing is assumed to be a hash or array that we call to_json on.
 
-      def save thing
+      def save thing=nil
+        if thing.nil? then
+          thing = @json  # the thing self.data returns
+        end
         super(thing.to_json)
       end
 
