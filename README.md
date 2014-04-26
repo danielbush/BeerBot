@@ -46,16 +46,23 @@ Then do ```bundle install```.
 First, take a look at the example configuration file in ```conf/```.
 Hopefully that is mostly self-explanatory.
 
-Outside of the code somewhere...
-
-1. create a configuration file (like example conf in ```conf/```)
-2. specify ```moduledir``` in the conf: make a directory to contain bot modules (like ```modules/```
-   * you can use the example ```modules/``` directory in this project
-   * but if you are going to use this bot in anger, I'd recommend
-     creating a separate directory outside of the bot code;
-   * if you want to use the ```Facts``` or ```Oracle``` modules, you
-     can copy or symlink them to your actual ```moduledir```
-3. specify ```datadir``` in the conf; make a data directory (like ```datadir/```)
+You want something like this:
+```
+  cd somewhere
+  mdir beerbot
+```
+then...
+- **beerbot/conf**
+  - Put your conf file(s) in here
+- **beerbot/code**
+  - Bot code can go here (if you're not using the gem.
+- **beerbot/modules**
+  - This is the moduledir in conf.
+  - Your 'modules' config should point to zero or more modules in this dir.
+    Get your own set of bot modules:
+      git clone https://github.com/danielbush/beerbot-modules.git modules
+- **beerbot/data**
+  - This is the datadir in conf.
 
 ## Running
 
@@ -130,18 +137,29 @@ Note, that ```@bot``` is just an array of bot modules.  Neat.
 
 ```@scheduler``` is an instance of ```CronR::Cron``` which is also an array.  You can add jobs to it from this repl if you feel so inclined.  See the ```CronR``` gem.
 
-## Goodies
+## Bot modules
 
-So there are 2 modules in ```modules/``` included. One is the
+BeerBot won't do anything out of the box.
+
+Go here: https://github.com/danielbush/beerbot-modules and clone that into **beerbot/modules** .
+
+So there will be at leat 2 modules in there.
 ```Facts``` module and the other is the ```Oracle``` module.
 
-If you want to use them, you should probably copy them over to your
-```moduledir``` that you specified in your conf.
+In your conf, you're gonna want something like this:
+- moduledir = 'path/to/beerbot/modules'
+- modules = ['Oracle','Facts']
+
 
 The ```Facts``` module is by far the more complicated of the two and
 provides a way for people to add one or more facts for a given term or
 keyword. At this point, maybe just look at the specs or use beerbot's
 ```,help``` command to check this out.
+
+The ```Oracle``` module shows you how to use the ```JsonDataFile```.
+This nifty piece of kit should automatically reload itself everytime
+you update the json file, allowing you to keep beerbot hip and current
+without even missing a beat.
 
 There's also a ```Beer``` module that I haven't included here. In fact
 both the ```Facts``` module and the ```Beer``` module were somewhat
