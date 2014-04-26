@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'beerbot'
-  s.version     = '0.1.3'
-  s.date        = '2014-04-21'
+  s.version     = '0.1.4'
+  s.date        = '2014-04-26'
   s.summary     = "An ruby 2.0 bot"
   s.description = "Out of the box you get an irc bot, but beerbot could be so much more...",
   s.authors     = ["Daniel Bush"]
@@ -16,7 +16,6 @@ Gem::Specification.new do |s|
     "lib/BeerBot/00.utils/More.rb",
     "lib/BeerBot/00.utils/world/World.rb",
     "lib/BeerBot/00.utils/world/IRCWorld.rb",
-    "lib/BeerBot/01.connect/Connection.rb",
     "lib/BeerBot/01.connect/IRCConnection.rb",
     "lib/BeerBot/01.bot/botmsg.rb",
     "lib/BeerBot/01.bot/BotModule.rb",
