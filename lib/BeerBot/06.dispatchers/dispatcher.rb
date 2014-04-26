@@ -90,6 +90,7 @@ module BeerBot
         when :quit
           nick,msg = args
           @world.quit(nick) if @world
+          replies = @bot.event(event,nick:nick,msg:msg)
         when :part
           nick,channel = args
           @world.part(nick,channel) if @world
