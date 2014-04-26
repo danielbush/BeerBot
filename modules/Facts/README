@@ -1,6 +1,0 @@
-Testing
-
-If you're running the tests with beerbot code (not gem), do:
-
-  rspec -I../../lib spec
-

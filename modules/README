@@ -1,3 +1,7 @@
-This is an example module dir where bot modules are stored.
-Some examples are given here, note the format: use of init.rb etc.
-You should make your own and set it in config (moduledir).
+Modules are in the beerbot module repository.
+Clone it from here:
+  https://github.com/danielbush/beerbot-modules.git
+and get going, there's no time.
+
+Anyway... wherever you clone to, that will become your moduledir --
+see example conf/.
