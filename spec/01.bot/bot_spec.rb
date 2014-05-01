@@ -92,6 +92,15 @@ describe "the Bot class",:bot => true do
 
     end
 
+    describe "bot actions" do
+      it "should run the modules in order" do
+        bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+        replies = bot.action('test')
+        replies.size.should == 1
+        replies[0][:msg].should == 'action testmodule1'
+      end
+    end
+
     describe "event handling" do
       it "handle a join event" do
         bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])

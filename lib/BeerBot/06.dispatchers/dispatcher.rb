@@ -111,8 +111,12 @@ module BeerBot
         when :chanlistend
           # ignore
 
-        when :msg
+        when :action
+          from,to,action = args
+          me = (@nickrx === to)
+          replies = @bot.action(action,from:from,to:to,me:me,world:world)
 
+        when :msg
           from,to,msg = args
 
           # Somebody messaging us privately:

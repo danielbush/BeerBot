@@ -36,6 +36,9 @@ describe "IRC parsing",:irc => true do
       # Colons in this example:
       ":danb!~danb@localhost.iiNet PRIVMSG #chan1 :,test1 is also:* hugs ::1\r\n",
     ],
+    :action => [
+      ":danb!~danb@localhost.iiNet PRIVMSG #foo :\u0001ACTION does something\u0001"
+    ],
     :misc => [
       ":irc.localhost 020 * :Please wait while we process your connection.\r\n",
     ],
@@ -99,6 +102,11 @@ describe "IRC parsing",:irc => true do
       event.should == :msg
       args.should == ['adamr','#sydney','because we have?']
     end
+    it "should handle actions" do
+      event,*args = IRC.parse(samples[:action][0])
+      event.should == :action
+      args.should == ['danb','#foo','does something']
+    end
 
     it "should handle 353's (chanlists)" do
       event,*args = IRC.parse(samples[:irc353][0])
@@ -134,6 +142,14 @@ describe "IRC parsing",:irc => true do
       args.should == ['#chan3']
     end
 
+
+  end
+
+  describe "irc utils",:irc => true do
+    it "can detect action-based privmsg's" do
+      m = IRC.match_action("PRIVMSG foo :\u0001ACTION does something\u0001")
+      m.should == "does something"
+    end
   end
 
 end

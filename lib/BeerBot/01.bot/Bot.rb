@@ -120,6 +120,10 @@ module BeerBot
       end
     end
 
+    def action action,from:nil,to:nil,me:false,world:nil
+      self.run(:action,action,from:from,to:to,me:me,world:world)
+    end
+
     # Handle events other than being messaged.
     #
     # IRC events like joining channels, changing nicks etc.

@@ -115,7 +115,11 @@ module BeerBot
           msg  = m[:trailing].strip
           from = m[:prefix][:nick].strip
           to   = m[:params][0].strip unless m[:params].empty?
-          result = [:msg,from,to,msg]
+          if action = self.match_action(msg) then
+            result = [:action,from,to,action]
+          else
+            result = [:msg,from,to,msg]
+          end
 
         else # command we don't handle
           result = [:default,m]
@@ -270,6 +274,22 @@ module BeerBot
 
       def self.action to,str
         "PRIVMSG #{to} :\u0001#{'ACTION'} #{str}\u0001"
+      end
+
+      ACTION_REGEX = /\u0001ACTION\s+(.+)\u0001/
+
+      # Returns string matching the action (the bit after ACTION) or nil.
+      #
+      # eg
+      #   danb does something => "does something"
+
+      def self.match_action str
+        m = ACTION_REGEX.match(str)
+        if m then
+          m[1].strip
+        else
+          nil
+        end
       end
 
       # Join a channel

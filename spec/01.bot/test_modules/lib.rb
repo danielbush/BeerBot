@@ -33,6 +33,15 @@ class TestClass
     end
   end
 
+  def action action,from:nil,to:nil,me:false,world:nil
+    case action
+    when String
+      [to:from,msg:"action #{@name}"]
+    else
+      action
+    end
+  end
+
   def event event,**kargs
     case event
     when :join

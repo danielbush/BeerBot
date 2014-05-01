@@ -36,7 +36,7 @@ describe "dispatchers",:dispatchers => true do
       @dispatcher = Dispatcher.new(@bot,'beerbot')
     }
 
-    it "should dispatch valid IRCMessage instances" do
+    it "should dispatch valid various generic events with parameters" do
       @dispatcher = Dispatcher.new(@bot,'beerbot') {|event,*args|
         case event
         when :nick
@@ -51,6 +51,17 @@ describe "dispatchers",:dispatchers => true do
       response = @dispatcher.receive(:msg,["adamr", "#sydney", "because we have?"])
       response.should == [:msg,'adamr','#sydney','because we have?']
       
+    end
+
+    it "should handle action events" do
+      @dispatcher = Dispatcher.new(@bot,'beerbot') {|event,*args|
+        case event
+        when :action
+          [event,*args]
+        end
+      }
+      response = @dispatcher.receive(:action,["danb", "#sydney", "does something"])
+      response.should == [:action,"danb", "#sydney", "does something"]
     end
 
     it "should handle join events" do
