@@ -19,6 +19,7 @@
   // be checked for a response.
   // These will be located in moduledir/ModName and ModName should
   // exist as a ruby constant.
+  // See https://github.com/danielbush/beerbot-modules. 
 
   "modules":["Facts","Oracle"],
 
