@@ -33,9 +33,9 @@
   // ------------------------------------------------------------
 
   // Channels you want to join when you start up.
-  "channels":["#chan1","#chan2"]
+  "channels":["#chan1","#chan2"],
 
   // The scheduler (cron-like library) will use this timezone when
   // calling Time.
-  "timezone":"Australia/Sydney",
+  "timezone":"Australia/Sydney"
 }
