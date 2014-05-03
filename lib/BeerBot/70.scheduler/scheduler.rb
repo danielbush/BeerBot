@@ -8,15 +8,11 @@
 module BeerBot
   module Scheduler
     def self.instance timezone=nil
-      @@instance ||= CronR::Cron.new
+      @instance ||= CronR::Cron.new
       if timezone then
-        @@instance.time {
-          Time.use_zone(timezone) {
-            Time.zone.now
-          }
-        }
+        @instance.timezone = timezone
       end
-      @@instance
+      @instance
     end
   end
 end
