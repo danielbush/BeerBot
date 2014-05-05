@@ -33,6 +33,7 @@ module BeerBot
       # to the irc server isn't ready yet:
       @readyq = Queue.new
       @ready = false
+      @ready_blocks = []
       @ready_mutex = Mutex.new
       @write_mutex = Mutex.new
 
@@ -44,6 +45,9 @@ module BeerBot
 
     def ready!
       @ready_mutex.synchronize {
+        unless @ready_blocks.empty? then
+          @ready_blocks.each{|b| @readyq.enq(b)}
+        end
         @ready = true
         while @readyq.size > 0
           block = @readyq.deq
@@ -55,6 +59,7 @@ module BeerBot
     def ready? &block
       return @ready unless block_given?
       @ready_mutex.synchronize {
+        @ready_blocks.push block
         if @ready then
           block.call
         else
@@ -75,28 +80,37 @@ module BeerBot
     # - @connection.eof? can throw things like ECONNRESET etc
 
     def open connection=nil
-      if connection then
-        @connection = connection
-        @connection.open(self.server, self.port)
-      else
-        @connection = TCPSocket.open(self.server, self.port)
-      end
-      self.write("USER #{@nick} #{@nick} #{@nick} :#{@nick}")
-      self.write("NICK #{@nick}")
       @thread = Thread.new {
-        while not @connection.eof? do
-          str = @connection.gets()
-          puts "<< #{str}"
-          case str
-          when /^PING (.*)$/
-            self.write "PONG #{$1}"
-          when / 001 / # ready
-            self.ready!
-          else
-            self.queue.enq(str)
+        loop do
+          begin
+            if connection then
+              @connection = connection
+              @connection.open(self.server, self.port)
+            else
+              @connection = TCPSocket.open(self.server, self.port)
+            end
+            self.write("USER #{@nick} #{@nick} #{@nick} :#{@nick}")
+            self.write("NICK #{@nick}")
+            while not @connection.eof? do
+              str = @connection.gets()
+              puts "<< #{str}"
+              case str
+              when /^PING (.*)$/
+                self.write "PONG #{$1}"
+              when / 001 / # ready
+                self.ready!
+              else
+                self.queue.enq(str)
+              end
+            end
+          rescue => e
+            puts "Connection whoops: #{e}"
           end
+          puts "Sleeping #{10} then try again..."
+          sleep 10
         end
       }
+        
       @write_thread = Thread.new {
         loop do
           thing = @writeq.deq
