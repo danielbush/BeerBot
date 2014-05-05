@@ -70,6 +70,9 @@ module BeerBot
     # It should respond to whatever is called on @connection
     # eg open,gets,write.
     # Use for testing this class.
+    #
+    # May throw errors.
+    # - @connection.eof? can throw things like ECONNRESET etc
 
     def open connection=nil
       if connection then
