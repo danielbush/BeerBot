@@ -142,6 +142,12 @@ class BeerBot::RunIRC
     @conn.writeq.enq(IRC.join(chan))
   end
 
+  # Convenience method to leave a channel.
+
+  def leave chan
+    @conn.writeq.enq(IRC.leave(chan))
+  end
+
   # Reload @bot using module list 'modules'.
   #
   # You could use
