@@ -102,7 +102,43 @@ Amongst these you should see some some scary numbers like ```001```
 ```366```... you'll get those if you specified any channels in your
 ```conf``` that beerbot will have joined.
 
-## Talking to the bot
+## Repl
+
+Yeh, repl is cool.  Way cool.  If you got beerbot running, you already have one once those lines go whizzing by.  Hit enter a couple of times and
+you should see the pry repl prompt
+```
+  pry>
+```
+
+
+Pry is running inside the **RunIRC** class in lib/RunIRC.rb .
+There are some convenience methods in this class for making the
+bot do things.
+
+```ruby
+  pry> self.join '#chan1'
+  pry> self.say '#chan1','howdy!'
+  pry> self.action '#chan1','departs the channel hastily'
+  pry> self.leave '#chan1'
+```
+You get the idea.
+
+Try typing:
+
+```ruby
+  pry> @scheduler
+  pry> @bot
+  pry> @config
+```
+
+Note, that ```@bot``` is just an array of bot modules.  Neat.
+Those are the bot modules that beerbot will run when responding
+to commands, overhearing messages / actions or receiving events.
+
+```@scheduler``` is an instance of ```CronR::Cron``` which is also an array.  You can add jobs to it from this repl if you feel so inclined.  See the ```CronR``` gem.
+
+
+## Talking to the bot (on irc)
 
 On irc, the ```cmd_prefix``` you specified in your ```conf``` can be used as a short to address the bot.
 
@@ -122,20 +158,6 @@ where ```,``` is the ```cmd_prefix```.
 
 If you do this on a channel, beerbot will tell you that it is
 messaging you directly with help.
-
-## Repl
-
-Yeh, repl is cool.  Way cool.  If you got beerbot running, you already have one.  Try typing:
-
-```ruby
-  @scheduler
-  @bot
-  @config
-```
-
-Note, that ```@bot``` is just an array of bot modules.  Neat.
-
-```@scheduler``` is an instance of ```CronR::Cron``` which is also an array.  You can add jobs to it from this repl if you feel so inclined.  See the ```CronR``` gem.
 
 ## Bot modules
 
