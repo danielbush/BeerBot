@@ -6,7 +6,6 @@
 # see <http://www.gnu.org/licenses/>.
 
 require_relative '../00.utils/utils'
-require_relative '../01.bot/BotMsgMore'
 
 module BeerBot
 
@@ -32,13 +31,11 @@ module BeerBot
 
       Utils      = BeerBot::Utils
       BotMsg     = BeerBot::BotMsg
-      BotMsgMore = BeerBot::BotMsgMore
       
-      attr_accessor :bot,:nick,:prefix,:world,:more
+      attr_accessor :bot,:nick,:prefix,:world
 
       def initialize bot,nick,prefix:',',world:nil,&block
         @bot = bot
-        @more = BotMsgMore.new
 
         @nick = nick
         @get_nick_cmd   = Utils.make_prefix_parser(nick)
@@ -131,9 +128,6 @@ module BeerBot
 
           if cmd then
             case cmd
-            # dispatch more-filtering...
-            when /^more!*|moar!*$/i
-              replies = @more.more(to)
             # dispatch help...
             when /^\s*help(?:\s+(.*))?$/
               if $1.nil? then
@@ -159,8 +153,7 @@ module BeerBot
         when String # assume protocol string eg irc
           replies
         when Hash,Array,Proc
-          # more-filter the reply...
-          replies = @more.filter(replies)
+          BotMsg.to_a(replies)
         else
           []
         end
