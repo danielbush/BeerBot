@@ -32,7 +32,7 @@ module BeerBot
       Utils      = BeerBot::Utils
       BotMsg     = BeerBot::BotMsg
       
-      attr_accessor :bot,:nick,:prefix,:world
+      attr_accessor :bot,:nick,:prefix
 
       def initialize bot,nick,prefix:',',world:nil,&block
         @bot = bot
@@ -43,8 +43,6 @@ module BeerBot
 
         @prefix = prefix
         @get_prefix_cmd = Utils.make_prefix_parser(prefix)
-
-        @world = world
 
         if block_given? then
           @block = block
@@ -81,29 +79,20 @@ module BeerBot
 
         when :nick
           old,nick = args
-          @world.nick(old,nick) if @world
           replies = @bot.event(event,old:old,nick:nick)
 
         when :quit
           nick,msg = args
-          @world.quit(nick) if @world
           replies = @bot.event(event,nick:nick,msg:msg)
         when :part
           nick,channel = args
-          @world.part(nick,channel) if @world
           replies = @bot.event(event,nick:nick,channel:channel)
         when :join
           nick,channel = args
           me = (@nickrx === nick)
-          @world.join(nick,channel) if @world
           replies = @bot.event(event,me:me,nick:nick,channel:channel)
         when :chanlist
           channel,users = args
-          if @world then
-            users.each {|user|
-              @world.join(user,channel)
-            }
-          end
           replies = @bot.event(event,channel:channel,users:users)
         when :chanlistend
           # ignore
@@ -111,7 +100,7 @@ module BeerBot
         when :action
           from,to,action = args
           me = (@nickrx === to)
-          replies = @bot.action(action,from:from,to:to,me:me,world:world)
+          replies = @bot.action(action,from:from,to:to,me:me)
 
         when :msg
           from,to,msg = args
@@ -135,14 +124,14 @@ module BeerBot
               else
                 args = $1.strip.split(/\s+/)
               end
-              replies = @bot.help(args,from:from,to:to,me:me,world:world)
+              replies = @bot.help(args,from:from,to:to,me:me)
             # dispatch cmd...
             else
-              replies = @bot.cmd(cmd,from:from,to:to,me:me,world:world)
+              replies = @bot.cmd(cmd,from:from,to:to,me:me)
             end
           else
             # We're just hearing something on a channel...
-            replies = @bot.hear(msg,from:from,to:to,me:me,world:world)
+            replies = @bot.hear(msg,from:from,to:to,me:me)
           end
 
         else
