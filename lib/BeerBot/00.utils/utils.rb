@@ -29,38 +29,6 @@ module BeerBot
       }
     end
 
-    # Regex that looks for a sed command eg
-    # "s/pattern/replacement/flags" in a string.
-    #
-    # This regex doesn't handle backslash escapes, so if pattern or
-    # replacement contain '/' use another delimiter eg s#...#...# etc.
-    # 
-    # Non alphanumeric delimiters are allowed.
-    #
-    # Returns: nil or a MatchData instance with symbol keys:
-    #  :sed (the whole sed command), :sep (the separator), :pattern,
-    #  :replacement, :flags
-    #
-    # If you want to combine this regex, call
-    #   sed_regex.source => <string>
-
-    def self.sed_regex
-      %r{
-        ^(?<before>.*)
-        \b
-        (?<sed>
-          s
-          (?<sep>[^A-z0-9\s])
-          (?<pattern>(?!\g<sep>)*.*)
-          \k<sep>
-          (?<replacement>(?!\g<sep>)*.*)
-          \k<sep>
-          (?<flags>[A-z]*)
-        )
-        (?<after>.*)$
-      }x
-    end
-
   end
 
 end
