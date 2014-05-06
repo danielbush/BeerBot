@@ -3,7 +3,6 @@ require 'CronR' # For scheduler
 require_relative 'BeerBot/00.utils/utils'
 require_relative 'BeerBot/00.utils/DataFile'
 require_relative 'BeerBot/00.utils/InOut'
-require_relative 'BeerBot/00.utils/world/IRCWorld'
 require_relative 'BeerBot/01.connect/IRCConnection'
 require_relative 'BeerBot/01.bot/botmsg'
 require_relative 'BeerBot/01.bot/BotModule'
