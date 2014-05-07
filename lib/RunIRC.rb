@@ -23,7 +23,6 @@ module BeerBot; end
 class BeerBot::RunIRC
 
   Utils         = BeerBot::Utils
-  IRCWorld      = BeerBot::Utils::IRCWorld
   InOut         = BeerBot::Utils::InOut
   IRCConnection = BeerBot::IRCConnection
   IRC           = BeerBot::Protocol::IRC
@@ -31,7 +30,7 @@ class BeerBot::RunIRC
   Dispatcher    = BeerBot::Dispatchers::Dispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatcher,:world,:conn,:postq,:parse,:more
+  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn,:postq,:parse,:more
 
   # Initialize all parts of the system here.
   #
@@ -48,16 +47,12 @@ class BeerBot::RunIRC
     # Create the bot.
     @bot = Bot.new(@module_path,config['modules'])
 
-    # Create a world associated with this irc connection.
-    # (lists channels and users we know about)
-    @world = IRCWorld.new(config['nick'])
-
     # Dispatcher which receives messages and interacts with the bot.
     @dispatcher = Dispatcher.new(
       @bot,
       config['nick'],
       prefix:config['cmd_prefix'],
-      world:@world
+      config:config
     )
 
     # Set up scheduler (this doesn't start it yet)...

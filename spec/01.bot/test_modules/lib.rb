@@ -12,7 +12,7 @@ class TestClass
     @name = name
   end
 
-  def cmd msg,from:nil,to:nil,world:nil,me:false
+  def cmd msg,from:nil,to:nil,config:nil,me:false
     case msg
     when String
       # This is what we'd expect a module to return:
@@ -24,7 +24,7 @@ class TestClass
     end
   end
 
-  def hear msg,from:nil,to:nil,me:false,world:nil
+  def hear msg,from:nil,to:nil,me:false,config:nil
     case msg
     when String
       [to:from,msg:"hear #{@name}"]
@@ -33,7 +33,7 @@ class TestClass
     end
   end
 
-  def action action,from:nil,to:nil,me:false,world:nil
+  def action action,from:nil,to:nil,me:false,config:nil
     case action
     when String
       [to:from,msg:"action #{@name}"]
@@ -56,7 +56,7 @@ class TestClass
   # Remember, help should return an array of lines ie strings
   # (not bot msgs).
 
-  def help topics,from:nil,to:nil,world:nil
+  def help topics,from:nil,to:nil,config:nil
     [topics.join('/')]
   end
 end

@@ -102,26 +102,26 @@ module BeerBot
 
     # Process messages addressed directly to the bot.
 
-    def cmd msg,from:nil,to:nil,me:false,world:nil
+    def cmd msg,from:nil,to:nil,me:false,config:nil
       if @cmd then
-        @cmd.call(msg,from:from,to:to,world:world,me:me)
+        @cmd.call(msg,from:from,to:to,config:config,me:me)
       else
-        self.run(:cmd,msg,from:from,to:to,world:world,me:me)
+        self.run(:cmd,msg,from:from,to:to,config:config,me:me)
       end
     end
 
     # Process messages the bot overhears.
 
-    def hear msg,from:nil,to:nil,me:false,world:nil
+    def hear msg,from:nil,to:nil,me:false,config:nil
       if @hear then
-        @hear.call(msg,from:from,to:to,me:me,world:world)
+        @hear.call(msg,from:from,to:to,me:me,config:config)
       else
-        self.run(:hear,msg,from:from,to:to,me:me,world:world)
+        self.run(:hear,msg,from:from,to:to,me:me,config:config)
       end
     end
 
-    def action action,from:nil,to:nil,me:false,world:nil
-      self.run(:action,action,from:from,to:to,me:me,world:world)
+    def action action,from:nil,to:nil,me:false,config:nil
+      self.run(:action,action,from:from,to:to,me:me,config:config)
     end
 
     # Handle events other than being messaged.
@@ -135,7 +135,7 @@ module BeerBot
       self.run(:event,event,**kargs)
     end
 
-    def help arr,from:nil,to:nil,world:nil,me:false
+    def help arr,from:nil,to:nil,config:nil,me:false
       m = []
       modname,*topics = arr
 

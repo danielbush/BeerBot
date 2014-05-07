@@ -34,7 +34,7 @@ module BeerBot
       
       attr_accessor :bot,:nick,:prefix
 
-      def initialize bot,nick,prefix:',',world:nil,&block
+      def initialize bot,nick,prefix:',',config:nil,&block
         @bot = bot
 
         @nick = nick
