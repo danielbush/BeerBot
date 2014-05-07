@@ -27,6 +27,7 @@ class BeerBot::RunIRC
   IRCConnection = BeerBot::IRCConnection
   IRC           = BeerBot::Protocol::IRC
   Bot           = BeerBot::Bot
+  BotMsg        = BeerBot::BotMsg
   Dispatcher    = BeerBot::Dispatchers::Dispatcher
   Scheduler     = BeerBot::Scheduler
 
@@ -46,6 +47,7 @@ class BeerBot::RunIRC
 
     # Create the bot.
     @bot = Bot.new(@module_path,config['modules'])
+    config.bot = @bot
 
     # Dispatcher which receives messages and interacts with the bot.
     @dispatcher = Dispatcher.new(
@@ -57,6 +59,7 @@ class BeerBot::RunIRC
 
     # Set up scheduler (this doesn't start it yet)...
     @scheduler = Scheduler.instance(config['timezone'])
+    config.scheduler = @scheduler
 
     # Create but don't open the irc connection.
     @conn = IRCConnection.new(
@@ -85,6 +88,25 @@ class BeerBot::RunIRC
       IRC.to_irc(cron_job.run)
     }
     @scheduler_thread.start!
+
+    # Active messaging queue.
+    #
+    # 'config' will be injected into bot modules.
+    # config.out should be a queue that we can dequeue.
+
+    @active_thread = InOut.new(inq:config.out,outq:@conn.writeq) {|replies|
+      puts "<< active #{replies}"
+      # TODO: almost identical logic in the dispatcher class (in
+      # @dispatcher_thread).
+      case replies
+      when String # assume protocol string eg irc
+        replies
+      when Hash,Array,Proc
+        BotMsg.to_a(replies)
+      else
+        []
+      end
+    }
 
     # Set up a repl in a separate thread.
     # 

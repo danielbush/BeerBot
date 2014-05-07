@@ -10,13 +10,18 @@ module BeerBot
   # Config should be loaded with the json from a config file before
   # initialisation of the system.
   #
+  # Config might be a bit of a misnomer, think of this as "an
+  # injectable thing that contains a lot of useful information".
+  #
   # It should be available to things like bot modules eg
   #   BeerBot::Config['datadir']
   # 
 
-  Config = {}
+  class Config < Hash
 
-  class << Config
+  #Config = {}
+
+  #class << Config
 
     def load config
       self.reject!{true}
@@ -55,6 +60,26 @@ module BeerBot
       else
         path
       end
+    end
+
+    # Should point to 'the' instance of scheduler used by this bot.
+
+    attr_accessor :scheduler
+
+    # Should reference the Bot instance.
+    #
+    # This will allow modules to inspect the bot module list and to
+    # override normal cmd behaviour (using Bot#set_cmd ).
+
+    attr_accessor :bot
+
+    # A queue that allows users of config to enqueue outgoing bot
+    # msg's actively.
+    #
+    # (passive = "as response to a command via Bot#cmd).
+
+    def out
+      @queue ||= Queue.new
     end
 
   end
