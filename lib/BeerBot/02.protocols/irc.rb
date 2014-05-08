@@ -231,7 +231,7 @@ module BeerBot
       end
 
 
-      # Return irc-conformat string from a botmsg hash.
+      # Return irc-conformat string from a botmsg.
       #
       # Generates nil if it can't handle 'botmsg'.
 
