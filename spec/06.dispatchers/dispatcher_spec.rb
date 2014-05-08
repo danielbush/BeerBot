@@ -1,5 +1,5 @@
-require_relative "../../lib/BeerBot/02.protocols/irc.rb"
-require_relative "../../lib/BeerBot/06.dispatchers/dispatcher.rb"
+require_relative "../../lib/beerbot/02.protocols/irc.rb"
+require_relative "../../lib/beerbot/06.dispatchers/dispatcher.rb"
 require 'pp'
 
 describe "dispatchers",:dispatchers => true do

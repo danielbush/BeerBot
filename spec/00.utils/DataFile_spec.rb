@@ -1,4 +1,4 @@
-require_relative "../../lib/BeerBot/00.utils/DataFile.rb"
+require_relative "../../lib/beerbot/00.utils/DataFile.rb"
 require 'pp'
 require 'json'
 

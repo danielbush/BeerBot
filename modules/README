@@ -1,7 +1,0 @@
-Modules are in the beerbot module repository.
-Clone it from here:
-  https://github.com/danielbush/beerbot-modules.git
-and get going, there's no time.
-
-Anyway... wherever you clone to, that will become your moduledir --
-see example conf/.

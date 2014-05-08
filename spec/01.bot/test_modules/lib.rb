@@ -4,7 +4,7 @@
 # If we pass a non-string msg, it will be returned.
 # (This is to help with testing/mocking).
 
-require_relative '../../../lib/BeerBot'
+require_relative '../../../lib/beerbot'
 
 class TestClass
 

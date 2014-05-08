@@ -1,4 +1,4 @@
-require_relative "../../lib/BeerBot/01.connect/IRCConnection"
+require_relative "../../lib/beerbot/01.connect/IRCConnection"
 
 describe 'IRCConnection' do
 

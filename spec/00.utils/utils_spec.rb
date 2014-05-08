@@ -1,4 +1,4 @@
-require_relative "../../lib/BeerBot/00.utils/utils.rb"
+require_relative "../../lib/beerbot/00.utils/utils.rb"
 require 'pp'
 require 'byebug'
 

@@ -9,7 +9,7 @@ require 'set'
 require 'rubygems'
 require 'pry'
 require 'json'
-require_relative 'BeerBot'
+require_relative 'beerbot'
 
 # Run the irc bot.
 #
