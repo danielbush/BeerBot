@@ -3,8 +3,6 @@ require 'pp'
 
 Bot = ::BeerBot::Bot
 PATH = File.dirname(__FILE__)
-# This path should exist and contain the Facts module.
-REAL_MODULE_PATH = File.expand_path(PATH) + '/../../lib/modules'
 TEST_MODULE_PATH = File.expand_path(PATH) + '/test_modules'
 
 describe "the Bot class",:bot => true do
@@ -30,6 +28,31 @@ describe "the Bot class",:bot => true do
       arr = bot.valid_modules.map{|bm| bm[:name]}
       arr.size.should == 2
       arr[0].should == 'TestModule1'
+    end
+
+  end
+
+  describe "config" do
+
+    it "can update all modules that have a config method" do
+      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot[0][:name].should == 'TestModule1'
+
+      # Set a config method on only one of the modules...
+      mod0 = bot[0][:mod]
+      mod1 = bot[1][:mod]
+      # This is the sort of method a bot module would implement...
+      def mod0.config config=nil
+        @config ||= config
+      end
+      mod0.config.should  == nil
+      config = BeerBot::Config.new :blah => true
+
+      expect {
+        bot.update_config(config)
+      }.to_not raise_error
+      mod0.config.should == config
+      mod1.respond_to?(:config).should == false
     end
 
   end

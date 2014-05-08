@@ -19,10 +19,6 @@ module BeerBot
 
   class Config < Hash
 
-  #Config = {}
-
-  #class << Config
-
     def load config
       self.reject!{true}
       self.merge!(config)

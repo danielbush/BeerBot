@@ -15,6 +15,7 @@ module BeerBot
   class Bot < Array
 
     attr_accessor :module_path,:module_names
+    attr_accessor :config
 
     def initialize module_path,module_names
       super()
@@ -22,6 +23,20 @@ module BeerBot
       @module_names = module_names
       self.load!
     end
+
+    # Call #config on all valid bot modules.
+
+    def update_config config
+      self.config = config
+      self.valid_modules.each {|botmodule|
+        if botmodule[:mod].respond_to?(:config) then
+          botmodule[:mod].config(config)
+        end
+      }
+    end
+
+    # Purge existing modules from this array and load modules in
+    # @module_path in to memory.
 
     def load!
       self.reject!{true} unless self.empty?  # ick :)
