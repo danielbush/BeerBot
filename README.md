@@ -1,6 +1,8 @@
 # BeerBot
 
-An irc bot written in ruby 2.0 and some bits of thread.
+*"...the number of BeerBot installations has grown to 1, with more expected..."* -- BeerBot Labs
+
+BeerBot is an irc bot written in ruby 2.0 and some bits of thread.
 
 * Uses ruby 2.0
 * includes IRC
@@ -9,20 +11,25 @@ An irc bot written in ruby 2.0 and some bits of thread.
 * Uses pry as a repl for administering the bot while running
 * Contains a scheduler based on ```CronR``` gem; this should make it easy to get BeerBot to do recurring tasks like reminders
 
-## Status
-
-Only just started building this in the last week (27-Nov-2013).
-Be careful about using this on a public network.
 I wrote it partly in frustration with another ruby irc bot and
 partly for an internal irc server.
+
+## Status
+
+* Started building this in the last week of 27-Nov-2013 .
+* Be careful about using this on a public network.
+
+## Batteries sold separately
+
+BeerBot won't do anything out of the box.
+
+* Go here: https://github.com/danielbush/beerbot-modules and follow the instructions.
 
 ## Layout
 
 * ```lib/``` contains the core bot code
-* ```modules/``` some example bot modules
-* ```datadir/``` example location for data directory; bot modules should store their data here (see example below)
 * ```conf/``` example configuration file here; some settings are mandatory, take a look at it
-* ```bin/``` contains ```run-irc.rb```
+* ```bin/``` contains ```beerbot-run-irc.rb```
 
 ## Installing
 
@@ -30,8 +37,8 @@ Install the gem
 
 ```
   gem install 'beerbot'
-  type run-irc.rb
-  # => run-irc.rb is hashed (/home/danb/.rvm/gems/ruby-2.0.0-p247/bin/run-irc.rb)
+  type beerbot-run-irc.rb
+  # => beerbot-run-irc.rb is hashed (/home/danb/.rvm/gems/ruby-2.0.0-p247/bin/beerbot-run-irc.rb)
 
 ```
   
@@ -49,20 +56,24 @@ Hopefully that is mostly self-explanatory.
 You want something like this:
 ```
   cd somewhere
-  mdir beerbot
+  mkdir beerbot
+  mkdir beerbot/conf
+  mkdir beerbot/code
+  mkdir beerbot/data
+  mkdir beerbot/modules
 ```
-then...
-- **beerbot/conf**
+where...
+- **conf/**
   - Put your conf file(s) in here
-- **beerbot/code**
-  - Bot code can go here (if you're not using the gem.
-- **beerbot/modules**
-  - This is the moduledir in conf.
+- **code/**
+  - Bot code can go here (if you're cloning from here, not using the gem)
+- **modules/**
+  - This is the ```moduledir``` in conf.
   - Your 'modules' config should point to zero or more modules in this dir.
     Get your own set of bot modules:
       git clone https://github.com/danielbush/beerbot-modules.git modules
-- **beerbot/data**
-  - This is the datadir in conf.
+- **data/**
+  - This is the ```datadir``` in conf.
 
 ## Running
 
@@ -70,14 +81,14 @@ If you installed the gem, with a bit of luck, all you need to do (once
 you've done the above preparatory stuff) is...
 
 ```
-  run-irc.rb path/to/conf.json
+  beerbot-run-irc.rb path/to/conf.json
 ```
 
 If you're working with the code (not a gem), then you'll probably want
 to do something like this:
 
 ```
-  ruby -Ip/t/b/lib p/t/b/bin/run-irc.rb path/to/conf.json
+  ruby -Ip/t/b/lib p/t/b/bin/beerbot-run-irc.rb path/to/conf.json
 ```
 
 where p/t/b = path/to/beerbot
@@ -87,13 +98,6 @@ things like a ```moduledir``` and a ```datadir``` and some other
 things - see ```conf/``` for example.
 
 Note that the bot modules in ```moduledir``` may require beerbot:
-
-```
-  require 'BeerBot'
-```
-
-...so that is why we add the ```-I``` to the above invocation so as to
-modify the ```load path``` to include the core bot code.
 
 You should see some irc lines whizz by on your terminal.
 
@@ -116,10 +120,10 @@ There are some convenience methods in this class for making the
 bot do things.
 
 ```ruby
-  pry> self.join '#chan1'
-  pry> self.say '#chan1','howdy!'
-  pry> self.action '#chan1','departs the channel hastily'
-  pry> self.leave '#chan1'
+  pry> join '#chan1'
+  pry> say '#chan1','howdy!'
+  pry> action '#chan1','departs the channel hastily'
+  pry> leave '#chan1'
 ```
 You get the idea.
 
@@ -137,10 +141,15 @@ to commands, overhearing messages / actions or receiving events.
 
 ```@scheduler``` is an instance of ```CronR::Cron``` which is also an array.  You can add jobs to it from this repl if you feel so inclined.  See the ```CronR``` gem.
 
+```ruby
+  pry> @scheduler.time
+```
+... will give you the current time for the configured timezone you have.
+See the CronR documentation.
 
 ## Talking to the bot (on irc)
 
-On irc, the ```cmd_prefix``` you specified in your ```conf``` can be used as a short to address the bot.
+On irc, the ```cmd_prefix``` you specified in your ```conf``` can be used as a shortcut to address the bot.
 
 You can say:
 
@@ -159,135 +168,9 @@ where ```,``` is the ```cmd_prefix```.
 If you do this on a channel, beerbot will tell you that it is
 messaging you directly with help.
 
-## Bot modules
+## Scheduling
 
-BeerBot won't do anything out of the box.
-
-Go here: https://github.com/danielbush/beerbot-modules and clone that into **beerbot/modules** .
-
-So there will be at leat 2 modules in there.
-```Facts``` module and the other is the ```Oracle``` module.
-
-In your conf, you're gonna want something like this:
-- moduledir = 'path/to/beerbot/modules'
-- modules = ['Oracle','Facts']
-
-
-The ```Facts``` module is by far the more complicated of the two and
-provides a way for people to add one or more facts for a given term or
-keyword. At this point, maybe just look at the specs or use beerbot's
-```,help``` command to check this out.
-
-The ```Oracle``` module shows you how to use the ```JsonDataFile```.
-This nifty piece of kit should automatically reload itself everytime
-you update the json file, allowing you to keep beerbot hip and current
-without even missing a beat.
-
-There's also a ```Beer``` module that I haven't included here. In fact
-both the ```Facts``` module and the ```Beer``` module were somewhat
-inspired by functionality resident in #emac's fsbot on freenode.
-
-## Hodor!
-
-Ok, enough of the dry stuff.  Let's make a bot module.
-
-```
-  mkdir moduledir/Hodor
-```
-
-In ```moduledir/Hodor/init.rb``` put:
-
-```ruby
-  require_relative 'Hodor'
-```
-
-In ```moduledir/Hodor/Hodor.rb``` put:
-
-```ruby
-  require 'BeerBot'
-  module BeerBot::Modules::Hodor
-    # This is called when the bot is addressed directly...
-    def self.cmd msg,**kargs
-      replyto = kargs[:me] ? kargs[:from] : kargs[:to]
-      [to:replyto,msg:"Hodor!"]
-    end
-
-    # This is called when the bot isn't addressed directly...
-    def self.hear msg,**kargs
-      replyto = kargs[:me] ? kargs[:from] : kargs[:to]
-      [to:replyto,msg:"Hodor?"]
-    end
-
-    # Only need to return an array of msgs (no to's/from's):
-
-    def self.help arr=[]
-      topic,*subtopics = arr
-      ['HODOR!']
-    end
-  end
-```
-
-So what does the above do?
-
-If you say anything directly:
-
-```
-  <danb> ,hi
-  <beerbot> Hodor!
-  <danb> beerbot: hi
-  <beerbot> Hodor!
-```
-
-If you say something on a channel not to the bot:
-
-```
-  <danb> hi
-  <beerbot> Hodor?
-  <danb> oh wow, that's annoying can we ban this plz??
-```
-
-Finally if you said: ```,help Hodor```, well, you can guess...
-
-Ok, so some things to note.
-
-```ruby
-  [to:replyto,msg:"..."]
-```
-
-is sugar for:
-
-```ruby
-  [{to:replyto,msg:"..."}]
-```
-
-In fact: 
-
-```ruby
-   {to:replyto,msg:"..."}
-```
-
-will do just fine. Both forms are referred to as a ```botmsg```.
-```#cmd``` and ```#hear``` can return either a single hash or an array
-of such.
-
-Now, if you were to return ```nil``` rather thana ```botmsg```, then
-BeerBot will move on and look at the next bot module to see if it has
-a response.
-
-What constitutes "the next bot module" you ask?
-
-Well, in the pry repl, look at ```@bot```.  It's an array (take a look at the source code for bot.rb in ```lib/*/```).  BeerBot will start with the first bot module in the array, and look for a response, and continue working through the array till it hits the first module to respond.
-
-At the moment, the first module to respond with non-nil terminates
-any further look ups.
-
-### Scheduling
-
-Now let's get really annoying. If saying "Hodor" all the time won't
-get you and Beerbot banned from the channel, you can perhaps try going
-the unsolicited route...
-
-You can grab the ```CronR``` scheduler like this in your module:
+You can grab the ```CronR``` scheduler in a more official way like this:
 
 ```ruby
   scheduler = BeerBot::Scheduler.instance
@@ -301,30 +184,4 @@ You can grab the ```CronR``` scheduler like this in your module:
   }
 ```
 
-Note, ```@scheduler``` should be available to you in the pry repl.
 
-### Events
-
-We've covered messages the bot hears and messages that are interpreted
-directly by the bot.  But what about other events like somebody joining
-a channel or conference room?
-
-Taking the Hodor module above we can add:
-
-```ruby
-    def self.event event,**kargs
-      case event
-      when :join
-        unless kargs[:me] then
-          [to:kargs[:channel],msg:"Greetings #{kargs[:nick]}!"]
-        end
-      end
-    end
-```
-
-Events are dispatched by the dispatcher - see
-```lib/BeerBot/06.dispatchers``` and ```lib/BeerBot/02.protocols```.
-The parse function in 02.protocols/irc.rb tries to return a generic
-representation of a particular irc event.
-The dispatcher in 06.dispatchers/dispatcher.rb takes this and decides what to
-do with it.
