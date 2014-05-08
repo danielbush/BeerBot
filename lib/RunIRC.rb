@@ -165,15 +165,5 @@ class BeerBot::RunIRC
     @conn.writeq.enq(IRC.leave(chan))
   end
 
-  # Reload @bot using module list 'modules'.
-  #
-  # You could use
-
-  def reload! modules=[]
-    @config['modules'] = modules
-    @bot = Bot.new(@module_path,modules)
-    @dispatcher.bot = @bot
-  end
-
 end
 
