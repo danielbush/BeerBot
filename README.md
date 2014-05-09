@@ -168,6 +168,50 @@ where ```,``` is the ```cmd_prefix```.
 If you do this on a channel, beerbot will tell you that it is
 messaging you directly with help.
 
+## Talking to the bot without irc
+
+```ruby
+pry> @bot
+```
+should give you access to the core of the bot.
+It's an array of BeerBot::BotModule instances which are just hashes
+(h). h[:mod] should reference the actual bot module.
+
+You can talk to the bot directly from the repl this way...
+```ruby
+pry> @bot.cmd 'do something',to:'beerbot',from:'me'
+pry> @bot.hear 'whisper, whisper, whisper',to:'#chan',from:'me'
+```
+No irc here.  None whatsoever.
+Of course, beerbot might not do anything, because you probably
+haven't got any modules loaded in there yet.
+
+Ok, so to give you a taste, try this:
+```ruby
+pry> mod = Object.new
+pry> def mod.cmd msg,**kargs; [to:kargs[:to],msg:"yo"]; end
+pry> @bot.push({mod:mod,status:true})
+```
+Now, say something to the bot:
+```
+irc> ,yo
+beerbot> yo
+```
+Or on the repl:
+```ruby
+repl> @bot.cmd 'hey!'
+repl> [{:to=>nil, :msg=>"yo"}]
+```
+
+Cool no?
+
+Ordinarily, modules are loaded from files using a particular
+standard, but here we just dynamically put one in.
+
+For beerbot to be of any use, you probably want to be heading
+over to https://github.com/danielbush/beerbot-modules .
+There you will learn the gentle art of beerbot.
+
 ## Scheduling
 
 You can grab the ```CronR``` scheduler in a more official way like this:
