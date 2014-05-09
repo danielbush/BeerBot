@@ -15,7 +15,6 @@ module BeerBot
   class Bot < Array
 
     attr_accessor :module_path,:module_names
-    attr_accessor :config
 
     def initialize module_path,module_names
       super()
@@ -27,7 +26,6 @@ module BeerBot
     # Call #config on all valid bot modules.
 
     def update_config config
-      self.config = config
       self.valid_modules.each {|botmodule|
         if botmodule[:mod].respond_to?(:config) then
           botmodule[:mod].config(config)
