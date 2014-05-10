@@ -21,8 +21,10 @@ module BeerBot
     # Queue containing received messages from the server.
     attr_accessor :queue,:writeq,:readyq
     attr_accessor :connection,:server,:port,:nick,:thread
+    attr_accessor :echo
 
     def initialize server:nil,port:6667,nick:'beerbot'
+      @echo = true
       @server = server
       @port = port
       @nick = nick
@@ -93,7 +95,7 @@ module BeerBot
             self.write("NICK #{@nick}")
             while not @connection.eof? do
               str = @connection.gets()
-              puts "<< #{str}"
+              puts "<< #{str}" if @echo
               case str
               when /^PING (.*)$/
                 self.write "PONG #{$1}"
@@ -132,7 +134,7 @@ module BeerBot
       case message
       when String
         message = message.chomp + "\r\n"
-        puts ">> #{message}"
+        puts ">> #{message}" if @echo
         @write_mutex.synchronize {
           @connection.print(message)
         }

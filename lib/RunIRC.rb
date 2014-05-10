@@ -41,6 +41,7 @@ class BeerBot::RunIRC
 
   def initialize config
 
+    @echo = true
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
     @module_path = config['moduledir']
     @config = config
@@ -84,8 +85,8 @@ class BeerBot::RunIRC
     # which also need to be dispatched.
 
     @scheduler_thread = InOut.new(inq:@scheduler.queue,outq:@conn.writeq) {|cron_job|
-      puts "<< scheduler #{cron_job.inspect}"
-      puts "<< scheduler #{@scheduler.time}"
+      puts "<< scheduler #{cron_job.inspect}" if @echo
+      puts "<< scheduler #{@scheduler.time}" if @echo
       IRC.to_irc(cron_job.run)
     }
     @scheduler_thread.start!
@@ -95,19 +96,20 @@ class BeerBot::RunIRC
     # 'config' will be injected into bot modules.
     # config.out should be a queue that we can dequeue.
 
-    @active_thread = InOut.new(inq:config.out,outq:@conn.writeq) {|replies|
-      puts "<< active #{replies}"
+    @active_thread = InOut.new(inq:@config.out,outq:@conn.writeq) {|replies|
+      puts "<< active #{replies}" if @echo
       # TODO: almost identical logic in the dispatcher class (in
       # @dispatcher_thread).
       case replies
       when String # assume protocol string eg irc
         replies
       when Hash,Array,Proc
-        BotMsg.to_a(replies)
+        IRC.to_irc(BotMsg.to_a(replies))
       else
         []
       end
     }
+    @active_thread.start!
 
     # Set up a repl in a separate thread.
     # 
@@ -134,6 +136,15 @@ class BeerBot::RunIRC
       end
       @scheduler.start
     }
+  end
+
+  # Toggle whether inputs and outputs show on the repl screen.
+  #
+  # Call this from the pry repl.
+
+  def echo
+    @echo = !@echo
+    @conn.echo = @echo
   end
 
   # Start the connection.
