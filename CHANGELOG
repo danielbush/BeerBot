@@ -1,0 +1,42 @@
+
+0.2.0
+
+* 0.2.x work is on master-0.2 branch
+* 0.1 code is on master-0.1 branch
+* master will probably be point to 0.2.x (the latest)
+* we now say
+    require 'beerbot'  (NOT require 'BeerBot')
+* all bot modules are now moved to a different repo
+  * see https://github.com/danielbush/beerbot-modules
+  * (don't confuse this with BeerBot::BotModule which is
+    a Hash we use to represent a bot module)
+* Bot modules can have #init and #config methods (optional, just
+  like #cmd, #hear, #event)
+  * #init takes one argument, BeerBot::Config
+    * it calls #init on all loaded/valid bot modules
+    * init should only be called once
+    * it gives your module a chance to set stuff up
+  * #config takes one argument, a BeerBot::Config instance or something
+    that quacks like it
+    * this gives us access to nick and some other things
+    * injecting the config makes testing easier
+  * BeerBot::Bot#update_config does the job of calling #config
+    on each bot module instance
+* BeerBot::Config (config) has some new things
+  * config.out => queue that active messages can be sent to;
+    * by 'active' we mean unsolicited, endogenous, you get the drill
+    * you can push botmsg's on to this
+  * config.scheduler => gives us access to beerbot's scheduler
+    (CronR::Cron instance)
+    * when running normally, this would be BeerBot::Scheduler.instance
+  * config.bot => points to an instance of BeerBot::Bot
+    * allows us to call BeerBot::Bot#set_cmd which allows
+      us to override normal bot behaviour (see README)
+      * eg config.bot.set_cmd{nil} => suppress normal bot behaviour
+    * it also allows us to inspect the current loaded bot modules
+
+
+0.1.x
+
+Original release of beerbot.
+	
