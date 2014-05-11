@@ -23,6 +23,18 @@ module BeerBot
       self.load!
     end
 
+    # Call all init methods on bot modules that have them.
+    # 
+    # Should only be called once.
+
+    def init config
+      self.valid_modules.each {|botmodule|
+        if botmodule[:mod].respond_to?(:init) then
+          botmodule[:mod].init(config)
+        end
+      }
+    end
+
     # Call #config on all valid bot modules.
 
     def update_config config

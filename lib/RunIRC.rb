@@ -49,7 +49,6 @@ class BeerBot::RunIRC
     # Create the bot.
     @bot = Bot.new(@module_path,config['modules'])
     config.bot = @bot
-    @bot.update_config(@config)
 
     # Dispatcher which receives messages and interacts with the bot.
     @dispatcher = Dispatcher.new(
@@ -121,6 +120,9 @@ class BeerBot::RunIRC
     @pry_thread = Thread.new {
       binding.pry
     }
+
+    @bot.init(@config)
+    @bot.update_config(@config)
 
     # Do stuff once we've identified with the irc server...
     # 

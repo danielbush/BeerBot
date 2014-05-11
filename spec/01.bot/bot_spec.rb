@@ -32,6 +32,29 @@ describe "the Bot class",:bot => true do
 
   end
 
+  describe "init" do
+
+    it "can call init on all modules that have an init method and pass config" do
+      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot[0][:name].should == 'TestModule1'
+      mod0 = bot[0][:mod]
+      mod1 = bot[1][:mod]
+      def mod0.init config
+        @config ||= config
+      end
+      def mod0.config config=nil
+        @config
+      end
+      mod0.config.should  == nil
+      config = BeerBot::Config.new :blah => true
+
+      bot.init(config)
+      mod0.config.should  == config
+      mod1.respond_to?(:init).should == false
+    end
+
+  end
+
   describe "config" do
 
     it "can update all modules that have a config method" do
