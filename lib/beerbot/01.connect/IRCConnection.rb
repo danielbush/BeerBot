@@ -53,6 +53,7 @@ module BeerBot
         @ready = true
         while @readyq.size > 0
           block = @readyq.deq
+          @ready_blocks.push(block)
           block.call
         end
       }
@@ -61,7 +62,6 @@ module BeerBot
     def ready? &block
       return @ready unless block_given?
       @ready_mutex.synchronize {
-        @ready_blocks.push block
         if @ready then
           block.call
         else
@@ -108,6 +108,7 @@ module BeerBot
           rescue => e
             puts "Connection whoops: #{e}"
           end
+          @ready = false
           puts "Sleeping #{10} then try again..."
           sleep 10
         end
