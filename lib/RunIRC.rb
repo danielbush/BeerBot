@@ -47,7 +47,8 @@ class BeerBot::RunIRC
     @config = config
 
     # Create the bot.
-    @bot = Bot.new(@module_path,config['modules'])
+    @bot = Bot.new
+    @bot.load!(config['modules'],@module_path)
     config.bot = @bot
 
     # Dispatcher which receives messages and interacts with the bot.

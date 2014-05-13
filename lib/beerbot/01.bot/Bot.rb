@@ -16,11 +16,8 @@ module BeerBot
 
     attr_accessor :module_path,:module_names
 
-    def initialize module_path,module_names
+    def initialize
       super()
-      @module_path = module_path
-      @module_names = module_names
-      self.load!
     end
 
     # Call all init methods on bot modules that have them.
@@ -45,13 +42,15 @@ module BeerBot
       }
     end
 
-    # Purge existing modules from this array and load modules in
-    # @module_path in to memory.
+    # Purge existing modules from this array and load modules with
+    # names in module_names in module_path on disk into memory.
 
-    def load!
+    def load! module_names,module_path
+      @module_path = module_path
+      @module_names = module_names
       self.reject!{true} unless self.empty?  # ick :)
-      Dir.chdir(@module_path) {
-        @module_names.each {|name|
+      Dir.chdir(module_path) {
+        module_names.each {|name|
           initfile = "#{name}/init.rb"
           modname = "::BeerBot::Modules::#{name}"
           mod = nil

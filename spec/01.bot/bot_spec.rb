@@ -10,7 +10,8 @@ describe "the Bot class",:bot => true do
   describe "loading" do
 
     it "can load the modules on the module path" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       bot.map{|b|
         [b[:status],b[:name]]
       }.should == [[true,'TestModule1'],[true,'TestModule2']]
@@ -19,12 +20,13 @@ describe "the Bot class",:bot => true do
 
     it "will throw load errors" do
       expect {
-        Bot.new(TEST_MODULE_PATH,['BadModule1'])
+        Bot.new.load!(['BadModule1'],TEST_MODULE_PATH)
       }.to raise_error(LoadError)
     end
 
     it "can list valid modules" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       arr = bot.valid_modules.map{|bm| bm[:name]}
       arr.size.should == 2
       arr[0].should == 'TestModule1'
@@ -35,7 +37,8 @@ describe "the Bot class",:bot => true do
   describe "init" do
 
     it "can call init on all modules that have an init method and pass config" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       bot[0][:name].should == 'TestModule1'
       mod0 = bot[0][:mod]
       mod1 = bot[1][:mod]
@@ -46,7 +49,7 @@ describe "the Bot class",:bot => true do
         @config
       end
       mod0.config.should  == nil
-      config = BeerBot::Config.new :blah => true
+      config = BeerBot::Config.new(:blah => true)
 
       bot.init(config)
       mod0.config.should  == config
@@ -58,7 +61,8 @@ describe "the Bot class",:bot => true do
   describe "config" do
 
     it "can update all modules that have a config method" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       bot[0][:name].should == 'TestModule1'
 
       # Set a config method on only one of the modules...
@@ -69,7 +73,7 @@ describe "the Bot class",:bot => true do
         @config ||= config
       end
       mod0.config.should  == nil
-      config = BeerBot::Config.new :blah => true
+      config = BeerBot::Config.new(:blah => true)
 
       expect {
         bot.update_config(config)
@@ -84,18 +88,21 @@ describe "the Bot class",:bot => true do
 
     describe "bot commands" do
       it "should run the modules in order (cmd)" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+        bot = Bot.new
+        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
         replies = bot.cmd('test')
         replies.size.should == 1
         replies[0][:msg].should == 'cmd testmodule1'
 
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule2','TestModule1'])
+        bot = Bot.new
+        bot.load!(['TestModule2','TestModule1'],TEST_MODULE_PATH,)
         replies = bot.cmd('test')
         replies[0][:msg].should == 'cmd testmodule2'
       end
 
       it "should return an array-based botmsg" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])
+        bot = Bot.new
+        bot.load!(['TestModule1'],TEST_MODULE_PATH)
         # Note: we've rigged the test modules to echo back non-strings
         # to bot#run, #run should then do BotMsg.to_a on them.
         replies = bot.cmd({to:'to',msg:'some msg'})
@@ -106,17 +113,29 @@ describe "the Bot class",:bot => true do
       end
 
       it "should return empty array if nothing" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])
+        bot = Bot.new
+
+        # We don't need to load modules from the fs any more.
+        # We can do it like this...
+        # TODO: do this elsewhere...
+
+        mod = Object.new 
+        def mod.cmd msg,**kargs
+          msg  # echo back
+        end
+        bot.push({mod:mod,status:true})
+
         replies = bot.cmd(nil)
         replies.class.should == Array
         replies.size.should == 0
+
         replies = bot.cmd(/foo/)  # some other random object
         replies.class.should == Array
         replies.size.should == 0
       end
 
       it "bot should still run even if no modules" do
-        bot = Bot.new(TEST_MODULE_PATH,[])
+        bot = Bot.new
         replies = bot.cmd("foo")
         replies.class.should == Array
         replies.size.should == 0
@@ -126,12 +145,14 @@ describe "the Bot class",:bot => true do
     describe "bot listening" do
 
       it "should run the modules in order" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+        bot = Bot.new
+        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
         replies = bot.hear('test')
         replies.size.should == 1
         replies[0][:msg].should == 'hear testmodule1'
 
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule2','TestModule1'])
+        bot = Bot.new
+        bot.load!(['TestModule2','TestModule1'],TEST_MODULE_PATH)
         replies = bot.hear('test')
         replies[0][:msg].should == 'hear testmodule2'
       end
@@ -140,7 +161,8 @@ describe "the Bot class",:bot => true do
 
     describe "bot actions" do
       it "should run the modules in order" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+        bot = Bot.new
+        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
         replies = bot.action('test')
         replies.size.should == 1
         replies[0][:msg].should == 'action testmodule1'
@@ -149,7 +171,8 @@ describe "the Bot class",:bot => true do
 
     describe "event handling" do
       it "handle a join event" do
-        bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])
+        bot = Bot.new
+        bot.load!(['TestModule1'],TEST_MODULE_PATH)
         replies = bot.event(:join,channel:'#foo',nick:'jonny')
         replies.size.should == 1
         replies[0][:to].should == '#foo'
@@ -158,7 +181,8 @@ describe "the Bot class",:bot => true do
     end
 
     describe "overriding cmd" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       bot.set_cmd {
         "foo"
       }
@@ -168,7 +192,8 @@ describe "the Bot class",:bot => true do
     end
 
     describe "overriding hear" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1','TestModule2'])
+      bot = Bot.new
+      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
       bot.set_hear {
         "foo"
       }
@@ -182,13 +207,15 @@ describe "the Bot class",:bot => true do
   describe "help functionality" do
 
     it "should offer help if module name is given as first argument" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])
+      bot = Bot.new
+      bot.load!(['TestModule1'],TEST_MODULE_PATH)
       replies = bot.help(["TestModule1","topic1"],to:'to',from:'from')
       replies.find{|r| r[:msg] == 'topic1'}.should_not == nil
     end
 
     it "should handle subtopics" do
-      bot = Bot.new(TEST_MODULE_PATH,['TestModule1'])
+      bot = Bot.new
+      bot.load!(['TestModule1'],TEST_MODULE_PATH)
       replies = bot.help(["TestModule1","topic1",'subtopic1'],to:'to',from:'from')
       replies.find{|r| r[:msg] == 'topic1/subtopic1'}.should_not == nil
     end
