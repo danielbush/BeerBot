@@ -86,50 +86,148 @@ describe "the Bot class",:bot => true do
 
   describe "running" do
 
-    describe "bot commands" do
-      it "should run the modules in order (cmd)" do
+    describe "handling replies from modules" do
+
+      it "can handle single botmsg's" do
         bot = Bot.new
-        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
+        mod1 = Object.new
+        def mod1.cmd msg,**kargs
+          [false,{to:'to1',msg:'msg1'}]
+        end
+        bot.push({status:true,mod:mod1})
         replies = bot.cmd('test')
         replies.size.should == 1
-        replies[0][:msg].should == 'cmd testmodule1'
+      end
 
+      it "can handle array botmsg's" do
         bot = Bot.new
-        bot.load!(['TestModule2','TestModule1'],TEST_MODULE_PATH,)
+        mod1 = Object.new
+        def mod1.cmd msg,**kargs
+          [false,[to:'to1',msg:'msg1']]
+        end
+        bot.push({status:true,mod:mod1})
         replies = bot.cmd('test')
-        replies[0][:msg].should == 'cmd testmodule2'
-      end
-
-      it "should return an array-based botmsg" do
-        bot = Bot.new
-        bot.load!(['TestModule1'],TEST_MODULE_PATH)
-        # Note: we've rigged the test modules to echo back non-strings
-        # to bot#run, #run should then do BotMsg.to_a on them.
-        replies = bot.cmd({to:'to',msg:'some msg'})
-        replies.class.should == Array
         replies.size.should == 1
-        replies[0][:to].should == 'to'
-        replies[0][:msg].should == 'some msg'
       end
 
-      it "should return empty array if nothing" do
+      it "can handle proc's that return single or array botmsg's",:foo => true do
         bot = Bot.new
+        mod1 = Object.new
+        def mod1.cmd msg,**kargs
+          lambda {
+            [to:'to1',msg:'msg1']
+          }
+        end
+        bot.push({status:true,mod:mod1})
+        replies = bot.cmd('test')
+        replies.size.should == 1
 
-        # We don't need to load modules from the fs any more.
-        # We can do it like this...
-        # TODO: do this elsewhere...
+        def mod1.cmd msg,**kargs
+          [true,
+            lambda {
+              [to:'to1',msg:'msg1']
+            }]
+        end
+        bot.push({status:true,mod:mod1})
+        replies = bot.cmd('test')
+        replies.size.should == 1
+      end
 
+      it "should follow through if bool is false in array format" do
+        bot = Bot.new
+        mod1 = Object.new
+        mod2 = Object.new
+        def mod1.cmd msg,**kargs
+          [false,[to:'to1',msg:'msg1']]
+        end
+        def mod2.cmd msg,**kargs
+          [false,[to:'to2',msg:'msg2']]
+        end
+        bot.push({status:true,mod:mod1})
+        bot.push({status:true,mod:mod2})
+
+        replies = bot.cmd('test')
+        replies.size.should == 2
+        replies[0].should == {to:'to1',msg:'msg1'}
+        replies[1].should == {to:'to2',msg:'msg2'}
+      end
+
+      it "should stop if bool is true (regardless of 2nd value) in array format" do
+        bot = Bot.new
+        mod1 = Object.new
+        mod2 = Object.new
+        def mod1.cmd msg,**kargs
+          [true,[to:'to1',msg:'msg1']]
+        end
+        def mod2.cmd msg,**kargs
+          [false,[to:'to2',msg:'msg2']]
+        end
+        bot.push({status:true,mod:mod1})
+        bot.push({status:true,mod:mod2})
+
+        replies = bot.cmd('test')
+        replies.size.should == 1
+        replies[0].should == {to:'to1',msg:'msg1'}
+      end
+
+      it "should handle single object repsonse format" do
+        bot = Bot.new
+        mod1 = Object.new
+        mod2 = Object.new
+        def mod1.cmd msg,**kargs
+          [to:'to1',msg:'msg1']
+        end
+        bot.push({status:true,mod:mod1})
+
+        replies = bot.cmd('test')
+        replies.size.should == 1
+        replies[0].should == {to:'to1',msg:'msg1'}
+      end
+
+      it "should suppress for handle single object repsonse format" do
+        bot = Bot.new
+        mod1 = Object.new
+        mod2 = Object.new
+        def mod1.cmd msg,**kargs
+          [to:'to1',msg:'msg1']
+        end
+        def mod2.cmd msg,**kargs
+          [to:'to2',msg:'msg2']
+        end
+        bot.push({status:true,mod:mod1})
+        bot.push({status:true,mod:mod2})
+
+        replies = bot.cmd('test')
+        replies.size.should == 1
+        replies[0].should == {to:'to1',msg:'msg1'}
+      end
+
+      it "should return empty array if nothing (single value format)" do
+        bot = Bot.new
         mod = Object.new 
         def mod.cmd msg,**kargs
-          msg  # echo back
+          nil
         end
         bot.push({mod:mod,status:true})
 
-        replies = bot.cmd(nil)
+        replies = bot.cmd('foo')
         replies.class.should == Array
         replies.size.should == 0
 
         replies = bot.cmd(/foo/)  # some other random object
+        replies.class.should == Array
+        replies.size.should == 0
+      end
+
+      it "should return empty array not-botmsg (single value format" do
+        bot = Bot.new
+        mod = Object.new 
+        def mod.cmd msg,**kargs
+          Object.new
+        end
+        bot.push({mod:mod,status:true})
+
+        replies = bot.cmd('foo')
         replies.class.should == Array
         replies.size.should == 0
       end
@@ -140,6 +238,7 @@ describe "the Bot class",:bot => true do
         replies.class.should == Array
         replies.size.should == 0
       end
+
     end
 
     describe "bot listening" do
@@ -181,25 +280,29 @@ describe "the Bot class",:bot => true do
     end
 
     describe "overriding cmd" do
-      bot = Bot.new
-      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
-      bot.set_cmd {
-        "foo"
-      }
-      bot.cmd("test").should == 'foo'
-      bot.set_cmd  # unset it
-      bot.cmd("test").class.should == Array
+      it "should override" do
+        bot = Bot.new
+        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
+        bot.set_cmd {
+          "foo"
+        }
+        bot.cmd("test").should == 'foo'
+        bot.set_cmd  # unset it
+        bot.cmd("test").class.should == Array
+      end
     end
 
     describe "overriding hear" do
-      bot = Bot.new
-      bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
-      bot.set_hear {
-        "foo"
-      }
-      bot.hear("test").should == 'foo'
-      bot.set_hear  # unset it
-      bot.hear("test").class.should == Array
+      it "should override" do
+        bot = Bot.new
+        bot.load!(['TestModule1','TestModule2'],TEST_MODULE_PATH)
+        bot.set_hear {
+          "foo"
+        }
+        bot.hear("test").should == 'foo'
+        bot.set_hear  # unset it
+        bot.hear("test").class.should == Array
+      end
     end
 
   end
