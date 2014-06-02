@@ -19,6 +19,12 @@ module BeerBot
 
   class Config < Hash
 
+    def initialize
+      # Defaults
+      self['cmd_prefix'] = ','
+      self['nick'] = 'beerbot'
+    end
+
     def load config
       self.reject!{true}
       self.merge!(config)
