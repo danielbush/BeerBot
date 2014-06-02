@@ -7,6 +7,11 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
+# If you're running this WITHOUT the gem, you probably want to do
+# something like this (in beerbot's root directory):
+#
+#   ruby -Ilib bin/beerbot-run-irb.rb path/to/conf.json
+
 raise "Needs ruby 2" if /^1/===RUBY_VERSION
 require_relative '../lib/RunIRC'
 
@@ -21,5 +26,5 @@ config = BeerBot::Config.new
 config.load JSON.load(File.read(conffile))
 config.validate!
 
-$runirc = BeerBot::RunIRC.new config
+$runirc = BeerBot::RunIRC.new(config)
 $runirc.start
