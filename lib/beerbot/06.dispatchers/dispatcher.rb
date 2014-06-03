@@ -40,6 +40,7 @@ module BeerBot
         @nick = nick
         @get_nick_cmd   = Utils.make_prefix_parser(nick)
         @nickrx = Regexp.new("^#{nick}$",'i')
+        @config = config
 
         @prefix = prefix
         @get_prefix_cmd = Utils.make_prefix_parser(prefix)
@@ -61,6 +62,11 @@ module BeerBot
         end
       end
 
+      # Receive generic events emitted by a protocol class and
+      # dispatch to an instance of Bot.
+      #
+      # eg the output from BeerBot::Protocol::IRC.parse .
+
       def receive event,args
 
         if @block then
@@ -73,34 +79,34 @@ module BeerBot
 
         case event
         when :unknown
-          replies = @bot.event(event,args:args)
+          replies = @bot.event(event,args:args,config:@config)
         when :default
-          replies = @bot.event(event,args:args)
+          replies = @bot.event(event,args:args,config:@config)
 
         when :nick
           old,nick = args
-          replies = @bot.event(event,old:old,nick:nick)
+          replies = @bot.event(event,old:old,nick:nick,config:@config)
 
         when :quit
           nick,msg = args
-          replies = @bot.event(event,nick:nick,msg:msg)
+          replies = @bot.event(event,nick:nick,msg:msg,config:@config)
         when :part
           nick,channel = args
-          replies = @bot.event(event,nick:nick,channel:channel)
+          replies = @bot.event(event,nick:nick,channel:channel,config:@config)
         when :join
           nick,channel = args
           me = (@nickrx === nick)
-          replies = @bot.event(event,me:me,nick:nick,channel:channel)
+          replies = @bot.event(event,me:me,nick:nick,channel:channel,config:@config)
         when :chanlist
           channel,users = args
-          replies = @bot.event(event,channel:channel,users:users)
+          replies = @bot.event(event,channel:channel,users:users,config:@config)
         when :chanlistend
           # ignore
 
         when :action
           from,to,action = args
           me = (@nickrx === to)
-          replies = @bot.action(action,from:from,to:to,me:me)
+          replies = @bot.action(action,from:from,to:to,me:me,config:@config)
 
         when :msg
           from,to,msg = args
@@ -124,14 +130,14 @@ module BeerBot
               else
                 args = $1.strip.split(/\s+/)
               end
-              replies = @bot.help(args,from:from,to:to,me:me)
+              replies = @bot.help(args,from:from,to:to,me:me,config:@config)
             # dispatch cmd...
             else
-              replies = @bot.cmd(cmd,from:from,to:to,me:me)
+              replies = @bot.cmd(cmd,from:from,to:to,me:me,config:@config)
             end
           else
             # We're just hearing something on a channel...
-            replies = @bot.hear(msg,from:from,to:to,me:me)
+            replies = @bot.hear(msg,from:from,to:to,me:me,config:@config)
           end
 
         else
