@@ -33,7 +33,7 @@ module BeerBot
     # A queue that allows users of config to enqueue outgoing bot
     # msg's actively.
     #
-    # (passive = "as response to a command via Bot#cmd).
+    # (passive = "as response to a command via Bot#cmd").
 
     def out
       @queue ||= Queue.new
