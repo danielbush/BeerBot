@@ -132,11 +132,11 @@ module BeerBot
           case bool
           when TrueClass,FalseClass
             # Assume array format:
-            [bool,BotMsg.to_a(botmsg)]
+            [bool,self.to_a(botmsg)]
           else
             # Assume single return format...
             # Array of any sort is truthy, so suppress.
-            [true,BotMsg.to_a(thing)]
+            [true,self.to_a(thing)]
           end
         else
           # Asume single return format...
@@ -144,9 +144,9 @@ module BeerBot
           # Look at truthiness of thing to determine whether to suppress
           # further responses (true) or continue (false).
           if thing then
-            [true,BotMsg.to_a(thing)]
+            [true,self.to_a(thing)]
           else
-            [false,BotMsg.to_a(thing)]
+            [false,self.to_a(thing)]
           end
         end
       end
