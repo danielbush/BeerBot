@@ -116,7 +116,7 @@ module BeerBot
           next arr
         end
         reply = mod.send(meth,*args,**kargs)
-        suppress,botmsg = self._handle_reply(reply)
+        suppress,botmsg = BotMsg.to_reply_format(reply)
         if botmsg then
           arr += botmsg
         end
@@ -126,57 +126,6 @@ module BeerBot
           arr
         end
       }
-    end
-
-    # Transform all replies from bot modules to ARRAY FORMAT.
-    #
-    # A module may reply in either format. But we convert it here. The
-    # single return format is the simplest, which is why we have 2
-    # formats.
-    # 
-    # ARRAY FORMAT
-    # 
-    #   [<bool>,<reply>]
-    # 
-    # where bool  = true  => "use <reply> and keep going"
-    #             = false => "use <reply> but stop here"
-    # where reply = whatever the bot returns.
-    # NOTE: any other type of array will assumed to be in
-    # single return form...
-    #
-    # SINGLE RETURN FORMAT
-    # 
-    # This form assumes you return one thing, either nil/false or a
-    # botmsg. Returning nil/false won't suppress subsequent modules
-    # from being evaluated.
-    #
-    # Note, that "whatever the bot returns" will need to be one of the
-    # valid forms of a botmsg for it to get sent out.
-
-    def _handle_reply thing
-      case thing
-      when Array
-        bool,botmsg = thing
-        case bool
-        when TrueClass,FalseClass
-          # Assume array format:
-          [bool,BotMsg.to_a(botmsg)]
-        else
-          # Assume single return format...
-          # Array of any sort is truthy, so suppress.
-          [true,BotMsg.to_a(thing)]
-        end
-      else
-        # Asume single return format...
-        # 
-        # Look at truthiness of thing to determine whether to suppress
-        # further responses (true) or continue (false).
-        if thing then
-          [true,BotMsg.to_a(thing)]
-        else
-          [false,BotMsg.to_a(thing)]
-        end
-      end
     end
 
     # Process messages addressed directly to the bot.
