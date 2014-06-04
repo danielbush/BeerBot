@@ -19,6 +19,26 @@ module BeerBot
 
   class Config < Hash
 
+    # Should point to 'the' instance of scheduler used by this bot.
+
+    attr_accessor :scheduler
+
+    # Should reference the Bot instance.
+    #
+    # This will allow modules to inspect the bot module list and to
+    # override normal cmd behaviour (using Bot#set_cmd ).
+
+    attr_accessor :bot
+
+    # A queue that allows users of config to enqueue outgoing bot
+    # msg's actively.
+    #
+    # (passive = "as response to a command via Bot#cmd).
+
+    def out
+      @queue ||= Queue.new
+    end
+
     def initialize **kargs
       # Defaults
       self['cmd_prefix'] = ','
@@ -48,6 +68,11 @@ module BeerBot
 
     # Return path for module data dir -- a place where the module can
     # stash data.
+    #
+    #   module_data('foo') => <datadir>/modules/foo
+    #   module_data('foo') {
+    #     ... set pwd to this dir...
+    #   }
 
     def module_data name,&block
       self.validate!
@@ -63,26 +88,6 @@ module BeerBot
       else
         path
       end
-    end
-
-    # Should point to 'the' instance of scheduler used by this bot.
-
-    attr_accessor :scheduler
-
-    # Should reference the Bot instance.
-    #
-    # This will allow modules to inspect the bot module list and to
-    # override normal cmd behaviour (using Bot#set_cmd ).
-
-    attr_accessor :bot
-
-    # A queue that allows users of config to enqueue outgoing bot
-    # msg's actively.
-    #
-    # (passive = "as response to a command via Bot#cmd).
-
-    def out
-      @queue ||= Queue.new
     end
 
   end
