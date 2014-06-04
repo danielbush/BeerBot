@@ -7,7 +7,7 @@
 
 module BeerBot
 
-  # Config should be loaded with the json from a config file before
+  # Config can be loaded with the json from a config file before
   # initialisation of the system.
   #
   # Config might be a bit of a misnomer, think of this as "an
@@ -19,10 +19,11 @@ module BeerBot
 
   class Config < Hash
 
-    def initialize
+    def initialize **kargs
       # Defaults
       self['cmd_prefix'] = ','
       self['nick'] = 'beerbot'
+      self.merge(kargs)
     end
 
     def load config
