@@ -26,6 +26,10 @@ BeerBot won't do anything out of the box.
 * Go here: https://github.com/danielbush/beerbot-modules and follow the instructions.
 * And there's a slightly dodgey tutorial below as well
 
+This version of beerbot is 0.2.x and should work with similarly versioned
+bot modules.
+
+
 ## Layout
 
 * ```lib/``` contains the core bot code
