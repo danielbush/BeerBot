@@ -37,14 +37,15 @@ describe "dispatchers",:dispatchers => true do
     }
 
     it "should dispatch valid various generic events with parameters" do
-      @dispatcher = Dispatcher.new(@bot,'beerbot') {|event,*args|
+      @dispatcher = Dispatcher.new(@bot,'beerbot')
+      def @dispatcher.receive event,args
         case event
         when :nick
           [event,*args]
         when :msg
           [event,*args]
         end
-      }
+      end
       response = @dispatcher.receive(:nick,['tom','tom_is_away'])
       response.should == [:nick,'tom','tom_is_away']
 
@@ -54,12 +55,13 @@ describe "dispatchers",:dispatchers => true do
     end
 
     it "should handle action events" do
-      @dispatcher = Dispatcher.new(@bot,'beerbot') {|event,*args|
+      @dispatcher = Dispatcher.new(@bot,'beerbot')
+      def @dispatcher.receive event,args
         case event
         when :action
           [event,*args]
         end
-      }
+      end
       response = @dispatcher.receive(:action,["danb", "#sydney", "does something"])
       response.should == [:action,"danb", "#sydney", "does something"]
     end

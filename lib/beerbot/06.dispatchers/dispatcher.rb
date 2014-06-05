@@ -9,57 +9,38 @@ require_relative '../00.utils/utils'
 
 module BeerBot
 
-  # Dispatchers receive incoming messages from a connection and
-  # decide what to do with them.
+  # Dispatchers receive incoming messages from a protocol object and
+  # dispatches them (usually to an instance of Bot).
+  #
+  # Dispatcher#receive takes:
+  # 1) event - a symbol representing an event eg :msg, :join etc
+  # 2) args  - an array representing arguments
 
   module Dispatchers
 
-    # This dispatcher receives generic events (provided by a parser
-    # for a given protocol eg irc) and does something with them.
-    #
-    # Dispatcher#receive receives the messages.
+    # This class is basically a glorified struct with a receive method
+    # that is the default way to dispatch to an instance of Bot.
     # 
-    # There are several ways to specify what the dispatcher should do:
-    # 1) just get the result of #receive
-    # 
-    # Or, override #receive's behaviour:
-    # 1) pass in a block at instantiation time
-    # 2) pass in a block using #set_receive
-    # 3) subclass this class and write your own #receive
+    # You have several options if you want to customize...
+    # 1) subclass if you want to pre or post filter
+    # 2) override #receive with your own singleton receive (see tests)
+    # 3) make a new Dispatcher-like class
 
     class Dispatcher
 
       Utils      = BeerBot::Utils
       BotMsg     = BeerBot::BotMsg
       
-      attr_accessor :bot,:nick,:prefix
+      attr_accessor :bot,:nick,:prefix,:config
 
-      def initialize bot,nick,prefix:',',config:nil,&block
+      def initialize bot,nick,prefix:',',config:nil
         @bot = bot
-
         @nick = nick
-        @get_nick_cmd   = Utils.make_prefix_parser(nick)
-        @nickrx = Regexp.new("^#{nick}$",'i')
-        @config = config
-
         @prefix = prefix
+        @config = config
+        @get_nick_cmd   = Utils.make_prefix_parser(nick)
+        @nickrx         = Regexp.new("^#{nick}$",'i')
         @get_prefix_cmd = Utils.make_prefix_parser(prefix)
-
-        if block_given? then
-          @block = block
-        end
-      end
-
-      # Set a receiving proc.
-      #
-      # If no block given, @block is set to nil and #receive is used.
-
-      def set_receive &block
-        if block_given? then
-          @block = block
-        else
-          @block = nil
-        end
       end
 
       # Receive generic events emitted by a protocol class and
@@ -68,10 +49,6 @@ module BeerBot
       # eg the output from BeerBot::Protocol::IRC.parse .
 
       def receive event,args
-
-        if @block then
-          return self.instance_exec(event,*args,&@block)
-        end
 
         replies = nil
 
