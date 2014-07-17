@@ -44,8 +44,14 @@ module BeerBot
 
     # Purge existing modules from this array and load modules with
     # names in module_names in module_path on disk into memory.
+    #
+    # MODULE NAMES and MODULE PATH:
+    # 
+    # Best understood like this:
+    #   "#{module_path}/#{name}/*" = location of modules
+    #   modname = "::BeerBot::Modules::#{name}"
 
-    def load! module_names,module_path
+    def load! module_names, module_path
       @module_path = module_path
       @module_names = module_names
       self.reject!{true} unless self.empty?  # ick :)
@@ -99,9 +105,10 @@ module BeerBot
     # Call :meth on valid (loaded) modules and maybe accumulate result
     # or return first valid response...
     #
-    # Returns array-based botmsg.  The array could be empty, which
-    # means nothing was returned (or we couldn't interpret the output
-    # of the bot modules).
+    # Converts return value to ARRAY FORMAT if not already.
+    # 
+    # The array could be empty, which means nothing was returned (or
+    # we couldn't interpret the output of the bot modules).
     # 
     # We expect each bot_module to return nil or a botmsg (Hash, Array
     # or Proc that returns the first two).

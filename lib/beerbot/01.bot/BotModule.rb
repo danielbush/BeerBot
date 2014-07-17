@@ -5,11 +5,16 @@ module BeerBot
 
   class BotModule < Hash
     def initialize name,status:false,mod:nil,modname:nil,errors:[]
+
       self[:status] = status
-      self[:name] = name  # The module name.
-      self[:mod] = mod  # The loaded ruby module.
+
+      # See Bot#load!
+      self[:name] = name
       self[:modname] = modname
+      self[:mod] = mod  # The loaded ruby module.
+
       self[:errors] = errors
+
     end
   end
 

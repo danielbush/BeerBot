@@ -6,6 +6,7 @@
 * master will probably be point to 0.2.x (the latest)
 * we now say
     require 'beerbot'  (NOT require 'BeerBot')
+* bin/run-irc.rb becomes bin/beerbot-run-irb.rb
 * all bot modules are now moved to a different repo
   * see https://github.com/danielbush/beerbot-modules
   * (don't confuse this with BeerBot::BotModule which is

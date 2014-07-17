@@ -100,11 +100,13 @@ module BeerBot
         end
       end
 
-      # Transform all replies from bot modules to ARRAY FORMAT.
+      # Transform a botmsg (aka SINGLE RETURN FORMAT) or ARRAY FORMAT
+      # to ARRAY FORMAT (described below).
       #
-      # A module may reply in either format. But we convert it here. The
-      # single return format is the simplest, which is why we have 2
-      # formats.
+      # Background:
+      # Bot modules may reply in either format. But we convert it
+      # here. The single return format is the simplest, which is why
+      # we have 2 formats.
       # 
       # ARRAY FORMAT
       # 
@@ -113,6 +115,7 @@ module BeerBot
       # where bool  = true  => "use <reply> and keep going"
       #             = false => "use <reply> but stop here"
       # where reply = whatever the bot returns.
+      # 
       # NOTE: any other type of array will assumed to be in
       # single return form...
       #

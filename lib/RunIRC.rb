@@ -47,11 +47,13 @@ class BeerBot::RunIRC
     @config = config
 
     # Create the bot.
+
     @bot = Bot.new
     @bot.load!(config['modules'],@module_path)
     config.bot = @bot
 
     # Dispatcher which receives messages and interacts with the bot.
+
     @dispatcher = Dispatcher.new(
       @bot,
       config['nick'],
@@ -60,10 +62,12 @@ class BeerBot::RunIRC
     )
 
     # Set up scheduler (this doesn't start it yet)...
+
     @scheduler = Scheduler.instance(config['timezone'])
     config.scheduler = @scheduler
 
     # Create but don't open the irc connection.
+
     @conn = IRCConnection.new(
       nick:config['nick'],
       server:config['server'])
@@ -121,6 +125,8 @@ class BeerBot::RunIRC
     @pry_thread = Thread.new {
       binding.pry
     }
+
+    # Initialize bot and its modules...
 
     @bot.init(@config)
     @bot.update_config(@config)
