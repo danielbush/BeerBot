@@ -9,8 +9,10 @@ require_relative '../00.utils/utils'
 
 module BeerBot
 
-  # Dispatchers receive incoming messages from a protocol object and
-  # dispatches them (usually to an instance of Bot).
+  # A dispatcher's main task is to receive incoming generic events
+  # (not protocol specific) and return a botmsg or empty array.
+  #
+  # This is done via the Dispatcher#receive.
   #
   # Dispatcher#receive takes:
   # 1) event - a symbol representing an event eg :msg, :join etc
