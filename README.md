@@ -349,6 +349,17 @@ You can grab the ```CronR``` scheduler in a more official way like this:
   }
 ```
 
+## Testing
+
+Tests are in spec/ .
+
+The tests should do a require_relative for the lib/ directory.
+
+So you should be able to run them like:
+  rspec
+Or
+  rspec spec
+
 ## Developer
 
 Broadly speaking:
