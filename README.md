@@ -27,7 +27,7 @@ BeerBot won't do anything out of the box.
 * And there's a slightly dodgey tutorial below as well
 
 This version of beerbot is 0.2.x and should work with similarly versioned
-bot modules.
+bot modules. Look for similar/matching tags/branches in the beerbot-modules git repo :).
 
 
 ## Layout
@@ -318,6 +318,21 @@ instance for that purpose.
 https://github.com/danielbush/beerbot-modules for more exciting
 details.
 
+## Array return format
+
+Actually bot modules can return in another more general format:
+
+  [bool, botmsg]
+
+where bool is ```true``` or ```false``` and botmsg is a botmsg (array,
+hash).
+
+If bool is false, this is interpreted by the bot as meaning
+"don't process any more bot modules after this one".
+
+See the ```Bot class``` which is essentially an array of bot modules
+that are run in order.
+
 ## Scheduling
 
 You can grab the ```CronR``` scheduler in a more official way like this:
@@ -334,4 +349,34 @@ You can grab the ```CronR``` scheduler in a more official way like this:
   }
 ```
 
+## Developer
 
+Broadly speaking:
+ 
+  ------------------------------------------------------------
+  RunIRC
+  - instantiated with an instance of Config
+  - TODO: this is essentially the kernel and should be
+    reusable (if we did xmpp).
+    So we should inject objects *like* BeerBot::IRCConnection and
+    BeerBot::Protocol::IRC .
+  - sets up and knows about all the other parts
+    - irc connection
+    - dispatcher
+    - scheduler
+    - the bot and its modules
+  ------------------------------------------------------------
+  IRCConnection
+  - connects, receives and sends out irc messages
+  ------------------------------------------------------------
+  IRC parser
+  - takes irc messages and makes them generic
+  - TODO: I'd probably rename this to encode/decode
+  => returns generic format: [event, *args]
+  ------------------------------------------------------------
+  Dispatcher#receive(event, *args)
+  - has an instance of Bot
+  - may call Bot#cmd|hear|action|event
+  - which will call instances of BotModule
+  => returns a botmsg
+  ------------------------------------------------------------

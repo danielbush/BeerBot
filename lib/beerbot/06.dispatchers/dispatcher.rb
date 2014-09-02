@@ -15,6 +15,8 @@ module BeerBot
   # Dispatcher#receive takes:
   # 1) event - a symbol representing an event eg :msg, :join etc
   # 2) args  - an array representing arguments
+  # 'event' and 'args' are intended to be protocol-neutral.
+  #
 
   module Dispatchers
 
