@@ -2,7 +2,7 @@ Gem::Specification.new do |s|
   s.name        = 'beerbot'
   s.version     = '0.2.0-1'
   s.date        = '2014-06-04'
-  s.summary     = "An ruby 2.0 bot"
+  s.summary     = "A ruby 2.0 bot"
   s.description = "Out of the box you get an irc bot, but beerbot could be so much more...",
   s.authors     = ["Daniel Bush"]
   s.email       = 'dlb.id.au@gmail.com'
