@@ -29,7 +29,7 @@ class BeerBot::Kernel
   Dispatcher    = BeerBot::Dispatchers::Dispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn,:postq,:parse,:more
+  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn,:postq,:more
 
   # Initialize all parts of the system here.
   #
@@ -72,7 +72,7 @@ class BeerBot::Kernel
 
     @dispatcher_thread = InOut.new(inq:@conn.queue,outq:@conn.writeq) {|input|
       str,raw = input
-      event,*args = @codec.parse(str)
+      event,*args = @codec.decode(str)
       replies = @dispatcher.receive(event,args)
       @codec.encode(replies)
     }

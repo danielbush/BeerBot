@@ -382,8 +382,8 @@ Broadly speaking:
   IRCConnection
   - connects, receives and sends out irc messages
   ------------------------------------------------------------
-  IRC parser
-  - takes irc messages and makes them generic
+  IRC codec
+  - encodes and decodes irc messages
   - TODO: I'd probably rename this to encode/decode
   => returns generic format: [event, *args]
   ------------------------------------------------------------

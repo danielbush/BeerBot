@@ -95,49 +95,49 @@ describe "IRC parsing",:irc => true do
     end
   end
 
-  describe "parse",:parse => true do
+  describe "decode",:decode => true do
 
     it "should handle PRIVMSG's" do
-      event,*args = IRC.parse(samples[:privmsg][0])
+      event,*args = IRC.decode(samples[:privmsg][0])
       event.should == :msg
       args.should == ['adamr','#sydney','because we have?']
     end
     it "should handle actions" do
-      event,*args = IRC.parse(samples[:action][0])
+      event,*args = IRC.decode(samples[:action][0])
       event.should == :action
       args.should == ['danb','#foo','does something']
     end
 
     it "should handle 353's (chanlists)" do
-      event,*args = IRC.parse(samples[:irc353][0])
+      event,*args = IRC.decode(samples[:irc353][0])
       event.should == :chanlist
       args.should == ['#chan1',['foo','bar','baz','danb']]
     end
 
     it "should handle QUIT's" do
-      event,*args = IRC.parse(samples[:quit][0])
+      event,*args = IRC.decode(samples[:quit][0])
       event.should == :quit
       args.should == ['thursday','Quit: Leaving.']
 
       # Variation 1:
-      event,*args = IRC.parse(samples[:quit][1])
+      event,*args = IRC.decode(samples[:quit][1])
       event.should == :quit
       args.should == ['thursday','Quit: Leaving.']
     end
 
     it "should handle PART's" do
-      event,*args = IRC.parse(samples[:part][0])
+      event,*args = IRC.decode(samples[:part][0])
       event.should == :part
       args.should == ['timprice','#sydney']
 
       # Variation 1:
-      event,*args = IRC.parse(samples[:part][1])
+      event,*args = IRC.decode(samples[:part][1])
       event.should == :part
       args.should == ['timprice','#sydney']
     end
   
     it "should handle INVITE's" do
-      event,*args = IRC.parse(samples[:invite][0])
+      event,*args = IRC.decode(samples[:invite][0])
       event.should == :invite
       args.should == ['#chan3']
     end

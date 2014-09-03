@@ -32,7 +32,7 @@ module BeerBot
       # Note that connection readiness and PONG protocol are handled by
       # the irc connection, not here.
 
-      def self.parse str
+      def self.decode str
 
         m = IRCMessage.new(str)
         result = []
@@ -100,7 +100,7 @@ module BeerBot
           channel = m[:params][2]
           users = m[:trailing].split(/\s+/)
           result = [:chanlist,channel,users]
-          #puts "[parse/353] #{result}"
+          #puts "[decode/353] #{result}"
 
         when '366'  # end of 353
           result = [:chanlistend]
