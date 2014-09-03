@@ -21,9 +21,10 @@ partly for an internal irc server.
 
 ## Batteries sold separately
 
-BeerBot won't do anything out of the box.
+BeerBot will run and connect to an irc server out of the box but not much else.
 
-* Go here: https://github.com/danielbush/beerbot-modules and follow the instructions.
+A bunch of useful modules can be found here:
+* https://github.com/danielbush/beerbot-modules and follow the instructions.
 * And there's a slightly dodgey tutorial below as well
 
 This version of beerbot is 0.2.x and should work with similarly versioned
@@ -91,20 +92,21 @@ you've done the above preparatory stuff) is...
   beerbot-run-irc.rb path/to/conf.json
 ```
 
+Your ```path/to/conf.json``` should be a json file that specifies
+things like a ```moduledir``` and a ```datadir``` and some other
+things - see ```conf/``` for example.
+
 If you're working with the code (not a gem), then you'll probably want
 to do something like this:
-
 ```
   ruby -Ip/t/b/lib p/t/b/bin/beerbot-run-irc.rb path/to/conf.json
 ```
 
 where p/t/b = path/to/beerbot
 
-Your ```path/to/conf.json``` should be a json file that specifies
-things like a ```moduledir``` and a ```datadir``` and some other
-things - see ```conf/``` for example.
-
-Note that the bot modules in ```moduledir``` may require beerbot:
+The -I will force 'require' used in the modules and possibly elsewhere
+to use the code-based beerbot and not the gem if you installed it.
+(If you don't, you may get "constant already defined" errors.
 
 You should see some irc lines whizz by on your terminal.
 
@@ -290,7 +292,7 @@ Also, it can be a ```Proc``` that returns either of the above.
 Actually, since we're in the pry repl, we have access to BeerBot's
 writeq as well, so we could have said this:
 ```ruby
-  @conn.writeq << IRC.to_irc([to:'#chan1',msg:"This is an announcement..."])
+  @conn.writeq << IRC.encode([to:'#chan1',msg:"This is an announcement..."])
 ```
 or even
 ```ruby
@@ -385,7 +387,7 @@ Broadly speaking:
   - TODO: I'd probably rename this to encode/decode
   => returns generic format: [event, *args]
   ------------------------------------------------------------
-  Dispatcher#receive(event, *args)
+  Dispatcher#receive(event, args)
   - has an instance of Bot
   - may call Bot#cmd|hear|action|event
   - which will call instances of BotModule
