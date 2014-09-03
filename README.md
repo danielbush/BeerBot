@@ -133,7 +133,7 @@ So do this:
   => true   # unsuppress
 ```
 
-Pry is running inside the **RunIRC** class in lib/RunIRC.rb .
+Pry is running inside the **BeerBot::Kernel** class in lib/kernel.rb .
 There are some convenience methods in this class for making the
 bot do things.
 
@@ -367,7 +367,7 @@ Or
 Broadly speaking:
  
   ------------------------------------------------------------
-  RunIRC
+  Kernel
   - instantiated with an instance of Config
   - TODO: this is essentially the kernel and should be
     reusable (if we did xmpp).

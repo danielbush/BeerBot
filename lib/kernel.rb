@@ -20,7 +20,7 @@ require_relative 'beerbot'
 
 module BeerBot; end
 
-class BeerBot::RunIRC
+class BeerBot::Kernel
 
   Utils         = BeerBot::Utils
   InOut         = BeerBot::Utils::InOut

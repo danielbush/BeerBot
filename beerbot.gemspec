@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
     "lib/beerbot/70.scheduler/scheduler.rb",
     "lib/beerbot/Config.rb",
     "lib/beerbot.rb",
-    "lib/RunIRC.rb",
+    "lib/kernel.rb",
   ]
   s.homepage    = 'http://github.com/danielbush/BeerBot'
   s.license       = 'GPL'

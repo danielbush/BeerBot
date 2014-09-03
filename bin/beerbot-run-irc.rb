@@ -13,7 +13,7 @@
 #   ruby -Ilib bin/beerbot-run-irb.rb path/to/conf.json
 
 raise "Needs ruby 2" if /^1/===RUBY_VERSION
-require_relative '../lib/RunIRC'
+require_relative '../lib/kernel'
 require_relative '../lib/beerbot/01.connect/IRCConnection'
 require_relative '../lib/beerbot/02.protocols/irc'
 
@@ -35,5 +35,5 @@ conn = IRCConnection.new(
   server:config['server']
 )
 
-$runirc = BeerBot::RunIRC.new(config, conn, BeerBot::Protocol::IRC)
-$runirc.start
+$kernel = BeerBot::Kernel.new(config, conn, BeerBot::Protocol::IRC)
+$kernel.start
