@@ -13,11 +13,13 @@
 #   ruby -Ilib bin/beerbot-run-irb.rb path/to/conf.json
 
 raise "Needs ruby 2" if /^1/===RUBY_VERSION
-require_relative '../lib/kernel'
-require_relative '../lib/beerbot/01.connect/IRCConnection'
-require_relative '../lib/beerbot/02.codecs/irc'
+require 'beerbot'
+require 'json'
 
+Bot           = BeerBot::Bot
+Dispatcher    = BeerBot::Dispatchers::Dispatcher
 IRCConnection = BeerBot::IRCConnection
+codec         = BeerBot::Codecs::IRC
 
 if ARGV.size == 0 then
   puts "Usage: ruby beerbot.rb path/to/ircconf.json"
@@ -35,5 +37,21 @@ conn = IRCConnection.new(
   server:config['server']
 )
 
-$kernel = BeerBot::Kernel.new(config, conn, BeerBot::Codecs::IRC)
+# Create the bot.
+
+bot = Bot.new
+bot.load!(config['modules'], config['moduledir'])
+config.bot = bot
+
+# Dispatcher which handles events and messages (protocol/codec
+# independent).
+
+dispatcher = Dispatcher.new(
+  bot,
+  config['nick'],
+  prefix:config['cmd_prefix'],
+  config:config
+)
+
+$kernel = BeerBot::Kernel.new(config, conn, codec, bot, dispatcher)
 $kernel.start

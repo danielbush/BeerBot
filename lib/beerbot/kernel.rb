@@ -9,7 +9,11 @@ require 'set'
 require 'rubygems'
 require 'pry'
 require 'json'
-require_relative 'beerbot'
+
+require_relative '00.utils/utils'
+require_relative '00.utils/InOut'
+require_relative '01.bot/botmsg'
+require_relative '70.scheduler/scheduler'
 
 # Run the bot.
 #
@@ -24,12 +28,10 @@ class BeerBot::Kernel
 
   Utils         = BeerBot::Utils
   InOut         = BeerBot::Utils::InOut
-  Bot           = BeerBot::Bot
   BotMsg        = BeerBot::BotMsg
-  Dispatcher    = BeerBot::Dispatchers::Dispatcher
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn,:postq,:more
+  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn
 
   # Initialize all parts of the system here.
   #
@@ -37,35 +39,21 @@ class BeerBot::Kernel
   # 
   # Note BeerBot::Config should be loaded before we initialize here.
 
-  def initialize config, conn, codec
+  def initialize config, conn, codec, bot, dispatcher
 
     @echo = true
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
     @module_path = config['moduledir']
     @config = config
-
-    # Create the bot.
-
-    @bot = Bot.new
-    @bot.load!(config['modules'],@module_path)
-    config.bot = @bot
-
-    # Dispatcher which receives messages and interacts with the bot.
-
-    @dispatcher = Dispatcher.new(
-      @bot,
-      config['nick'],
-      prefix:config['cmd_prefix'],
-      config:config
-    )
+    @bot = bot
+    @conn = conn
+    @codec = codec
+    @dispatcher = dispatcher
 
     # Set up scheduler (this doesn't start it yet)...
 
     @scheduler = Scheduler.instance(config['timezone'])
     config.scheduler = @scheduler
-
-    @conn = conn
-    @codec = codec
 
     # Dispatcher thread takes stuff coming from the connection and does
     # something with it...
