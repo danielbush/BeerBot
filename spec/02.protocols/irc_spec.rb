@@ -1,12 +1,12 @@
-require_relative "../../lib/beerbot/02.protocols/irc"
+require_relative "../../lib/beerbot/02.codecs/irc"
 require 'pp'
 
 # http://www.mirc.org/mishbox/reference/rawhelp3.htm#raw353
 
 describe "IRC parsing",:irc => true do
 
-  IRC = BeerBot::Protocol::IRC
-  Message = BeerBot::Protocol::IRC::IRCMessage
+  IRC = BeerBot::Codecs::IRC
+  Message = BeerBot::Codecs::IRC::IRCMessage
 
   samples = {
     :quit => [

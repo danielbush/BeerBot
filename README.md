@@ -372,7 +372,7 @@ Broadly speaking:
   - TODO: this is essentially the kernel and should be
     reusable (if we did xmpp).
     So we should inject objects *like* BeerBot::IRCConnection and
-    BeerBot::Protocol::IRC .
+    BeerBot::Codecs::IRC .
   - sets up and knows about all the other parts
     - irc connection
     - dispatcher

@@ -15,7 +15,7 @@
 raise "Needs ruby 2" if /^1/===RUBY_VERSION
 require_relative '../lib/kernel'
 require_relative '../lib/beerbot/01.connect/IRCConnection'
-require_relative '../lib/beerbot/02.protocols/irc'
+require_relative '../lib/beerbot/02.codecs/irc'
 
 IRCConnection = BeerBot::IRCConnection
 
@@ -35,5 +35,5 @@ conn = IRCConnection.new(
   server:config['server']
 )
 
-$kernel = BeerBot::Kernel.new(config, conn, BeerBot::Protocol::IRC)
+$kernel = BeerBot::Kernel.new(config, conn, BeerBot::Codecs::IRC)
 $kernel.start

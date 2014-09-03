@@ -50,7 +50,7 @@ module BeerBot
       # Receive generic events emitted by a protocol class and
       # dispatch to an instance of Bot.
       #
-      # eg the output from BeerBot::Protocol::IRC.decode .
+      # eg the output from BeerBot::Codecs::IRC.decode .
 
       def receive event,args
 

@@ -7,7 +7,7 @@
 
 module BeerBot
 
-  module Protocol
+  module Codecs
 
     # IRC Protcol module.
     #
