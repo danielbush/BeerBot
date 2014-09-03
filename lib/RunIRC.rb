@@ -11,10 +11,10 @@ require 'pry'
 require 'json'
 require_relative 'beerbot'
 
-# Run the irc bot.
+# Run the bot.
 #
 # This class creates and coordinates all the high level components
-# needed to run beerbot over irc.
+# needed to run beerbot.
 #
 # See bin/* .
 
@@ -24,8 +24,6 @@ class BeerBot::RunIRC
 
   Utils         = BeerBot::Utils
   InOut         = BeerBot::Utils::InOut
-  IRCConnection = BeerBot::IRCConnection
-  IRC           = BeerBot::Protocol::IRC
   Bot           = BeerBot::Bot
   BotMsg        = BeerBot::BotMsg
   Dispatcher    = BeerBot::Dispatchers::Dispatcher
@@ -39,7 +37,7 @@ class BeerBot::RunIRC
   # 
   # Note BeerBot::Config should be loaded before we initialize here.
 
-  def initialize config
+  def initialize config, conn, codec
 
     @echo = true
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
@@ -66,20 +64,17 @@ class BeerBot::RunIRC
     @scheduler = Scheduler.instance(config['timezone'])
     config.scheduler = @scheduler
 
-    # Create but don't open the irc connection.
+    @conn = conn
+    @codec = codec
 
-    @conn = IRCConnection.new(
-      nick:config['nick'],
-      server:config['server'])
-
-    # Dispatcher thread takes stuff coming from the irc connection and does
+    # Dispatcher thread takes stuff coming from the connection and does
     # something with it...
 
     @dispatcher_thread = InOut.new(inq:@conn.queue,outq:@conn.writeq) {|input|
       str,raw = input
-      event,*args = IRC.parse(str)
+      event,*args = @codec.parse(str)
       replies = @dispatcher.receive(event,args)
-      IRC.to_irc(replies)
+      @codec.encode(replies)
     }
     @dispatcher_thread.start!
 
@@ -91,7 +86,7 @@ class BeerBot::RunIRC
     @scheduler_thread = InOut.new(inq:@scheduler.queue,outq:@conn.writeq) {|cron_job|
       puts "<< scheduler #{cron_job.inspect}" if @echo
       puts "<< scheduler #{@scheduler.time}" if @echo
-      IRC.to_irc(cron_job.run)
+      @codec.encode(cron_job.run)
     }
     @scheduler_thread.start!
 
@@ -108,7 +103,7 @@ class BeerBot::RunIRC
       when String # assume protocol string eg irc
         replies
       when Hash,Array,Proc
-        IRC.to_irc(BotMsg.to_a(replies))
+        @codec.encode(BotMsg.to_a(replies))
       else
         []
       end
@@ -118,8 +113,8 @@ class BeerBot::RunIRC
     # Set up a repl in a separate thread.
     # 
     # In pry, you can then do:
-    #   @conn.writeq.enq IRC.join('#chan1')
-    #   @conn.write IRC.join('#chan1')
+    #   @conn.writeq.enq @codec.join('#chan1')
+    #   @conn.write @codec.join('#chan1')
 
     Pry.config.prompt = Proc.new {|_| "pry> "}
     @pry_thread = Thread.new {
@@ -131,7 +126,7 @@ class BeerBot::RunIRC
     @bot.init(@config)
     @bot.update_config(@config)
 
-    # Do stuff once we've identified with the irc server...
+    # Do stuff once we've identified with the server...
     # 
     # Join channels.
     # Start the scheduler.
@@ -165,25 +160,25 @@ class BeerBot::RunIRC
   # Convenience method to say something to channel or someone.
 
   def say to,msg
-    @conn.writeq.enq(IRC.msg(to,msg))
+    @conn.writeq.enq(@codec.msg(to,msg))
   end
 
   # Convenience method to do something (/me).
 
   def action to,msg
-    @conn.writeq.enq(IRC.action(to,msg))
+    @conn.writeq.enq(@codec.action(to,msg))
   end
 
   # Convenience method to join a channel.
 
   def join chan
-    @conn.writeq.enq(IRC.join(chan))
+    @conn.writeq.enq(@codec.join(chan))
   end
 
   # Convenience method to leave a channel.
 
   def leave chan
-    @conn.writeq.enq(IRC.leave(chan))
+    @conn.writeq.enq(@codec.leave(chan))
   end
 
 end

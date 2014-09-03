@@ -14,6 +14,10 @@
 
 raise "Needs ruby 2" if /^1/===RUBY_VERSION
 require_relative '../lib/RunIRC'
+require_relative '../lib/beerbot/01.connect/IRCConnection'
+require_relative '../lib/beerbot/02.protocols/irc'
+
+IRCConnection = BeerBot::IRCConnection
 
 if ARGV.size == 0 then
   puts "Usage: ruby beerbot.rb path/to/ircconf.json"
@@ -26,5 +30,10 @@ config = BeerBot::Config.new
 config.load JSON.load(File.read(conffile))
 config.validate!
 
-$runirc = BeerBot::RunIRC.new(config)
+conn = IRCConnection.new(
+  nick:config['nick'],
+  server:config['server']
+)
+
+$runirc = BeerBot::RunIRC.new(config, conn, BeerBot::Protocol::IRC)
 $runirc.start

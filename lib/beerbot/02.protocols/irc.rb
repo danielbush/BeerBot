@@ -235,7 +235,7 @@ module BeerBot
       #
       # Generates nil if it can't handle 'botmsg'.
 
-      def self.to_irc botmsg
+      def self.encode botmsg
         case botmsg
         when Hash
           to = botmsg[:to]
@@ -249,11 +249,11 @@ module BeerBot
           end
         when Array
           botmsg.map{|reply|
-            self.to_irc reply
+            self.encode reply
           }
         when Proc
           #p botmsg.call
-          self.to_irc(botmsg.call)
+          self.encode(botmsg.call)
         else
           nil
         end
