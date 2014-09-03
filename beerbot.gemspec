@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
     "lib/beerbot/02.codecs/irc.rb",
     "lib/beerbot/06.dispatchers/dispatcher.rb",
     "lib/beerbot/70.scheduler/scheduler.rb",
-    "lib/beerbot/Config.rb",
+    "lib/beerbot/config.rb",
     "lib/beerbot/kernel.rb",
     "lib/beerbot.rb",
   ]

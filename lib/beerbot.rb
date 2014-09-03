@@ -9,7 +9,7 @@ require_relative 'beerbot/01.bot/Bot'
 require_relative 'beerbot/02.codecs/irc'
 require_relative 'beerbot/06.dispatchers/dispatcher'
 require_relative 'beerbot/70.scheduler/scheduler'
-require_relative 'beerbot/Config'
+require_relative 'beerbot/config'
 require_relative 'beerbot/kernel'
 
 module BeerBot
