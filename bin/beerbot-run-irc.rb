@@ -17,7 +17,7 @@ require 'beerbot'
 require 'json'
 
 Bot           = BeerBot::Bot
-Dispatcher    = BeerBot::Dispatchers::Dispatcher
+Dispatcher    = BeerBot::Dispatcher
 IRCConnection = BeerBot::IRCConnection
 codec         = BeerBot::Codecs::IRC
 

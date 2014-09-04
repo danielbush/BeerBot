@@ -4,7 +4,7 @@ require 'pp'
 
 describe "dispatchers",:dispatchers => true do
 
-  Dispatcher = BeerBot::Dispatchers::Dispatcher
+  Dispatcher = BeerBot::Dispatcher
 
   class MockBot
     attr_accessor :output
