@@ -361,6 +361,9 @@ So you should be able to run them like:
   rspec
 Or
   rspec spec
+You could also do
+  rspec -Ilib spec
+to ensure you're using the checked out code.
 
 ## Developer
 
