@@ -31,7 +31,7 @@ class BeerBot::Kernel
   BotMsg        = BeerBot::BotMsg
   Scheduler     = BeerBot::Scheduler
 
-  attr_accessor :config,:bot,:scheduler,:dispatcher,:conn
+  attr_accessor :config, :bot, :scheduler, :dispatcher, :conn, :codec
 
   # Initialize all parts of the system here.
   #
