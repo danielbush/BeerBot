@@ -5,7 +5,7 @@
 # enclosed with this project in the file LICENSE.  If not
 # see <http://www.gnu.org/licenses/>.
 
-require_relative '../00.utils/utils'
+require_relative '00.utils/utils'
 
 module BeerBot
 
