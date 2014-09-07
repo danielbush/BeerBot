@@ -3,7 +3,7 @@ require 'pp'
 
 # http://www.mirc.org/mishbox/reference/rawhelp3.htm#raw353
 
-describe "IRC parsing",:irc => true do
+describe "IRC codec",:irc => true do
 
   IRC = BeerBot::Codecs::IRC
   Message = BeerBot::Codecs::IRC::IRCMessage
