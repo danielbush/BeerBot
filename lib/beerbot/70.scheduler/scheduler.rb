@@ -7,6 +7,9 @@
 
 module BeerBot
   module Scheduler
+
+    CronR = ::CronR
+
     def self.instance timezone=nil
       @instance ||= CronR::Cron.new
       if timezone then
@@ -14,5 +17,6 @@ module BeerBot
       end
       @instance
     end
+
   end
 end
