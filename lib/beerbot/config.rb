@@ -43,7 +43,9 @@ module BeerBot
       # Defaults
       self['cmd_prefix'] = ','
       self['nick'] = 'beerbot'
-      self.merge(kargs)
+      kargs.keys.each {|key|
+        self[key.to_s] = kargs[key]
+      }
     end
 
     def load config
