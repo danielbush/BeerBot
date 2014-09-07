@@ -13,7 +13,6 @@ require 'json'
 require_relative '00.utils/utils'
 require_relative '00.utils/InOut'
 require_relative '01.bot/botmsg'
-require_relative '70.scheduler/scheduler'
 
 # Run the bot.
 #
@@ -29,7 +28,6 @@ class BeerBot::Kernel
   Utils         = BeerBot::Utils
   InOut         = BeerBot::Utils::InOut
   BotMsg        = BeerBot::BotMsg
-  Scheduler     = BeerBot::Scheduler
 
   attr_accessor :config, :bot, :scheduler, :dispatcher, :conn, :codec
 
@@ -39,7 +37,7 @@ class BeerBot::Kernel
   # 
   # Note BeerBot::Config should be loaded before we initialize here.
 
-  def initialize config, conn, codec, bot, dispatcher
+  def initialize config, conn, codec, bot, dispatcher, scheduler
 
     @echo = true
     @path = File.expand_path(File.dirname(__FILE__)+'/..')
@@ -49,11 +47,8 @@ class BeerBot::Kernel
     @conn = conn
     @codec = codec
     @dispatcher = dispatcher
+    @scheduler = scheduler
 
-    # Set up scheduler (this doesn't start it yet)...
-
-    @scheduler = Scheduler.instance(config['timezone'])
-    config.scheduler = @scheduler
 
     # Dispatcher thread takes stuff coming from the connection and does
     # something with it...

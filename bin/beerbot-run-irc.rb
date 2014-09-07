@@ -19,6 +19,7 @@ require 'json'
 Bot           = BeerBot::Bot
 Dispatcher    = BeerBot::Dispatcher
 IRCConnection = BeerBot::IRCConnection
+Scheduler     = BeerBot::Scheduler
 codec         = BeerBot::Codecs::IRC
 
 if ARGV.size == 0 then
@@ -27,10 +28,14 @@ if ARGV.size == 0 then
   exit 1
 end
 
+# Get our configuration...
+
 conffile = ARGV[0]
 config = BeerBot::Config.new
 config.load JSON.load(File.read(conffile))
 config.validate!
+
+# Create the connection (not opened yet)...
 
 conn = IRCConnection.new(
   nick:config['nick'],
@@ -53,5 +58,10 @@ dispatcher = Dispatcher.new(
   config:config
 )
 
-$kernel = BeerBot::Kernel.new(config, conn, codec, bot, dispatcher)
+# Set up scheduler.
+
+scheduler = Scheduler.instance(config['timezone'])
+config.scheduler = scheduler
+
+$kernel = BeerBot::Kernel.new(config, conn, codec, bot, dispatcher, scheduler)
 $kernel.start
